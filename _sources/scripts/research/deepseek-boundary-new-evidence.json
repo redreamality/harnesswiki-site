@@ -1,0 +1,315 @@
+{
+  "anchor": "22ddee3792402c3e70ec5f86a63c3e3e895a2f60",
+  "executedAt": "2026-10-24T06:17:11.602Z",
+  "node": "v26.7.0",
+  "platform": "win32 x64",
+  "compiler": "5.9.3",
+  "upstreamCheckout": "99f6f02fecdb7dff40c3fbc9470f5907c29f74ca",
+  "refresh": {
+    "harness": "deepseek-harness",
+    "runId": "7318a131-3402-447b-854b-4b99667e00e3",
+    "startedAt": "2026-10-24T06:07:01.889Z",
+    "status": "fetched",
+    "sources": [
+      {
+        "id": "core",
+        "path": "upstreams/deepseek-ai/DeepSeek-Harness",
+        "repositoryUrl": "https://github.com/deepseek-ai/DeepSeek-Harness",
+        "defaultBranch": "master",
+        "baseline": "47f943859bef60e4160492346772ded9b24f765a",
+        "checkout": "99f6f02fecdb7dff40c3fbc9470f5907c29f74ca",
+        "fetchedCommit": "22ddee3792402c3e70ec5f86a63c3e3e895a2f60",
+        "commitDate": "2026-10-23T19:48:59+08:00",
+        "fetchedAt": "2026-10-24T06:07:23.502Z"
+      }
+    ],
+    "finishedAt": "2026-10-24T06:07:23.502Z"
+  },
+  "moduleManifest": [
+    {
+      "path": "packages/core/session/src/types.ts",
+      "blob": "7787dd9bd073217825356b9c6b419d2e153d2537"
+    },
+    {
+      "path": "packages/core/session/src/known-event-types.ts",
+      "blob": "a0f5c17795be074e3c521c525a0eb59ee25248d6"
+    },
+    {
+      "path": "packages/util/brand/src/index.ts",
+      "blob": "7f89f3eddc5e78208da31eb0a6a40b09aa3f71fd"
+    },
+    {
+      "path": "packages/util/values/src/index.ts",
+      "blob": "8664da7e34bac08627f503e834b666ce434e6da4"
+    },
+    {
+      "path": "packages/util/values/src/partial-json.ts",
+      "blob": "2fd6f7867eed136d7ca3ee558622c435995b4bd0"
+    },
+    {
+      "path": "packages/util/crypto/src/index.ts",
+      "blob": "cfb55b57a5d868974b17a478902d98813eea5906"
+    },
+    {
+      "path": "packages/core/session/src/repair.ts",
+      "blob": "bb32f01ca06af2c496fa4c68fed287297e1b7fce"
+    },
+    {
+      "path": "packages/core/session/src/surface.ts",
+      "blob": "0bb84c030ef595b3d9a17116e7dc7b9deb26369c"
+    },
+    {
+      "path": "packages/util/timeout/src/index.ts",
+      "blob": "5d3dcfe2a2d6fc12d8d081dd4b05ea324b9d2761"
+    },
+    {
+      "path": "packages/compaction/compaction/src/index.ts",
+      "blob": "c6dee6fbae49bd06732bbbbc1a185ee4b25aeb88"
+    },
+    {
+      "path": "packages/compaction/compaction/src/brand.ts",
+      "blob": "5b6de03e61e5154744fad5facb04a99965a93162"
+    },
+    {
+      "path": "packages/compaction/compaction/src/checkpoint.ts",
+      "blob": "5cba6ca14cf6929030eba1f0518d1f61cd5bacc3"
+    },
+    {
+      "path": "packages/compaction/compaction/src/tool-pairing.ts",
+      "blob": "ca070851abebd2919a8b06c832b75f72159c1b8d"
+    },
+    {
+      "path": "packages/compaction/compaction-basic/src/region.ts",
+      "blob": "7b3d77d299881fa47b8dfdab7fae0a92cd7d462c"
+    },
+    {
+      "path": "packages/compaction/compaction-basic/src/summarizer.ts",
+      "blob": "2d258fa410a7a87258f8d3a45c548cde0d383014"
+    },
+    {
+      "path": "packages/llm/llm/src/adapter-failure.ts",
+      "blob": "98dba446d1f4a5080ad17d6d8d3e995e9b37ef3e"
+    },
+    {
+      "path": "packages/llm/llm/src/api-key.ts",
+      "blob": "85d0b1ed604c62b5836a086514da5a0db060e528"
+    },
+    {
+      "path": "packages/llm/llm/src/assembler.ts",
+      "blob": "917dd11e2cfc13646ef17f037f30b5c95bd00d19"
+    },
+    {
+      "path": "packages/llm/llm/src/assistant-stream.ts",
+      "blob": "7fca34c5d5bf432f7fad81bd48edfbdaf5083e83"
+    },
+    {
+      "path": "packages/llm/llm/src/attribution.ts",
+      "blob": "b984c18ca7fac9f250dedc237f92debfd7109d1a"
+    },
+    {
+      "path": "packages/llm/llm/src/brand.ts",
+      "blob": "c919603da4fd02391b670517ba0669cd2e9094ec"
+    },
+    {
+      "path": "packages/llm/llm/src/call-config.ts",
+      "blob": "29b97bb46805dae14abfd8045f733b90ba9afad9"
+    },
+    {
+      "path": "packages/llm/llm/src/content.ts",
+      "blob": "cecbfba938926da0c4fc821d95a07ddda5dee0bd"
+    },
+    {
+      "path": "packages/llm/llm/src/error.ts",
+      "blob": "9be7cf9c00e2205b6e66facb921c209f904f26ac"
+    },
+    {
+      "path": "packages/llm/llm/src/index.ts",
+      "blob": "b4a5f82ad371291efde69dd6a01e7d80e7a82a0e"
+    },
+    {
+      "path": "packages/llm/llm/src/message.ts",
+      "blob": "d96a63edb6d78d64508875ebc1cc6a1cc5a824b6"
+    },
+    {
+      "path": "packages/llm/llm/src/retry-policy.ts",
+      "blob": "f6e6175cb9f47d6f11ad2b8ff56283b34540099a"
+    },
+    {
+      "path": "packages/llm/llm/src/types.ts",
+      "blob": "8001ab81d8f4e159f1b5e02e12af4f7f6223f625"
+    },
+    {
+      "path": "vendor/cordis/src/context.ts",
+      "blob": "0488423088e4da284d28c2d2cef887a5c69ed0f5"
+    },
+    {
+      "path": "vendor/cordis/src/events.ts",
+      "blob": "c7bf42632e5468b19c4a846bfdda5daaa2d3c27a"
+    },
+    {
+      "path": "vendor/cordis/src/fiber.ts",
+      "blob": "d4aed3158f65b3a9881536d97669c25587872b04"
+    },
+    {
+      "path": "vendor/cordis/src/index.ts",
+      "blob": "5c27008b44d50b8319ab3828ba02bd94adc5aa16"
+    },
+    {
+      "path": "vendor/cordis/src/logger.ts",
+      "blob": "7038ecc20249500b5bef1dda60644fa8c9752a10"
+    },
+    {
+      "path": "vendor/cordis/src/reflect.ts",
+      "blob": "7bbe1ae9919b930230844ec3d4365466a78e90a8"
+    },
+    {
+      "path": "vendor/cordis/src/registry.ts",
+      "blob": "478cf036cb2339fcd6c092ee0cb6f2babc500014"
+    },
+    {
+      "path": "vendor/cordis/src/service.ts",
+      "blob": "dc5742f8c22d338e6aee874b5bca51b3e3031165"
+    },
+    {
+      "path": "vendor/cordis/src/utils.ts",
+      "blob": "024d21f5e025290b2fd01277ea83ad2128908bfa"
+    },
+    {
+      "path": "vendor/cosmokit/src/array.ts",
+      "blob": "18ed5e407fe6932b2ca9eb2267d63deffca3a8cf"
+    },
+    {
+      "path": "vendor/cosmokit/src/index.ts",
+      "blob": "b6b7144168ae62cf1242fe051baa4ba35babcaa7"
+    },
+    {
+      "path": "vendor/cosmokit/src/misc.ts",
+      "blob": "11ed0a8597b12314f99cf39db10fec71cede8067"
+    },
+    {
+      "path": "vendor/cosmokit/src/string.ts",
+      "blob": "6f7084488196e9d73075dfcdb72cd5998ba6dfe6"
+    },
+    {
+      "path": "vendor/cosmokit/src/time.ts",
+      "blob": "6f9065493e56e8a5592704858a51a5d25f605a88"
+    },
+    {
+      "path": "vendor/cosmokit/src/types.ts",
+      "blob": "0aab4420c16776750ae4c5891ec3d6c3a1a8231b"
+    },
+    {
+      "path": "vendor/cosmokit/src/volatile.ts",
+      "blob": "a64c35f253e1619c20b8f95ee32fab0e1eb2684b"
+    },
+    {
+      "path": "vendor/schemastery/src/index.ts",
+      "blob": "6edc132c49e2d0a2d845ddd00a8dae7d2d525380"
+    },
+    {
+      "path": "packages/llm/llm/package.json",
+      "blob": "a4b5567fe77a413e114945f417407cba04da6930"
+    }
+  ],
+  "recovery": {
+    "childExit": {
+      "exitCode": null,
+      "signal": "SIGKILL"
+    },
+    "durableCallSeq": 4,
+    "externalCountAfterRepair": 1,
+    "persistedEventCount": 8,
+    "closers": [
+      {
+        "type": "tool/result",
+        "seq": 5,
+        "data": {
+          "turn": 1,
+          "step": 1,
+          "message": {
+            "id": "interrupted-tool-result-write-1-5",
+            "role": "tool",
+            "toolCallId": "write-1",
+            "isError": true,
+            "source": {
+              "kind": "tool",
+              "callId": "write-1"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "The tool call was interrupted after it was recorded, but no result was durably recorded. Its outcome is unknown. Decide whether to retry from the tool semantics: retry only if the operation is read-only or idempotent; if it may have side effects, first verify external state or ask the user. Do not retry blindly."
+              }
+            ]
+          },
+          "error": {
+            "name": "ToolOutcomeUnknownError",
+            "code": "TOOL_OUTCOME_UNKNOWN"
+          }
+        }
+      },
+      {
+        "type": "step/end",
+        "seq": 6,
+        "data": {
+          "turn": 1,
+          "step": 1
+        }
+      },
+      {
+        "type": "turn/end",
+        "seq": 7,
+        "data": {
+          "turn": 1,
+          "reason": {
+            "kind": "interrupted"
+          }
+        }
+      }
+    ],
+    "repeatedRepairClosers": 0,
+    "partialRepair": [
+      {
+        "persistedClosers": 1,
+        "remainingTypes": [
+          "step/end",
+          "turn/end"
+        ]
+      },
+      {
+        "persistedClosers": 2,
+        "remainingTypes": [
+          "turn/end"
+        ]
+      }
+    ],
+    "missingCallControl": "TOOL_NOT_STARTED",
+    "deliberateBlindRetryExternalCount": 2
+  },
+  "surfaceReload": {
+    "nodes": [
+      3,
+      2
+    ],
+    "replacements": [
+      {
+        "seq": 3,
+        "start": 0,
+        "end": 1,
+        "shadowedSeqs": [
+          0,
+          1
+        ]
+      }
+    ],
+    "originalRetained": true,
+    "missingLineageRejected": true
+  },
+  "compaction": {
+    "status": "blocked",
+    "stage": "module-load",
+    "code": "ERR_MODULE_NOT_FOUND",
+    "message": "Cannot find package '@deepseek-ai/dsh-typert-protocol' imported from C:\\Users\\unknown\\Documents\\ChatGPT\\harnesswiki\\.dev\\research-work\\deepseek\\run-amQhDQ\\modules\\packages\\llm\\llm\\src\\index.js",
+    "limit": "No latest compaction transaction executed; historical observations are not migrated."
+  }
+}

@@ -1,0 +1,239 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Stakpak：暂停恢复、授权变化与 Skill 重载 | Harness Wiki</title><link rel="canonical" href="https://redreamality.com/harnesswiki-site/docs/research/stakpak-pause-extension-refresh/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Stakpak：暂停恢复、授权变化与 Skill 重载"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.com/harnesswiki-site/docs/research/stakpak-pause-extension-refresh/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="0kpgtl8" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">版本演进</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#锚点与拉取记录" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">锚点与拉取记录</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#先分清状态由谁保存" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">先分清状态由谁保存</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#暂停恢复的授权边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">暂停恢复的授权边界</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s1策略重新读取不代表批准动作重新检查" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S1：策略重新读取，不代表批准动作重新检查</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s2恢复输入没有绑定旧工作区或审批者身份" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S2：恢复输入没有绑定旧工作区或审批者身份</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s3去重依赖已加载的消息不是跨恢复的唯一消费" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S3：去重依赖已加载的消息，不是跨恢复的唯一消费</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s4暂停会请求关闭未等待所有工具完全静止" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S4：暂停会请求关闭，未等待所有工具完全静止</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#skill-重载与失败处理" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Skill 重载与失败处理</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s5发现列表与加载正文有不同的新鲜度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S5：发现列表与加载正文有不同的新鲜度</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s6加载-skill-不延续或扩大工具授权" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S6：加载 Skill 不延续或扩大工具授权</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s7损坏项跳过不等于事务回滚" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S7：损坏项跳过不等于事务回滚</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#可执行实验与当前限制" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">可执行实验与当前限制</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#锚点与拉取记录" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">锚点与拉取记录</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#先分清状态由谁保存" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">先分清状态由谁保存</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#暂停恢复的授权边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">暂停恢复的授权边界</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s1策略重新读取不代表批准动作重新检查" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S1：策略重新读取，不代表批准动作重新检查</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s2恢复输入没有绑定旧工作区或审批者身份" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S2：恢复输入没有绑定旧工作区或审批者身份</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s3去重依赖已加载的消息不是跨恢复的唯一消费" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S3：去重依赖已加载的消息，不是跨恢复的唯一消费</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s4暂停会请求关闭未等待所有工具完全静止" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S4：暂停会请求关闭，未等待所有工具完全静止</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#skill-重载与失败处理" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Skill 重载与失败处理</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s5发现列表与加载正文有不同的新鲜度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S5：发现列表与加载正文有不同的新鲜度</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s6加载-skill-不延续或扩大工具授权" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S6：加载 Skill 不延续或扩大工具授权</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#s7损坏项跳过不等于事务回滚" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">S7：损坏项跳过不等于事务回滚</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#可执行实验与当前限制" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">可执行实验与当前限制</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Stakpak：暂停恢复、授权变化与 Skill 重载</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="stakpak暂停恢复授权变化与-skill-重载"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/docs/research/">研究索引</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak 画像</a> · <a href="/harnesswiki-site/docs/comparisons/durable-approval-pause/">耐久审批比较</a> · <a href="/harnesswiki-site/changelog/stakpak-agent/">版本演进</a><br>
+相关机制：<a href="/harnesswiki-site/docs/primitives/control-continuity/action-authorization/">Action 授权</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/approver-identity/">审批者身份</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态恢复</a> · <a href="/harnesswiki-site/docs/primitives/composition-interop/extension-lifecycle/">扩展生命周期</a></p>
+</blockquote>
+<h2 id="本轮结论">本轮结论</h2>
+<p>在核验的 async CLI 路径中，恢复输入里的批准 ID 会直接进入工具执行。当前进程会重新初始化配置和 MCP，但这不等于重新授权：恢复分支没有再次归约自动审批策略，没有绑定原工作区或审批者，也没有消费一次便永久关闭的审批记录。它依赖所加载消息中的 tool result 排除已经完成的调用。读取没有结果的旧 checkpoint，仍能再次识别出同一调用。</p>
+<p>Skill 重载分为目录重新发现与按 URI 重新读正文。前者替换可用资源列表，后者读文件当时的内容；两者都没有在已检查路径中把 Skill 的 <code>allowed_tools</code> 元数据写入工具授权策略。TUI 切换 profile 是另一条更重的路径，会更新配置并重启外层循环，不能与普通 Skill 列表更新混为一谈。</p>
+<p>恢复授权、TUI 接线和 MCP 清理仍为 <code>implemented</code> 的源码结论。Skill 本地发现与加载则已取得五组 <code>observed</code> 模块证据。最初缺少 MSVC 链接器，单独设置 GNU target 后 host build script 仍失败；协调者改用独立的 GNU host 工具链后，原探针完整通过。系统默认工具链没有改变，重复副作用和完整 MCP 关闭仍未实测。</p>
+<h2 id="锚点与拉取记录">锚点与拉取记录</h2>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>固定值与来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>观察日期</td>
+<td>2026-10-24</td>
+</tr>
+<tr>
+<td>旧画像 baseline</td>
+<td><code>760cd2b5984d29c2d513bb15ca33e995fae45f17</code>，从画像及版本注册表读取</td>
+</tr>
+<tr>
+<td>本轮 Claim 锚点</td>
+<td><code>760cd2b5984d29c2d513bb15ca33e995fae45f17</code>，刷新脚本 fetch 后解析 <code>origin/main</code>，再以 <code>ls-remote</code> 确认</td>
+</tr>
+<tr>
+<td>本地物化</td>
+<td>checkout 与根仓库 index 的 gitlink 均为同一 SHA；本轮没有 checkout、修改 gitlink 或提交</td>
+</tr>
+<tr>
+<td>默认分支提交日期</td>
+<td><code>2026-07-06T13:10:46+03:00</code>，即 <code>2026-07-06T10:10:46Z</code>；不是 release 日期</td>
+</tr>
+<tr>
+<td>官方稳定发布</td>
+<td><code>v0.3.88</code>，发布于 <code>2026-06-10T12:06:54Z</code>，tag 指向 <code>d3eba6f502a79b993b826ef3ab4065eec9e38dfa</code></td>
+</tr>
+<tr>
+<td>行为锚点</td>
+<td>同一 Claim SHA；GNU host 工具链下五组本地 Skill 断言通过，不包含 async 恢复与 MCP 集成</td>
+</tr>
+</tbody>
+</table>
+<p>本轮执行 <code>node scripts/refresh-research.mjs stakpak-agent</code>。第一次于 <code>05:10:25.366Z</code> 开始，<code>git ls-remote</code> 连接失败，<code>05:10:46.623Z</code> 返回 <code>blocked</code>。仅重试一次，于 <code>05:10:56.988Z</code> 开始，<code>05:11:02.436Z</code> 返回 <code>fetched</code>，随后读取 <code>.dev/research-latest/stakpak-agent.json</code>。因此本页的“本轮默认分支”有成功刷新依据，不是将缓存称为 latest。</p>
+<p>旧画像与本轮 SHA 相等，相关路径的 <code>git diff --exit-code</code> 为 0。不能人为制造两版机制迭代。发布版到当前主干的真实差异另见<a href="/harnesswiki-site/changelog/stakpak-agent/">版本演进</a>。证据快照见<a href="/harnesswiki-site/_sources/scripts/research/stakpak-refresh-evidence.json">本轮记录</a>。</p>
+<h2 id="先分清状态由谁保存">先分清状态由谁保存</h2>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>状态归属</th>
+<th>恢复或更新入口</th>
+<th>边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>async CLI</td>
+<td><code>run_async</code> 的 messages、独立 <code>ResumeInput</code>、pause manifest</td>
+<td>Session active checkpoint 或显式 checkpoint，再检测 pending calls</td>
+<td>本页主要暂停路径；没有调用 core 的 <code>ApprovalStateMachine</code></td>
+</tr>
+<tr>
+<td>agent-core</td>
+<td>当前 tool cycle 中的 <code>ApprovalStateMachine</code></td>
+<td>当前运行内的 command</td>
+<td><code>Dispatched</code> 能阻止同一内存状态机再次分发，不能外推到 async 跨进程恢复</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td><code>AgentContext.skills</code> 与 MCP server 的 skill directories</td>
+<td>TUI 重新发现列表；<code>load_skill</code> 按 URI 读取</td>
+<td>指令资源与工具授权分别保存</td>
+</tr>
+<tr>
+<td>TUI profile 切换</td>
+<td>外层交互循环与新 <code>AppConfig</code></td>
+<td>验证新 profile、退出当前任务、重新建客户端</td>
+<td>会更新 <code>allowed_tools</code>、<code>auto_approve</code>，不是轻量 Skill reload</td>
+</tr>
+</tbody>
+</table>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L185-L403">async 恢复分支</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/agent-core/src/approval.rs#L43-L160">core 状态机</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_interactive.rs#L1634-L1700">profile 重建</a>。</p>
+<h2 id="暂停恢复的授权边界">暂停恢复的授权边界</h2>
+<h3 id="s1策略重新读取不代表批准动作重新检查">S1：策略重新读取，不代表批准动作重新检查</h3>
+<ul>
+<li>情境：工具等待期间将 session 自动审批配置改为 <code>Never</code>，或收紧 <code>allowed_tools</code>，随后用 <code>--approve &lt;id&gt;</code> 恢复。</li>
+<li>状态 / 事实类型：<code>implemented / implemented</code>。</li>
+<li>事实：<code>run_async</code> 在启动时可构建 <code>AsyncAutoApproveConfig</code>，但恢复分支仅检查 <code>ResumeInput::is_approved(id)</code>，随后调用 <code>run_tool_call</code>；<code>any_requires_approval</code> 位于后面的新模型输出分支，没有覆盖这个恢复分支。<code>Never</code> 在该 async 配置中意味着“不能自动批准”，也不能直接等同于 core 的硬拒绝。</li>
+<li>进一步的边界：MCP 初始化返回原始 <code>mcp_tools</code> 和经 <code>allowed_tools</code> 过滤的模型工具列表 <code>tools</code>。恢复执行传递前者；<code>run_tool_call</code> 只在原始表中查找名称，再发送 MCP 请求。因此这里的 <code>allowed_tools</code> 是模型可见性过滤，不能单凭它证明恢复执行被拒绝。</li>
+<li>限制：工具服务器自身、凭据和外部执行环境仍可能拒绝请求。本结论不是“所有策略均可绕过”，也不是产品漏洞利用实测。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L78-L199">策略构造</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L308-L395">恢复执行</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L602-L668">新调用暂停</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mcp_init.rs#L408-L425">两份工具表</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/tooling.rs#L36-L108">名称查找与派发</a>。</p>
+<h3 id="s2恢复输入没有绑定旧工作区或审批者身份">S2：恢复输入没有绑定旧工作区或审批者身份</h3>
+<ul>
+<li>情境：暂停后更换目录、配置或账号，再加载原 checkpoint。</li>
+<li>状态 / 事实类型：本地字段与调用路径为 <code>implemented / implemented</code>；跨账号服务端可访问性为 <code>unknown</code>。</li>
+<li>事实：manifest 保存 Session、Checkpoint、工具名称、参数等，但没有 workspace hash、policy version 或 approver identity。<code>ResumeInput</code> 保存批准/拒绝 ID 集合与全选标志。恢复端重新创建客户端，以当前配置读取 checkpoint，没有在此处比较旧审批者与新账号，也没有比较旧工作区快照。</li>
+<li>工作区后果：本地 session store 以当前目录定位 <code>.stakpak/session</code>，Skill 默认目录也包含相对路径 <code>.stakpak/skills</code>。换目录会改变这些本地输入；恢复 Session 身份不等于恢复原文件环境。</li>
+<li>限制：没有服务端账户授权源码或跨账号实验，不能推出任意账号都能读取旧 checkpoint。这里缺少的是本地恢复协议中的“原审批者、原环境”绑定证据。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/shared/src/models/async_manifest.rs#L24-L75">manifest 字段</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/pause.rs#L31-L65">批准输入</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L208-L306">当前配置与 checkpoint</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/shared/src/local_store.rs#L5-L24">当前目录存储</a>。</p>
+<h3 id="s3去重依赖已加载的消息不是跨恢复的唯一消费">S3：去重依赖已加载的消息，不是跨恢复的唯一消费</h3>
+<ul>
+<li>情境：工具已经产生副作用，但结果尚未持久化；或者两次指定同一旧 checkpoint。</li>
+<li>状态 / 事实类型：pending 识别为 <code>implemented / implemented</code>；重复副作用风险为 <code>inferred</code>。</li>
+<li>事实：<code>detect_pending_tool_calls</code> 找最后一个含 tool calls 的 assistant 消息，再排除任意已加载 tool 消息中出现的 ID。恢复执行结果先追加到内存 <code>chat_messages</code>。该检测函数不接收耐久执行账本、消费令牌或 lease。</li>
+<li>后果：加载包含配对结果的历史，会排除这个调用；重复读取仍不含结果的旧历史，则会重新识别为 pending。工具调用元数据只在已检查路径中携带 session/model 信息，没有将原 tool-call ID 作为跨进程幂等键传给 MCP。</li>
+<li>限制：未实际重复执行有副作用的工具，也未证明远端 checkpoint 是否允许并发消费。因此不能写成“已实测重复执行两次”，也不能称 exactly-once 已成立。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/pause.rs#L68-L95">pending 检测</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L348-L395">结果追加</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/tooling.rs#L62-L96">MCP 元数据</a>。</p>
+<h3 id="s4暂停会请求关闭未等待所有工具完全静止">S4：暂停会请求关闭，未等待所有工具完全静止</h3>
+<ul>
+<li>状态 / 事实类型：<code>implemented / implemented</code>。</li>
+<li>事实：manifest 写失败只打印 warning，仍发送 server/proxy shutdown 并等待 100ms，随后返回 <code>Paused</code>。MCP server 的关闭处理会等待 task manager shutdown；proxy 调用 <code>graceful_shutdown(None)</code>。但 async runner 不持有并等待两者完成的 join handle。</li>
+<li>限制：不能把“发送关闭信号”写成“所有子进程已退出”。初始化出错时，广播 sender 被丢弃也可能使 receiver 结束等待，不能仅看到 <code>?</code> 提前返回就断言永久泄漏。跨进程暂停的原子持久化与完整静止仍需故障注入实验。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_async.rs#L637-L668">暂停清理</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/mcp/server/src/lib.rs#L149-L221">server 关闭</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/mcp/proxy/src/server/mod.rs#L908-L924">proxy 关闭</a>。</p>
+<h2 id="skill-重载与失败处理">Skill 重载与失败处理</h2>
+<h3 id="s5发现列表与加载正文有不同的新鲜度">S5：发现列表与加载正文有不同的新鲜度</h3>
+<ul>
+<li>情境：Skill 首次被列出后，修改或删除其文件，再使用同一 URI 加载。</li>
+<li>状态 / 事实类型：本地发现和按路径重读为 <code>implemented / observed</code>；TUI 接线仍为 <code>implemented / implemented</code>。</li>
+<li>事实：发现阶段读文件并校验 frontmatter，但仅保存 metadata，<code>content=None</code>；同名项按目录顺序 first-wins。<code>load_skill_from_path</code> 每次重新读文件、重新解析并核对目录名，返回当前正文，不使用发现时的正文快照。</li>
+<li>TUI 接线：<code>RequestRulebookUpdate</code> 从启动时保存的远端列表筛选 URI，再重新发现 local skills，替换 <code>AgentContext.skills</code>，并在下一条消息强制注入。它不是重新请求全部远端 Rulebook 的网络刷新；该分支还受 <code>all_available_remote_skills</code> 为 <code>Some</code> 的条件限制。</li>
+<li>限制：这没有证明文件监听式热重载、事务化 swap 或历史上下文撤销；此前进入消息的旧正文不能因为列表替换就被视为删除。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/api/src/local/skills/mod.rs#L7-L164">发现和加载</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_interactive.rs#L1226-L1246">TUI 更新入口</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/utils/agent_context.rs#L38-L69">替换列表与注入</a>。</p>
+<h3 id="s6加载-skill-不延续或扩大工具授权">S6：加载 Skill 不延续或扩大工具授权</h3>
+<ul>
+<li>情境：修改 Skill 的 <code>allowed-tools</code> 为更宽权限，然后 reload。</li>
+<li>状态 / 事实类型：<code>allowed-tools</code> 字符串解析为 <code>implemented / observed</code>；MCP 与授权接线仍为 <code>implemented / implemented</code>，全产品其他路径是否消费此字段保持 <code>unknown</code>。</li>
+<li>事实：parser 将 <code>allowed-tools</code> 解析成可选字符串，discovery 搬入 <code>Skill.allowed_tools</code>。已检查的 MCP loader 只返回目录与正文，没有更新审批策略。loader 每次 canonicalize 本地路径并要求位于配置目录内；“允许读取说明文件”与“允许执行其中建议的工具”分别处理。</li>
+<li>profile 切换的差异：新 profile 验证失败时保持原 profile；成功后外层循环重新建立客户端，重新发现 Skill，并更新 <code>allowed_tools</code>、<code>auto_approve</code>。这些配置来自新 profile，而不是 Skill 的 frontmatter。</li>
+<li>限制：不能把 Skill 声明解读为持久授权证书；也没有证明 profile 切换会迁移旧 pending approval 的身份、租约或唯一消费状态。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/api/src/local/skills/parser.rs#L5-L21">metadata 类型</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/mcp/server/src/remote_tools.rs#L349-L406">加载边界</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_interactive.rs#L1173-L1187">失败保留 profile</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/cli/src/commands/agent/run/mode_interactive.rs#L1654-L1700">更新 profile 配置</a>。</p>
+<h3 id="s7损坏项跳过不等于事务回滚">S7：损坏项跳过不等于事务回滚</h3>
+<ul>
+<li>状态 / 事实类型：本地损坏文件、名称不符及后备目录选择为 <code>implemented / observed</code>；远端 Rulebook 与 TUI 清理路径仍为 <code>implemented / implemented</code>。</li>
+<li>事实：discovery 静默跳过读取失败、解析失败和目录名不符的项。因此优先目录中的 Skill 损坏后，后续同名项可能变成赢家。直接加载已允许的本地文件失败时，MCP 返回 <code>LOAD_SKILL_ERROR</code>，不会在这个分支回退到 Rulebook；路径不存在或不在允许目录内时，则会走远端 Rulebook 尝试。</li>
+<li>清理边界：本地加载是同步读取和解析，没有在这些函数中登记 active plugin、启动任务或设置 disposer。失败不需要撤销一个由 loader 启动的插件，但也没有“保留上一份有效目录快照”或“撤销已经进入对话的指令”的事务契约。</li>
+<li>限制：只覆盖 local Skill、Rulebook loader 与 TUI 接线。外部 MCP 扩展、Pak 服务内部的 reload、unload 和资源清理仍为 <code>unknown</code>。</li>
+</ul>
+<p>源码：<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/api/src/local/skills/mod.rs#L11-L70">跳过与优先级</a> · <a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/mcp/server/src/remote_tools.rs#L356-L406">直接加载错误与远端回退</a>。</p>
+<h2 id="可执行实验与当前限制">可执行实验与当前限制</h2>
+<p>入口：<a href="/harnesswiki-site/_sources/scripts/research/stakpak-skill-probe.mjs">Node runner</a> 与 <a href="/harnesswiki-site/_sources/scripts/research/stakpak-skill-probe.rs">Rust 断言</a>。</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$env:RUSTUP_TOOLCHAIN</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">1.97.1-x86_64-pc-windows-gnu</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">node scripts</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">stakpak</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">skill</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.mjs</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Remove-Item</span><span style="--0:#D6DEEB;--1:#403F53"> Env:\RUSTUP_TOOLCHAIN</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="$env:RUSTUP_TOOLCHAIN = &#x27;1.97.1-x86_64-pc-windows-gnu&#x27;node scripts/research/stakpak-skill-probe.mjsRemove-Item Env:\RUSTUP_TOOLCHAIN"><div></div></button></div></figure></div>
+<p>runner 固定上述 SHA，先 <code>git ls-tree</code> 验证路径，再 <code>git show</code> 导出两个完整 local Skill 模块。它从同版本 models 文件提取实际类型声明，不重写解析和加载算法。临时 Cargo 工程只依赖 Serde 与 serde_yaml，不构建 <code>stakpak-api</code> 的数据库、HTTP 和模型依赖；输出源码 SHA-256、临时目录、退出码和日志。Cargo 有 90 秒上限，Windows 超时会终止该进程树；源码 checkout 保持不动。</p>
+<p>断言覆盖同名目录优先级、metadata-only、同 URI 修改正文、损坏项的直接失败与后备目录选择、名称不匹配、删除后恢复。<code>allowed-tools</code> 仅检查解析出的字符串，不能据此宣称已经测试工具授权。</p>
+<p>本机最初使用 <code>stable-x86_64-pc-windows-msvc</code>，Cargo 两次返回 101，报 <code>linker link.exe not found</code>，发生在 Serde 等依赖的 host build script 编译阶段。这些尝试没有执行断言，保留为失败记录。</p>
+<p>随后安装同一 Rust 版本的独立 <code>1.97.1-x86_64-pc-windows-gnu</code> 工具链，用进程级 <code>RUSTUP_TOOLCHAIN</code> 选择它，配合已存在的 MinGW linker。<code>rustc</code> 仍为 <code>1.97.1 (8bab26f4f 2026-07-14)</code>，系统默认仍是 MSVC。最终 Cargo 返回 0，五组 PASS 分别为：</p>
+<ul>
+<li>project 同名 Skill 优先，发现结果只有 metadata，<code>allowed-tools</code> 保留为字符串。</li>
+<li>同一文件 URI 重读得到修改后的正文，无需重新发现。</li>
+<li>project 文件损坏时直接加载报错，重新发现改选 user 后备项。</li>
+<li>frontmatter 名称与目录不符时拒绝加载。</li>
+<li>文件删除时报错，恢复后 project 项重新成为首选。</li>
+</ul>
+<p>源码哈希、工具链、退出码与原始输出见<a href="/harnesswiki-site/_sources/scripts/research/stakpak-refresh-evidence.json">证据快照</a>。没有模型请求、凭据调用或完整 Agent 启动；这五组只提升上述本地函数的证据等级。</p>
+<p>下一缺口是无模型的恢复集成实验：用可控 checkpoint provider 与计数工具，先暂停，再分别收紧策略、换目录、换身份，并两次加载同一个旧 checkpoint。需要同时记录“是否再次请求审批”“MCP 收到几次调用”“结果何时持久化”。另外应延迟 task manager 关闭并注入 manifest 写入失败，确认 <code>Paused</code> 与资源真正静止之间的时间差。这些实验没有由本轮 Skill 探针替代。</p>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Qwen Code 审批竞争与回放边界复核 | Harness Wiki</title><link rel="canonical" href="https://redreamality.com/harnesswiki-site/docs/research/qwen-approval-replay-refresh/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Qwen Code 审批竞争与回放边界复核"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.com/harnesswiki-site/docs/research/qwen-approval-replay-refresh/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="0kpgtl8" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">版本演进</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#版本与刷新证据" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">版本与刷新证据</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#当前谁拥有状态" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">当前谁拥有状态</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界一votetimeout-与-close" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界一：vote、timeout 与 close</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界二ring-淘汰慢消费者与-live-handoff" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界二：ring 淘汰、慢消费者与 live handoff</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#复现与产物" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">复现与产物</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮剩余-unknown" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮剩余 unknown</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#版本与刷新证据" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">版本与刷新证据</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#当前谁拥有状态" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">当前谁拥有状态</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界一votetimeout-与-close" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界一：vote、timeout 与 close</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界二ring-淘汰慢消费者与-live-handoff" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界二：ring 淘汰、慢消费者与 live handoff</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#复现与产物" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">复现与产物</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮剩余-unknown" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮剩余 unknown</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Qwen Code 审批竞争与回放边界复核</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="qwen-code-审批竞争与回放边界复核"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/docs/research/">研究索引</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code 画像</a> · <a href="/harnesswiki-site/changelog/qwen-code/">版本记录</a> · <a href="/harnesswiki-site/changelog/">版本演进索引</a><br>
+对应 Primitive：<a href="/harnesswiki-site/docs/primitives/control-continuity/approval-mediation/">审批协调</a> · <a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">重连投影</a> · <a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面</a><br>
+观察日期：2026-10-24；本页只补充两条边界，不迁移画像 baseline，也不覆盖<a href="/harnesswiki-site/docs/research/control-plane-behavior-experiments/">旧控制面实验</a>的历史结果。</p>
+</blockquote>
+<h2 id="本轮结论">本轮结论</h2>
+<p>审批投票、定时超时和 Session 关闭最终都调用同一个收尾函数。六种受控执行顺序中，最先完成收尾的路径决定结果，后续操作没有产生第二个终态。这里的“竞争”是单线程事件循环中的先后顺序，不是多个 CPU 线程同时写 Map。</p>
+<p>历史事件被 ring 淘汰后，重连仍能收到剩余事件和 <code>replay_complete</code>，但前面会先收到要求重新加载状态的告警。因此“回放结束”只表示本次回放已经输出完，不代表历史连续、客户端状态完整。慢消费者的 live 队列与历史回放分别计数；本轮确认历史积压没有挤占 live 容量。</p>
+<p>上述结论为真实模块探针的 <code>observed</code>，共 12 组通过。HTTP/SSE 连接、SDK 的重新加载流程、模型和工具执行均未运行。</p>
+<h2 id="版本与刷新证据">版本与刷新证据</h2>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>本轮证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>旧画像研究锚点</td>
+<td><code>f2a6e6c727c4964ccc7d7e516740678aaf80763b</code>，根包 <code>0.21.11</code></td>
+</tr>
+<tr>
+<td>旧行为锚点及保留的 checkout/gitlink</td>
+<td><code>b4f5079dc0cc89ce1448785898ab72b358399c95</code></td>
+</tr>
+<tr>
+<td>本轮 Claim 与行为锚点</td>
+<td><a href="https://github.com/QwenLM/qwen-code/commit/e034944c73f77d63fca7fbd9d84ab96ef87b4d21"><code>e034944c73f77d63fca7fbd9d84ab96ef87b4d21</code></a>，拉取时默认分支 <code>main</code>，根包 <code>0.26.0</code></td>
+</tr>
+<tr>
+<td>刷新命令</td>
+<td><code>node scripts/refresh-research.mjs qwen-code</code></td>
+</tr>
+<tr>
+<td>首次尝试</td>
+<td>2026-10-24 05:09:14.895Z 开始，05:09:36.351Z 以 <code>blocked</code> 结束；远端 HEAD 查询连接被重置</td>
+</tr>
+<tr>
+<td>唯一一次重试</td>
+<td>05:10:00.168Z 开始，05:10:08.633Z 完成；退出码 0，<code>status=fetched</code></td>
+</tr>
+<tr>
+<td>机器证据</td>
+<td><code>.dev/research-latest/qwen-code.json</code> 的 <code>sources[0].fetchedCommit</code> 与本页 SHA 一致；刷新脚本在 fetch 后再次核对远端分支</td>
+</tr>
+<tr>
+<td>发布边界</td>
+<td>已核验官方 CLI <code>v0.26.0</code>，发布时间为 2026-10-21T23:20:53Z；默认分支不是稳定发布，详见<a href="/harnesswiki-site/changelog/qwen-code/">版本记录</a></td>
+</tr>
+</tbody>
+</table>
+<p>本轮没有 checkout、更新 gitlink、安装上游依赖或提交。源码路径先由 <code>git ls-tree -r --name-only &lt;SHA&gt;</code> 确认，再用 <code>git show &lt;SHA&gt;:&lt;path&gt;</code> 读取。读取新控制面文件时发生过一次 promisor blob 下载失败，随后定向读取成功；这次取证失败没有被当成“文件不存在”。</p>
+<h2 id="当前谁拥有状态">当前谁拥有状态</h2>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>owner 与契约</th>
+<th>类型与来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>审批请求</td>
+<td><code>MultiClientPermissionMediator</code> 持有 pending、已决 FIFO、投票集合和 timer；<code>request()</code> 同步注册，timeout 为 0 时不启用定时器</td>
+<td><code>implemented</code>，<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/permissionMediator.ts#L412-L555">请求注册与定时器</a></td>
+</tr>
+<tr>
+<td>审批与 Session 的连接</td>
+<td><code>BridgeClient.requestPermission</code> 先发布事件，成功后才登记 Session 索引并等待 mediator；finally 清理索引。控制面构造 mediator，并在关闭路径调用 <code>forgetSession</code></td>
+<td><code>implemented</code>，<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/bridgeClient.ts#L1101-L1168">BridgeClient</a>、<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/session-control-plane.ts#L4536-L4555">控制面构造</a>、<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/session-control-plane.ts#L9819-L9897">关闭路径</a></td>
+</tr>
+<tr>
+<td>重连历史与订阅队列</td>
+<td>每个 Session 的 <code>EventBus</code> 持有 epoch、单调 id、ring 和订阅集合；每个订阅使用独立有界队列。ring 默认 8000 帧，live 默认 256 帧、2 MiB，单次 replay 默认 8 MiB</td>
+<td><code>implemented</code>，<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/eventBus.ts#L187-L229">默认值</a>、<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/eventBus.ts#L417-L452">状态与构造器</a></td>
+</tr>
+<tr>
+<td>replay 到 live 的移交</td>
+<td><code>subscribe()</code> 同步登记订阅并排入历史及完成标记；后续 publish 排在后面。控制面可在完成标记之后插入当前 <code>session_snapshot</code>，没有 cursor 时则先插 snapshot</td>
+<td><code>implemented</code>，<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/eventBus.ts#L784-L1043">EventBus 订阅</a>、<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/session-control-plane.ts#L12162-L12216">snapshot 包装</a></td>
+</tr>
+</tbody>
+</table>
+<p>旧实验中长达数千行的 <code>bridge.ts</code> 不再是当前控制面主体。<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/bridge.ts#L7-L23">新入口</a>组装 <code>createSessionControlPlane</code> 与 <code>createChannelHarness</code>。这次只迁移本页涉及的 Claim，不把旧路径的行号套在新版本上。</p>
+<h2 id="边界一votetimeout-与-close">边界一：vote、timeout 与 close</h2>
+<p><code>implemented</code>：timeout 回调与 <code>resolveEntry()</code> 都比较 pending entry 的对象身份；对象已经移走时直接返回。收尾顺序为清 timer、删除 pending、发 <code>permission_resolved</code>、写已决缓存、写审计、完成 Promise。该顺序也留下一个明确的同步回调窗口：正在发 terminal 时，pending 已删除，而已决缓存还没有写入。来源：<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/permissionMediator.ts#L509-L552">timeout</a>、<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/permissionMediator.ts#L1031-L1110">唯一收尾与缓存</a>。</p>
+<table>
+<thead>
+<tr>
+<th>输入情境</th>
+<th>实测结果</th>
+<th>事实类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vote → timeout → close；vote → close → timeout</td>
+<td>两组均为 <code>{kind:'option', optionId:'allow'}</code>；各一次 terminal、一次 resolved audit、零 pending</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>timeout → vote → close；timeout → close → vote</td>
+<td>两组均为 <code>cancelled/timeout</code>；vote 返回 <code>already_resolved</code>，不能翻转结果</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>close → vote → timeout；close → timeout → vote</td>
+<td>两组均为 <code>cancelled/session_closed</code>；vote 返回 <code>already_resolved</code></td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>真实 Node timer，5 ms 配置超时</td>
+<td>得到 <code>cancelled/timeout</code>；随后 close 和 vote 没有新增 terminal。5 ms 是配置值，不是测得的延迟保证</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>terminal emit 回调内同步投票，再在外层投票</td>
+<td>回调内为 <code>unknown_request</code>；外层为 <code>already_resolved</code></td>
+<td><code>observed</code>，仅注入回调的重入情境</td>
+</tr>
+<tr>
+<td>同 Session 的后台 prompt 和用户 prompt 同时 pending，只取消后台 prompt</td>
+<td>后台为 <code>agent_cancelled</code>；用户请求仍 pending，随后可投票批准</td>
+<td><code>observed</code></td>
+</tr>
+</tbody>
+</table>
+<p>前六组用 Node <code>mock.timers</code> 只控制 <code>setTimeout</code>，按列出的顺序调用真实模块；不是概率性压测，也没有验证操作系统同一时刻到达的网络请求。真实 timer 另跑一组作为补充。</p>
+<p><code>implemented</code>：<code>vote()</code> 在没有 pending 时查找同 Session 的已决记录，找到后发 <code>permission_already_resolved</code>；缓存为最多 512 项的 FIFO，不能承诺任意久后的晚票都能读到终态。<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/permissionMediator.ts#L558-L591">晚票分支</a>和<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/permissionMediator.ts#L1101-L1110">缓存淘汰</a>给出该边界，本轮未运行 513 项淘汰实验。</p>
+<p><code>inferred</code>：这里保证的是收尾路径的状态幂等，不是“投票返回值在任何自定义 hook 重入下都提供完整终态”。生产 EventBus 将事件排入队列，不会在 publish 内直接运行异步消费者；不能把注入 emit hook 观察到的窗口写成已复现的 HTTP 缺陷。</p>
+<h2 id="边界二ring-淘汰慢消费者与-live-handoff">边界二：ring 淘汰、慢消费者与 live handoff</h2>
+<p>ring 是有限的历史事件数组；慢消费者队列是某个连接尚未读取的数据。二者容量不同，淘汰后果也不同。</p>
+<table>
+<thead>
+<tr>
+<th>输入情境</th>
+<th>实测输出与后果</th>
+<th>事实类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ring 容量 3，发布 id 1–5，以 cursor 1 重连</td>
+<td><code>state_resync_required(reason=ring_evicted)</code> → 3、4、5 → <code>replay_complete(replayedCount=3)</code>；继续发布 6，连接仍能读到 6</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>发布 6 后 ring 保留 4–6，以 cursor 3 重连</td>
+<td>4、5、6 → <code>replay_complete</code>；cursor 恰好在保留区前一项，不报缺口</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>replay 预算设为 1 字节，ring 有 id 1、2</td>
+<td>仍接收第一帧 id 1，随后 <code>replay_budget_exceeded</code> 和 <code>replay_complete(replayedCount=1)</code>；后续 live id 3 继续到达</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>历史 1–3 未消费，live 容量 2，再发布 4、5</td>
+<td>订阅仍存活；历史帧和 <code>replay_complete</code> 未占用 live 配额</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>上述慢订阅继续不消费，发布 6；健康订阅每次都读取</td>
+<td>慢端依次读到 1、2、3、完成标记、4、5、warning、evicted，然后结束；健康端完整读到 4、5、6</td>
+<td><code>observed</code></td>
+</tr>
+<tr>
+<td>慢端以最后实际收到的 cursor 5 重连</td>
+<td>成功回放 6，再得到完成标记</td>
+<td><code>observed</code></td>
+</tr>
+</tbody>
+</table>
+<p>这三组 replay 实验在脚本中分别记为 ring、budget、handoff 三个结果项，其中每组包含多条断言。</p>
+<p><code>implemented</code>：ring 淘汰按 <code>earliestInRing &gt; lastEventId + 1</code> 判断，缺口告警不关闭连接。replay 用 <code>forcePush</code> 绕过 live 帧数和字节配额，但有独立总字节预算；至少允许第一帧，即使它本身已超过预算。来源：<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/eventBus.ts#L838-L1031">缺口与预算分支</a>。</p>
+<p><code>implemented</code>：队列逐项记录是否 forced，live 计数只统计普通 push。超过 live 配额时把无 id 的 <code>client_evicted</code> 放到尾部，关闭并移除该订阅；已有帧仍可排空。来源：<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/eventBus.ts#L639-L701">订阅淘汰</a>、<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/src/eventBus.ts#L1139-L1325">队列实现</a>。</p>
+<p>一个容易误读的字段是 <code>client_evicted.data.droppedAfter</code>。本轮值为 6，但慢端没有收到业务帧 6，只收到到 5 为止的业务帧。源码把触发拒收的 <code>event.id</code> 写入该字段，因此它不是客户端最后成功接收的 cursor。将 6 当作已消费进度会跳过这帧，是 <code>inferred</code> 的使用风险；本轮没有声称真实 SDK 会这样使用它。</p>
+<p><code>inferred</code>：<code>replay_complete</code> 是本次回放的分界标记，不能解除先前缺口告警所代表的恢复责任。控制面插入的 snapshot 仅含模型、审批模式等侧状态，也不是完整 transcript；完整客户端 resync 是否与后续 live 增量正确合并，仍需另外测试。</p>
+<h2 id="复现与产物">复现与产物</h2>
+<p>脚本：<a href="/harnesswiki-site/_sources/scripts/research/qwen-boundary-probe.mjs">qwen-boundary-probe.mjs</a>。从仓库根目录运行：</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">node scripts</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">qwen</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">boundary</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.mjs</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="node scripts/research/qwen-boundary-probe.mjs"><div></div></button></div></figure></div>
+<p>脚本要求刷新 JSON 为 <code>fetched</code> 且 SHA 与固定锚点一致。它不会自行 fetch 默认分支；以后刷新到其他 SHA 时应先审查源码和预期，不能只替换锚点继续宣称同一结果。缺少 Git blob 时，<code>git show</code> 可能对本轮 Qwen 仓库做定向物化。</p>
+<p>执行环境为 Windows <code>win32 x64</code>、Node <code>v26.7.0</code>、pnpm <code>10.28.2</code>。脚本在 <code>.dev/research-work/qwen/e034944c73f77d63fca7fbd9d84ab96ef87b4d21</code> 内生成源码副本、编译产物和 <code>results.json</code>。使用 TypeScript <code>5.8.3</code> 的 <code>transpileModule</code>，只转译语法；不声称运行过上游完整类型检查。运行时 SDK 固定为 <code>@agentclientprotocol/sdk@0.14.1</code>，落在<a href="https://github.com/QwenLM/qwen-code/blob/e034944c73f77d63fca7fbd9d84ab96ef87b4d21/packages/acp-bridge/package.json">上游声明范围</a>内，但没有复用整个上游 lockfile。</p>
+<p>真实加载的模块是 <code>permissionMediator</code>、<code>bridgeErrors</code>、<code>workspacePaths</code>、<code>eventBus</code>、<code>replay-summary</code>；<code>permission.ts</code> 同样导出转译。没有复制状态机实现或替换 SDK。审计接口为记录器，事件输入为人工构造，重入实验使用注入 emit hook。</p>
+<p>输出摘要：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ordering: 6/6 passed, each terminalCount=1</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">native-timeout: cancelled/timeout</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">synchronous-emit-reentry: unknown_request -&gt; already_resolved</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">prompt-cancel-isolation: background=agent_cancelled, foreground=allow</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">ring-gap-and-boundary: resync, 3, 4, 5, replay_complete; live=6</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">replay-budget-first-frame: 1, resync, replay_complete; live=3</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">replay-live-handoff-and-slow-consumer:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">slow=1,2,3,replay_complete,4,5,slow_client_warning,client_evicted</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">healthy=4,5,6; droppedAfter=6; recovered=6</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">passed=12; exit code=0</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="ordering: 6/6 passed, each terminalCount=1native-timeout: cancelled/timeoutsynchronous-emit-reentry: unknown_request -> already_resolvedprompt-cancel-isolation: background=agent_cancelled, foreground=allowring-gap-and-boundary: resync, 3, 4, 5, replay_complete; live=6replay-budget-first-frame: 1, resync, replay_complete; live=3replay-live-handoff-and-slow-consumer:  slow=1,2,3,replay_complete,4,5,slow_client_warning,client_evicted  healthy=4,5,6; droppedAfter=6; recovered=6passed=12; exit code=0"><div></div></button></div></figure></div>
+<h2 id="本轮剩余-unknown">本轮剩余 unknown</h2>
+<ul>
+<li>尚未运行真实 HTTP/SSE、浏览器或 SDK reducer 的 snapshot/loadSession/live 合并，也没有验证代理缓冲和网络乱序。</li>
+<li>审批顺序探针使用 first-responder；consensus 的最后一票、迟到的同 tick timer、audit 回调重入和抛错组合没有全部覆盖。旧实验的 2-of-3 quorum 仍只属于旧行为锚点。</li>
+<li>慢端本轮触发帧数上限，未触发 live 字节上限、MCP App HTML 降级或 warning 恢复阈值；这些只有源码证据。</li>
+<li>未覆盖进程重启、epoch mismatch、ring seed/reset、已决 FIFO 淘汰和压缩引擎失败。内存队列实验不能证明持久化恢复。</li>
+<li>未验证 <code>closeSession</code> 在子进程拒绝关闭时的外部状态；直接 <code>forgetSession</code> 的结果不能等同于完整 daemon 关闭成功。</li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

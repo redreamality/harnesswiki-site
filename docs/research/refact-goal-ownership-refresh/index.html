@@ -1,0 +1,284 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Refact：Goal 证据新鲜度与任务所有权复核 | Harness Wiki</title><link rel="canonical" href="https://redreamality.com/harnesswiki-site/docs/research/refact-goal-ownership-refresh/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Refact：Goal 证据新鲜度与任务所有权复核"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.com/harnesswiki-site/docs/research/refact-goal-ownership-refresh/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="0kpgtl8" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">版本演进</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#版本和取证范围" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">版本和取证范围</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#主要结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">主要结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#goal新鲜度保护到哪一层" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Goal：新鲜度保护到哪一层</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#producer-与-verifier-冲突" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Producer 与 verifier 冲突</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#work-claim崩溃与晚到结果" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Work claim、崩溃与晚到结果</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#claim-的原子边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Claim 的原子边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#崩溃接管的实际路径" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">崩溃接管的实际路径</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#三类晚到写入分别防护" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">三类晚到写入分别防护</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#join结束工作不等于合并验收" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Join：结束工作不等于合并验收</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本机模块实验" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本机模块实验</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#版本和取证范围" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">版本和取证范围</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#主要结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">主要结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#goal新鲜度保护到哪一层" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Goal：新鲜度保护到哪一层</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#producer-与-verifier-冲突" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Producer 与 verifier 冲突</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#work-claim崩溃与晚到结果" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Work claim、崩溃与晚到结果</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#claim-的原子边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Claim 的原子边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#崩溃接管的实际路径" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">崩溃接管的实际路径</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#三类晚到写入分别防护" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">三类晚到写入分别防护</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#join结束工作不等于合并验收" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Join：结束工作不等于合并验收</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本机模块实验" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本机模块实验</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Refact：Goal 证据新鲜度与任务所有权复核</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="refactgoal-证据新鲜度与任务所有权复核"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/docs/research/">研究索引</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/harnesses/refact/">Refact 画像</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/goal-evidence/">Goal 证据协议</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/work-topology/">工作拓扑</a> · <a href="/harnesswiki-site/changelog/refact/">版本演进</a></p>
+</blockquote>
+<p>观察日期：2026-10-24。本轮只补充固定版本的研究，不迁移画像 baseline，也不修改 Primitive 的成熟度。</p>
+<h2 id="版本和取证范围">版本和取证范围</h2>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>核验结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>当前 Wiki</td>
+<td><code>redreamality/harnesswiki</code>，分支 <code>main</code></td>
+</tr>
+<tr>
+<td>研究对象</td>
+<td><code>JegernOUTT/refact</code>，官方仓库 API 返回 <code>fork=true</code>，parent/source 均为 <code>smallcloudai/refact</code></td>
+</tr>
+<tr>
+<td>画像 baseline</td>
+<td><code>5f5bbd0257c5d667c7b60903088c953533ffd5ce</code>；提交日期 2026-07-29，画像快照日期 2026-08-19</td>
+</tr>
+<tr>
+<td>本轮 Claim / 行为锚点</td>
+<td><code>0d096c958c6d1af9b702e48607adab03cc689c86</code>，提交日期 <code>2026-09-08T11:20:48+10:00</code></td>
+</tr>
+<tr>
+<td>默认分支</td>
+<td>远端两次查询确认 <code>main</code>，不是从本地 HEAD 推测</td>
+</tr>
+<tr>
+<td>官方稳定发布</td>
+<td><code>release/v8.6.4</code>，2026-09-07 发布；剥离 tag 后指向 <code>8e61d805b86f42f64e5be610e3a0bc4a22ff7059</code>，不等于本轮分支 SHA</td>
+</tr>
+<tr>
+<td>本地物化</td>
+<td>checkout、HEAD gitlink、index gitlink 均保持旧 baseline</td>
+</tr>
+</tbody>
+</table>
+<p>先执行 <code>node scripts/refresh-research.mjs refact</code>，进程退出码为 0，再读取 <code>.dev/research-latest/refact.json</code>。其关键字段如下。本轮默认分支 fetch 首次成功，无需重试。</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"status"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">fetched</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"startedAt"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">2026-10-24T05:10:28.374Z</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"finishedAt"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">2026-10-24T05:10:34.609Z</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"defaultBranch"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">main</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"checkout"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">5f5bbd0257c5d667c7b60903088c953533ffd5ce</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"fetchedCommit"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">0d096c958c6d1af9b702e48607adab03cc689c86</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="{  &quot;status&quot;: &quot;fetched&quot;,  &quot;startedAt&quot;: &quot;2026-10-24T05:10:28.374Z&quot;,  &quot;finishedAt&quot;: &quot;2026-10-24T05:10:34.609Z&quot;,  &quot;defaultBranch&quot;: &quot;main&quot;,  &quot;checkout&quot;: &quot;5f5bbd0257c5d667c7b60903088c953533ffd5ce&quot;,  &quot;fetchedCommit&quot;: &quot;0d096c958c6d1af9b702e48607adab03cc689c86&quot;}"><div></div></button></div></figure></div>
+<p>随后先用 <code>git ls-tree -r --name-only &lt;SHA&gt;</code> 定位文件，再用 <code>git show &lt;SHA&gt;:&lt;path&gt;</code> 读取。partial clone 首次物化 README 和 spawn 文件时各遇到一次 GitHub 连接失败，下一次定向读取成功；这些读取失败没有被算作源码缺席。没有 checkout、修改 gitlink 或提交。身份与发布证据分别来自<a href="https://api.github.com/repos/JegernOUTT/refact">官方仓库 API</a>、<a href="https://api.github.com/repos/JegernOUTT/refact/releases?per_page=5">发布 API</a>、远端 tags 和<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/README.md">固定 README</a>。</p>
+<h2 id="主要结论">主要结论</h2>
+<p>当 Agent 宣称完成时，有三个不同的问题：报告是否可信，报告是否仍对应当前工作，以及结果是否已经合入目标工作区。Refact 为这些问题设置了不同检查，不能把其中一项通过等同于全部通过。</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>触发情境与 Claim</th>
+<th>状态 / 事实类型</th>
+<th>源码与限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G1</td>
+<td>验证期间会话历史改写，旧 verdict 返回 <code>Superseded</code>；验证期间发生 Goal 状态转换，也丢弃旧 verdict</td>
+<td><code>implemented + implemented</code></td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L670-L816">Goal guard</a>；保护会话版本与状态序列，不等于磁盘文件内容新鲜度</td>
+</tr>
+<tr>
+<td>G2</td>
+<td>验证器只读取当前有效历史，排除归档部分；单独调用模型且禁止工具</td>
+<td><code>implemented + implemented</code></td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L520-L571">有效历史</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L444-L473">请求参数</a>；使用父线程模型，没有证明模型或信任主体独立</td>
+</tr>
+<tr>
+<td>G3</td>
+<td>总评 <code>MET</code> 与单项 <code>UNMET</code> 冲突时，解析结果仍为 <code>Met</code></td>
+<td><code>implemented + observed</code>，仅解析模块</td>
+<td><a href="/harnesswiki-site/_sources/scripts/research/refact-goal-probe-result.json">实验结果</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L326-L398">解析实现</a>；未运行模型或完整完成流程</td>
+</tr>
+<tr>
+<td>W1</td>
+<td>两次 spawn 争同一卡，锁内重新检查 <code>agent_chat_id</code>，已被占用的请求失败</td>
+<td><code>implemented + implemented</code></td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_spawn_agent.rs#L981-L1033">spawn 的锁内检查</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tasks/storage.rs#L208-L275">board 更新</a>；是单进程互斥，不是有到期时间的 item lease</td>
+</tr>
+<tr>
+<td>W2</td>
+<td>旧 Agent 晚到 finish、旧 verifier 晚到报告、旧 cleanup 试图清理新 owner，均有对应身份或指纹保护</td>
+<td><code>implemented + implemented</code></td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_agent_finish.rs#L898-L957">finish</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/verifier.rs#L175-L210">报告写回</a>；未运行并发调度或跨进程实验</td>
+</tr>
+<tr>
+<td>W3</td>
+<td>缺失 Session 或停滞会触发通知/失败；显式 restart 重新绑定身份</td>
+<td><code>alternative + implemented</code>，相对于自动 lease 接管</td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/task_agent_monitor.rs#L1745-L2021">monitor</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_restart_agent.rs">restart</a>；没有证实自动续租、过期重领或 fencing token</td>
+</tr>
+<tr>
+<td>W4</td>
+<td>工作区进程租约防止两个 engine 占用同一规范化 root；进程退出后可重新取得</td>
+<td><code>implemented + implemented</code></td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/daemon/lock.rs#L103-L312">workspace lease</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/daemon/lock.rs#L510-L554">上游崩溃测试</a>；属于 workspace owner，不是单张任务卡 owner</td>
+</tr>
+<tr>
+<td>J1</td>
+<td>卡片报告、等待结束、依赖解锁与 merge 验证分别处理；没有报告时 merge 的 verifier gate 放行</td>
+<td><code>implemented + implemented</code></td>
+<td><a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/crates/refact-tasks/src/types.rs#L498-L540">依赖 ready set</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_merge_agent.rs#L433-L507">merge gate</a>、<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_merge_agent.rs#L2395-L2409">无报告测试</a>；不能称为所有 join 都强制验收</td>
+</tr>
+</tbody>
+</table>
+<p>所有静态 Claim 默认绑定本轮 SHA。表中 <code>implemented</code> 表示源码和上游断言已核验，不表示这些上游集成测试已在本机运行。</p>
+<h2 id="goal新鲜度保护到哪一层">Goal：新鲜度保护到哪一层</h2>
+<p><code>verify_goal_before_completion</code> 先在 Session 锁内把 Goal 改成 <code>Verifying</code>，记录 ledger 的序号与 <code>trajectory_version</code>，释放锁后调用 verifier。回写时重新持锁，先比较历史版本，再检查序号之后是否有状态变化。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L109-L189">入口及提交路径</a></p>
+<p>这里的 freshness 是“判断所依据的会话还有效”。历史版本不同会返回 <code>Superseded</code>，若仍在 <code>Verifying</code> 则恢复为 <code>Active</code>；状态序号保护只把 <code>StatusChanged</code>、<code>TransferredOut</code>、<code>TransferredIn</code> 当作失效事件。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/crates/refact-chat-api/src/goal_ledger.rs#L329-L338">状态序列过滤</a> 这不是通用的 expected Goal revision CAS，不能只因有递增序号就声称所有需求、criteria 或预算变更均受同一守卫保护。</p>
+<p>上游 <code>apply_goal_verdict_discards_verdict_when_status_changed_after_epoch</code> 测试在验证期间写入 <code>Stopped</code>，断言旧结果被丢弃、状态保持停止、attempt 数量不变。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L1547-L1572">断言</a> 本轮未运行该测试。<code>verifier_fork_uses_active_history_only</code> 明确断言 verifier 输入含有效证据且不含归档 sentinel；legacy summary 还会被拒绝，而非由 verifier 偷偷迁移。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L1197-L1231">有效历史测试</a></p>
+<p>这套机制没有在所查 Goal gate 中对文件、当前 Git HEAD、测试产物或远端状态重新取指纹。外部文件变化但没有对应会话版本变化时，旧证据是否失效仍为 <code>unknown</code>。Card verifier 的指纹有 base commit 和 worktree 路径，却没有在该指纹中加入当前文件内容哈希；不能把它解释为完整工作区快照。</p>
+<h2 id="producer-与-verifier-冲突">Producer 与 verifier 冲突</h2>
+<p>Producer 是完成工作的 Agent；verifier 是检查已有材料的另一次调用。Goal verifier 复制父线程配置，使用同一模型解析路径，设置 <code>ToolChoice::None</code>，并要求只判断是否满足目标。它与 producer 分开执行，但没有建立不同模型、不同账号或经过认证的证据来源边界。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L444-L473">请求</a> 最终文本也没有 Qwen 式 typed evidence kinds，因而不能直接迁移为完整的 <a href="/harnesswiki-site/docs/primitives/control-continuity/goal-evidence/">Goal 证据协议</a>。</p>
+<p>确定性解析器先读第一行。<code>GOAL: MET</code> 立即返回 <code>Met</code>，不会用后面的 <code>CRITERION ... UNMET</code> 推翻总评。随后提交函数会记录逐项 verdict，但选择 <code>Completed</code> 的分支依据仍是总评。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L326-L398">解析</a> · <a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/goal_verifier.rs#L670-L816">提交</a> 本轮实验确认前半段；端到端是否由真实模型产出此种矛盾回复没有测试。由此推断：若此回复进入守卫且版本检查通过，逐项失败不会阻止该分支提交完成。这是 <code>inferred</code>，不是完整 runtime 的 <code>observed</code>。</p>
+<p>Card verifier 的路径不同。它提取 verification commands，在 worktree 内运行，再读取 diff 并调用 review；失败命令或语义 concern 归为 <code>VerificationFailed</code>，无法启动、策略拒绝或 review 不可用则归为 <code>HumanReview</code>。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/verifier.rs#L282-L463">执行与分类</a> 这避免把“测试没跑成”伪装为“代码测试失败”，也避免直接相信 producer 自报成功。</p>
+<p>合并时，已有报告必须在总评、classification 和逐条命令 outcome 上一致；<code>force=true</code> 也不能绕过真实失败，只能在满足条件时接受基础设施类问题。上游测试明确拒绝 <code>passed=true</code> 但命令失败的矛盾报告。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_merge_agent.rs#L433-L507">merge gate</a> · <a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_merge_agent.rs#L2006-L2056">冲突断言</a> 但没有报告时直接 <code>Ok(None)</code>，且有明确允许测试，因此这不是普遍强制的 verifier barrier。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_merge_agent.rs#L2395-L2409">无报告断言</a></p>
+<h2 id="work-claim崩溃与晚到结果">Work claim、崩溃与晚到结果</h2>
+<h3 id="claim-的原子边界">Claim 的原子边界</h3>
+<p><code>update_board_atomic</code> 用进程内、按 task id 索引的 mutex 覆盖 load、updater、rev 增量和 save。spawn 在准备 worktree 前检查卡片，还在此锁内再次检查卡片是否已终结、是否已有 active <code>agent_chat_id</code>；竞争失败会清理未关联 worktree。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tasks/storage.rs#L208-L275">board 更新</a> · <a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_spawn_agent.rs#L981-L1033">spawn</a></p>
+<p>这足以证明受控的同进程 claim，但不是分布式租约。<code>BoardCard</code> 保存 assignee、agent chat id、heartbeat 和工作区引用，没有在该 schema 中定义每次 claim 的到期时间与 fencing token。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/crates/refact-tasks/src/types.rs#L415-L461">schema</a> 更广的跨进程共享 task 目录、非受管 writer 和自动 claim 接管协议仍为 <code>unknown</code>。</p>
+<p>新版增加的 engine workspace lease 是另一个层次。它对规范化 root 取得文件锁，managed worktree 归到 source workspace 的 root，锁与进程持有的文件句柄同寿命。上游崩溃测试启动子进程持锁，确认第二次获取失败，杀掉子进程，再确认可以重新获取。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/daemon/lock.rs#L103-L312">实现</a> · <a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/daemon/lock.rs#L510-L554">断言</a> 本轮未运行这一进程测试；也没有把 workspace lease 的恢复等同于卡片恢复。</p>
+<h3 id="崩溃接管的实际路径">崩溃接管的实际路径</h3>
+<p>monitor 每 2 分钟巡检，缺失 Session 等路径使用 20 分钟停滞门槛；流式生成和工具停滞另有 4/8 分钟门槛，先通知 planner，通知次数耗尽或长期无法通知时标记失败。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/task_agent_monitor.rs#L37-L50">常量</a> · <a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/task_agent_monitor.rs#L1745-L2021">检查</a> 因此这些时间是故障检测阈值，不是其他 worker 到期即可取得的租约。</p>
+<p><code>mark_agent_as_failed</code> 在更新时再次检查 assignee，避免旧巡检快照把新 owner 标成失败。restart 则支持 fresh 与 resume，先等待旧 Session 停止；超时会拒绝继续。创建新身份后，还在锁内核对原 column、assignee、chat id 和工作区绑定，拒绝覆盖已变化的卡片。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/task_agent_monitor.rs#L816-L879">失败更新</a> · <a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_restart_agent.rs">restart</a></p>
+<p>这证明“检测、通知/失败、显式重启”的恢复方式。机器崩溃后会不会无需 planner 决策就自动重领每一张卡，仍为 <code>unknown</code>。</p>
+<h3 id="三类晚到写入分别防护">三类晚到写入分别防护</h3>
+<table>
+<thead>
+<tr>
+<th>晚到动作</th>
+<th>拒绝条件</th>
+<th>上游断言，均未在本机运行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>旧 Agent 提交 finish</td>
+<td>当前 chat id 或 assignee 已改变；终态卡拒绝重复 finish</td>
+<td><code>finish_heartbeat_rejects_restarted_card_owner</code>、<code>finish_failure_cleanup_preserves_restarted_owner</code>，<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_agent_finish.rs#L1304-L1413">finish 文件</a></td>
+</tr>
+<tr>
+<td>旧 verifier 写回</td>
+<td>board rev 不能倒退，且 card fingerprint 必须相同</td>
+<td><code>store_verifier_report_noops_when_card_restarted</code>、<code>store_verifier_report_noops_when_report_already_changed</code>，<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/verifier.rs#L1105-L1217">报告测试</a></td>
+</tr>
+<tr>
+<td>restart 准备完成后回写</td>
+<td>原 owner 与工作区绑定不再匹配</td>
+<td><code>restart_agent_source_guard_rejects_stale_previous_binding</code>，<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_restart_agent.rs">restart 文件</a></td>
+</tr>
+</tbody>
+</table>
+<p>注意 <code>ExpectedCardState</code> 采用 <code>board_rev &gt;= expected_rev</code> 加卡片指纹相等，不要求全 board revision 相等。这让别的卡片更新不必废弃当前验证；同一卡的 verifier report 已是指纹一部分，所以先到的不同报告可让后到写入失效。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/chat/verifier.rs#L32-L93">指纹与比较</a> <code>expected_state</code> 是可选参数，不能将受保护调用链的保证扩展到所有无条件写入。</p>
+<p>这些保护拒绝的是晚到状态写入。不能据此推断旧 Agent 已执行的工具、文件修改或 Git 操作也会被撤销；这类副作用需要独立的取消与工作区事务证据。</p>
+<h2 id="join结束工作不等于合并验收">Join：结束工作不等于合并验收</h2>
+<p>任务结果汇合至少分为三步。第一步，Agent 提交报告；第二步，planner 收到完成/失败通知，或 <code>wait_agents</code> 等待结束；第三步，选择 worktree 并通过 merge 流程处理组合结果。<code>wait_agents</code> 有 30 至 1800 秒的可选唤醒时间，它只恢复 planner 检查，不证明工作完成。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_wait_for_agents.rs#L19-L117">wait 工具</a></p>
+<p>依赖 ready set 按前置卡片 <code>column == done</code> 判断，不要求其 verifier report 通过，也不检查变更已经合入目标分支。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/crates/refact-tasks/src/types.rs#L498-L540">ready set</a> A/B 任务的两份结果分别保存，第一份返回不会把共享卡片终结，上游有对应断言。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_agent_finish.rs#L1416-L1513">A/B 测试</a> 这些是结果收集与调度语义，不能取代工作区 join。</p>
+<p><code>merge_agent</code> 支持后置检查和可选自动回退；<code>auto_revert</code> 默认关闭。<a href="https://github.com/JegernOUTT/refact/blob/0d096c958c6d1af9b702e48607adab03cc689c86/refact-agent/engine/src/tools/tool_task_merge_agent.rs#L2395-L2409">默认值测试</a> 结合无 verifier report 的允许路径，整体结论只能是“具备检查与回退路径”，不能写成“所有卡片完成后必然组合验证成功”。依赖循环的统一拒绝、任意外部文件变更后的重新验收，以及跨进程 exactly-once join 仍为 <code>unknown</code>。</p>
+<h2 id="本机模块实验">本机模块实验</h2>
+<p>运行脚本：<a href="/harnesswiki-site/_sources/scripts/research/refact-goal-probe.mjs">refact-goal-probe.mjs</a>。实际结果：<a href="/harnesswiki-site/_sources/scripts/research/refact-goal-probe-result.json">refact-goal-probe-result.json</a>。</p>
+<p>脚本从两个固定 SHA 分别 <code>ls-tree</code> 后 <code>git show</code>，原样提取 <code>parse_goal_verdict</code>、<code>inconclusive_verdict</code>、<code>parse_criteria_verdicts</code>，以真实 Rust 函数编译运行。只从数据类型移除 serde 属性以免下载整个 engine 依赖，没有重写解析逻辑。结果保存完整源码和提取函数的 SHA-256。</p>
+<p>环境：Windows x64，Node <code>v26.7.0</code>，Rust <code>1.97.1</code>。首次 host MSVC 编译因缺少 <code>link.exe</code> 失败；发现已有 MinGW，安装 GNU Rust 标准库目标后成功。没有安装整个 engine 或模型凭据。</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$env:REFACT_RUST_TARGET</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">x86_64-pc-windows-gnu</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">node scripts</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">refact</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">goal</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.mjs</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="$env:REFACT_RUST_TARGET = &#x27;x86_64-pc-windows-gnu&#x27;node scripts/research/refact-goal-probe.mjs"><div></div></button></div></figure></div>
+<table>
+<thead>
+<tr>
+<th>输入</th>
+<th>旧 baseline</th>
+<th>新 Claim SHA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GOAL: MET</code></td>
+<td><code>Met</code></td>
+<td><code>Met</code></td>
+</tr>
+<tr>
+<td><code>GOAL: UNMET</code> 加两条 bullet 缺口</td>
+<td>保留两条缺口</td>
+<td>保留两条缺口</td>
+</tr>
+<tr>
+<td><code>GOAL: MET</code> 同时返回工具调用</td>
+<td>inconclusive / Unmet</td>
+<td>inconclusive / Unmet</td>
+</tr>
+<tr>
+<td>空回复</td>
+<td>inconclusive / Unmet</td>
+<td>inconclusive / Unmet</td>
+</tr>
+<tr>
+<td>总评 UNMET，C1 为 MET、C2 为 UNMET</td>
+<td>把两行 criterion 都列成缺口</td>
+<td>仅保留 <code>C2: docs missing</code></td>
+</tr>
+<tr>
+<td>总评 MET，C1 为 UNMET</td>
+<td>总评 <code>Met</code>，逐项 <code>met=false</code></td>
+<td>总评 <code>Met</code>，逐项 <code>met=false</code></td>
+</tr>
+</tbody>
+</table>
+<p>每个版本 6 个场景、9 条断言，均通过。这里“通过”包括成功复现矛盾回复仍被接受的现状，不表示该行为正确。</p>
+<p>没有运行完整 upstream cargo 测试、真实 verifier 模型、双 worker 抢占、进程崩溃、文件变化后重新验收或真实 merge。上文对应结论是 <code>implemented</code> / <code>unknown</code>，不能借解析模块实测升级为 <code>observed</code>。</p>
+<p>本地文档校验：<code>pnpm wiki:check</code> 通过；<code>pnpm wiki:test</code> 23/23 通过；<code>node --check scripts/research/refact-goal-probe.mjs</code> 通过。测试针对当时的共享工作树运行，没有暂存文件或改动 index。</p>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

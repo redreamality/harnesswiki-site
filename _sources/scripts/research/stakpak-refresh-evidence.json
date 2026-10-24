@@ -1,0 +1,76 @@
+{
+  "observedOn": "2026-10-24",
+  "harness": "stakpak-agent",
+  "repository": "https://github.com/stakpak/agent",
+  "refreshCommand": "node scripts/refresh-research.mjs stakpak-agent",
+  "attempts": [
+    {
+      "startedAt": "2026-10-24T05:10:25.366Z",
+      "finishedAt": "2026-10-24T05:10:46.623Z",
+      "status": "blocked",
+      "error": "git ls-remote --symref origin HEAD: Failed to connect to github.com:443 after 21094 ms"
+    },
+    {
+      "startedAt": "2026-10-24T05:10:56.988Z",
+      "finishedAt": "2026-10-24T05:11:02.436Z",
+      "status": "fetched",
+      "defaultBranch": "main",
+      "fetchedCommit": "760cd2b5984d29c2d513bb15ca33e995fae45f17",
+      "commitDateUtc": "2026-07-06T10:10:46Z",
+      "sourceRecord": ".dev/research-latest/stakpak-agent.json"
+    }
+  ],
+  "baseline": "760cd2b5984d29c2d513bb15ca33e995fae45f17",
+  "checkoutBeforeAndAfter": "760cd2b5984d29c2d513bb15ca33e995fae45f17",
+  "indexGitlink": "760cd2b5984d29c2d513bb15ca33e995fae45f17",
+  "baselineToFetchedDiff": "empty: identical commit",
+  "release": {
+    "source": "https://api.github.com/repos/stakpak/agent/releases/latest",
+    "tag_name": "v0.3.88",
+    "published_at": "2026-06-10T12:06:54Z",
+    "created_at": "2026-06-10T11:43:07Z",
+    "target_commitish": "main",
+    "tagCommit": "d3eba6f502a79b993b826ef3ab4065eec9e38dfa",
+    "tagCommitSource": "git ls-remote --tags origin v0.3.88*; git cat-file -t; git show -s",
+    "html_url": "https://github.com/stakpak/agent/releases/tag/v0.3.88",
+    "body": "## 0.3.88\nReleased on 2026-06-10.\n\n### Bug Fixes\n\n- Specify version for stakpak-api dependency\n\n### Maintenance\n\n- Bump version to 0.3.88\n\n"
+  },
+  "probe": {
+    "command": "node scripts/research/stakpak-skill-probe.mjs",
+    "anchor": "760cd2b5984d29c2d513bb15ca33e995fae45f17",
+    "status": "blocked",
+    "phase": "dependency build scripts; assertions not executed",
+    "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+    "toolchain": "stable-x86_64-pc-windows-msvc",
+    "exitCode": 101,
+    "timedOut": false,
+    "error": "linker `link.exe` not found",
+    "workDirectory": "C:\\Users\\unknown\\AppData\\Local\\Temp\\stakpak-skill-probe-pIYfyY",
+    "normalizedSourceSha256": {
+      "libs/api/src/local/skills/mod.rs": "68764f27a42e9987ec340c667306be7f730e96137848af00d8ab3b2c6dc6c408",
+      "libs/api/src/local/skills/parser.rs": "dc49582cdf586dbc8d472c3cc7fc507430d16ad1fd31652f90ade1b29eed5113",
+      "libs/api/src/models.rs": "c3234ff8009057ee41e3a9feb8aa54bc45df9fb1ba200389bb89c857eae79b04"
+    }
+  },
+  "coordinatorRecheck": {
+    "observedOn": "2026-10-24",
+    "environmentOverride": "CARGO_BUILD_TARGET=x86_64-pc-windows-gnu",
+    "status": "blocked",
+    "exitCode": 101,
+    "assertionsExecuted": false,
+    "reason": "Target selection did not change the MSVC host used for serde/proc-macro build scripts; link.exe is still missing."
+  },
+  "coordinatorGnuHostVerification": {
+    "observedOn": "2026-10-24",
+    "toolchain": "1.97.1-x86_64-pc-windows-gnu",
+    "defaultToolchainUnchanged": "stable-x86_64-pc-windows-msvc",
+    "status": "passed",
+    "exitCode": 0,
+    "timedOut": false,
+    "scenarios": 5,
+    "workDirectory": "C:\\Users\\unknown\\AppData\\Local\\Temp\\stakpak-skill-probe-f4PZE5",
+    "stdout": "PASS initial discovery: project wins; metadata only; allowed-tools is a string\nPASS same URI reload reads changed body without rediscovering\nPASS malformed project skill errors on direct load; rediscovery selects user fallback\nPASS changed name fails directory-name validation\nPASS removal errors; restored project file becomes first choice again\n",
+    "stderr": "",
+    "scope": "Real local Skill discovery and loading modules only. No async resume, approval or MCP integration."
+  }
+}

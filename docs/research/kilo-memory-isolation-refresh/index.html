@@ -1,0 +1,361 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Kilo：记忆纠正、遗忘传播与执行隔离复核 | Harness Wiki</title><link rel="canonical" href="https://redreamality.com/harnesswiki-site/docs/research/kilo-memory-isolation-refresh/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Kilo：记忆纠正、遗忘传播与执行隔离复核"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.com/harnesswiki-site/docs/research/kilo-memory-isolation-refresh/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="0kpgtl8" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">版本演进</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#锚点与刷新" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">锚点与刷新</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#谁拥有状态" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">谁拥有状态</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#记忆纠正与遗忘" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">记忆纠正与遗忘</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#为什么当前-session-仍可能看到旧知识" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">为什么当前 Session 仍可能看到旧知识</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#共享-scope-的收益与代价" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">共享 scope 的收益与代价</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#执行隔离与降级" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">执行隔离与降级</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#persistent-process-的-owner-与终态" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Persistent process 的 owner 与终态</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#复现与产物" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">复现与产物</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#固定来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">固定来源</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#本轮结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">本轮结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#锚点与刷新" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">锚点与刷新</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#谁拥有状态" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">谁拥有状态</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#记忆纠正与遗忘" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">记忆纠正与遗忘</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#为什么当前-session-仍可能看到旧知识" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">为什么当前 Session 仍可能看到旧知识</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#共享-scope-的收益与代价" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">共享 scope 的收益与代价</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#执行隔离与降级" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">执行隔离与降级</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#persistent-process-的-owner-与终态" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Persistent process 的 owner 与终态</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#复现与产物" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">复现与产物</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#固定来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">固定来源</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Kilo：记忆纠正、遗忘传播与执行隔离复核</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="kilo记忆纠正遗忘传播与执行隔离复核"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/docs/research/">研究索引</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/harnesses/kilo-code/">Kilo 画像</a> · <a href="/harnesswiki-site/changelog/kilo-code/">版本演进</a><br>
+Primitive：<a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/execution-isolation/">执行隔离</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/background-job-lifecycle/">后台 Job 生命周期</a></p>
+</blockquote>
+<h2 id="本轮结论">本轮结论</h2>
+<p>如果用户把“编译器是 A”纠正成“编译器是 B”，系统需要处理的不止一份文件。本轮真实模块实验发现：Kilo 的 <code>correct</code> 可以让纠正记录与旧事实并存；精确 <code>forget</code> 删除事实之后，旧 Session digest 仍可进入索引并被召回。同一仓库的 linked worktree 共用项目记忆，因此这些效果也会跨 worktree 传播。这里的 digest 是会话摘要，不是原始聊天记录。</p>
+<p>执行边界是另一件事。当前代码在 sandbox 已启用而后端不可用时拒绝执行；sandbox 关闭或显式批准升级权限时可走非沙箱路径。持久进程由独立后台进程模块管理，按项目 scope 保存 ownership 和控制文件。worktree 不会因此成为 OS 沙箱，Session 结束也不代表 persistent 进程结束。记忆实验记为 <code>observed</code>；执行隔离与进程生命周期只记为 <code>implemented</code>，本轮没有运行对应 OS 实验。</p>
+<h2 id="锚点与刷新">锚点与刷新</h2>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>本轮记录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>观察日期</td>
+<td>2026-10-24</td>
+</tr>
+<tr>
+<td>刷新命令</td>
+<td><code>node scripts/refresh-research.mjs kilo-code</code></td>
+</tr>
+<tr>
+<td>刷新终态</td>
+<td>退出码 0，<code>status=fetched</code>；开始 <code>2026-10-24T05:10:43.016Z</code>，完成 <code>2026-10-24T05:10:55.034Z</code></td>
+</tr>
+<tr>
+<td>官方仓库 / 默认分支</td>
+<td><code>Kilo-Org/kilocode</code> / <code>main</code></td>
+</tr>
+<tr>
+<td>旧画像 baseline</td>
+<td><code>c90f5d68802e55fd35c88882e4b6785dc202ac83</code>，提交时间 <code>2026-08-18T17:13:49+02:00</code></td>
+</tr>
+<tr>
+<td>本轮 Claim / 行为锚点</td>
+<td><code>9723be621429771ea47a2614b0ac433448023cec</code>，提交时间 <code>2026-10-23T17:16:37Z</code></td>
+</tr>
+<tr>
+<td>checkout</td>
+<td>保持 <code>c90f5d68802e55fd35c88882e4b6785dc202ac83</code>；未 checkout、未修改 gitlink</td>
+</tr>
+<tr>
+<td>刷新记录</td>
+<td><code>.dev/research-latest/kilo-code.json</code>，读取其 <code>fetchedCommit</code> 后再取证</td>
+</tr>
+</tbody>
+</table>
+<p>先用 <code>git ls-tree -r --name-only &lt;SHA&gt;</code> 定位路径，再用 <code>git show &lt;SHA&gt;:&lt;path&gt;</code> 读取。主刷新首试成功。随后按需读取 README 的 promisor blob 发生一次连接失败，唯一一次有界重试成功，未遗留 blocked 来源。旧提交和两个 release tag 对应提交均通过 <code>git cat-file -e &lt;SHA&gt;^{commit}</code> 校验。</p>
+<p>本页没有更新旧画像默认锚点。尤其是 <code>memory.ts</code>、<code>storage/paths.ts</code>、<code>capture/operations.ts</code>、<code>storage/fs.ts</code> 与 sandbox <code>backend.ts</code>，在旧、新 SHA 下的 Git blob 完全相同。本轮补足其边界证据，不把它们写成新功能。</p>
+<h2 id="谁拥有状态">谁拥有状态</h2>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>实际 owner</th>
+<th>作用与边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>项目记忆身份</td>
+<td><code>packages/kilo-memory/src/storage/paths.ts</code></td>
+<td>从 workspace context 推导 canonical 主仓库路径，再对路径求 hash；不是 worktree 名或 Git commit</td>
+</tr>
+<tr>
+<td>文件、索引、删除</td>
+<td><code>Memory</code> → <code>MemoryOperations</code> / <code>MemoryFiles</code></td>
+<td>保存 Markdown、会话摘要和 <code>index.kmem</code>；底层 API 接收 raw root，调用边界负责传入正确项目 root</td>
+</tr>
+<tr>
+<td>CLI 接入</td>
+<td><code>packages/kilo-memory/src/effect/index.ts</code> 与 <code>packages/opencode/src/kilocode/memory/runtime.ts</code></td>
+<td>context 转 root、事件、timer 与宿主 data 目录接线</td>
+</tr>
+<tr>
+<td>已注入 prompt</td>
+<td><code>packages/opencode/src/kilocode/session/prompt.ts</code></td>
+<td>进程内 <code>pinnedMemory</code>，以 Session ID 为键，最多 512 项</td>
+</tr>
+<tr>
+<td>sandbox 策略与执行</td>
+<td>CLI 的 <code>sandbox/policy.ts</code> → <code>packages/kilo-sandbox</code></td>
+<td>Session 状态、执行 gate、平台 backend；并非 Git worktree 本身</td>
+</tr>
+<tr>
+<td>persistent 进程</td>
+<td>CLI 的 <code>background-process/index.ts</code> / <code>runner.ts</code> / <code>windows.ts</code></td>
+<td>项目 scope、lease、token、OS 进程及控制文件</td>
+</tr>
+</tbody>
+</table>
+<p>来源：<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/storage/paths.ts#L35-L104">记忆路径</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/effect/index.ts#L11-L51">context adapter</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/memory/runtime.ts">宿主接线</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/session/prompt.ts#L388-L446">注入缓存</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/sandbox/policy.ts#L601-L639">sandbox 执行</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L205-L208">后台进程 scope</a>。<code>packages/core</code>、<code>packages/kilo-sandbox</code> 在旧 baseline 已存在；本轮不把目录拆分误记为两次提交之间的迁移。</p>
+<h2 id="记忆纠正与遗忘">记忆纠正与遗忘</h2>
+<p>以下 Claim 的 Harness 均为 <a href="/harnesswiki-site/docs/harnesses/kilo-code/">Kilo Code</a>，Primitive 为<a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a>，研究锚点均为上表新 SHA。Implementation 状态为 <code>implemented</code>，事实类型按行区分。</p>
+<table>
+<thead>
+<tr>
+<th>ID / 触发场景</th>
+<th>事实与后果</th>
+<th>事实类型 / 限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1：同仓不同 worktree 开启记忆</td>
+<td><code>.git</code> 文件、<code>commondir</code> 与反向 <code>gitdir</code> 核验将 linked worktree 归回主仓库。实测主工作树与 linked worktree 得到同一 root；独立 clone 得到另一 root</td>
+<td><code>observed</code>；只测正常 Git worktree 与本地 clone，未穷尽 bare repo、网络盘或 Windows 路径大小写</td>
+</tr>
+<tr>
+<td>M2：显式纠正错误事实</td>
+<td><code>correct</code> 向 <code>corrections.md/Corrections</code> upsert。它不会自动删除 <code>project.md/Facts</code> 中同 key 的旧记录。实测新旧两条同时存在于索引</td>
+<td><code>observed</code>；不代表模型一定采用错误事实，也不代表纠正等于旧事实的全局撤销</td>
+</tr>
+<tr>
+<td>M3：指定完整 ID 遗忘</td>
+<td><code>forget("project.md:Facts:compiler_choice")</code> 删除该条事实并重建索引；另一文件的同 key 纠正记录保留</td>
+<td><code>observed</code>；查询按记录 ID/key 匹配，不是任意语义删除</td>
+</tr>
+<tr>
+<td>M4：被删事实曾写入 digest</td>
+<td>上述 forget 不遍历 Session 摘要。实测旧文本仍在 digest、重建后的索引和 <code>Memory.recall</code> 命中中</td>
+<td><code>observed</code>；这是保留摘要导致的重新召回，不证明自动采集会把旧事实再次写回</td>
+</tr>
+<tr>
+<td>M5：自动采集提出 remove</td>
+<td>facade 的非 explicit trigger 过滤 remove；自动采集虽有 reconcile，也只提交 adds。同 source/section/key 的 add 可更新旧条目</td>
+<td>facade 过滤与同 key 更新为 <code>observed</code>；模型采集接线为 <code>implemented</code>，未调用模型</td>
+</tr>
+<tr>
+<td>M6：用户直接删除 source 文件</td>
+<td><code>indexExpired</code> 将缺失 source 判为过期；fresh <code>Memory.context</code> 重建后不再包含该 source 的旧文本</td>
+<td><code>observed</code>；仅覆盖新读取，不代表所有已注入 Session 同步刷新</td>
+</tr>
+<tr>
+<td>M7：清空整个记忆 root</td>
+<td><code>purge</code> 检查归属 manifest 后删除 root；实测 source/index/digest 整体消失，未归属目录被拒绝且文件保留</td>
+<td><code>observed</code>；不是对聊天记录、远端 provider cache 或备份的擦除保证</td>
+</tr>
+</tbody>
+</table>
+<p>M1 来源：<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/storage/paths.ts#L35-L104">路径解析</a>及上游 <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/test/kilocode/memory/memory-integration.test.ts#L133-L160">worktree 接入测试</a>；M2–M5 来源：<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/memory.ts#L184-L318">facade</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/capture/operations.ts">删除与 upsert</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/effect/capture.ts#L447-L455">自动采集只提交 adds</a>；M6–M7 来源：<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/storage/state.ts#L140-L264">过期检查与 purge</a>。上述上游测试是静态证据，没有在本轮冒充执行通过。</p>
+<p>一次“纠正成功”应理解为纠正记录已保存；一次“删除成功”应理解为选定来源的匹配条目已删除。它们没有提供覆盖所有摘要、索引、既有 prompt 与 provider cache 的全局遗忘事务。</p>
+<h3 id="为什么当前-session-仍可能看到旧知识">为什么当前 Session 仍可能看到旧知识</h3>
+<p><code>memoryInject</code> 先检查记忆是否启用，再读取 <code>pinnedMemory.get(sessionID)</code>；只要缓存的 enabled 与当前 enabled 相等，就复用原 block。缓存键不含 root、索引版本或内容 hash。上游测试明确断言：同 Session 的后续注入保持字节相同，新 Session 才看到后写入事实。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/session/prompt.ts#L388-L446">实现</a> · <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/test/kilocode/memory/memory-integration.test.ts#L488-L570">缓存与开关测试</a></p>
+<p>因此，保存、纠正或删除后，即使磁盘索引已经更新，既有 Session 也不能据此宣称立即忘记。这是 <code>implemented</code> 缓存契约支持的 <code>inferred</code> 后果，本轮未启动完整 Session runtime。若一个保留 ID 的 Session 换 root，且 enabled 不变，该函数本身也没有 root 变更失效条件；实际移动流程是否重建进程或清理缓存仍为 <code>unknown</code>，不声称复现了跨项目泄露。</p>
+<p>HTTP handler 的 enable/disable/purge 会失效“工具是否启用”缓存；这与清除 pinned prompt 是两个对象。开关变化被注入函数实际观察到时才会重建 block；不能把任意 disable→enable 调用都当成强制清除 prompt 的接口。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/server/httpapi/handlers/memory.ts#L22-L121">HTTP 接线</a></p>
+<h3 id="共享-scope-的收益与代价">共享 scope 的收益与代价</h3>
+<p>在 worktree A 学到的项目约定，可供 worktree B 的新 Session 直接使用；分支相关事实也会进入同一知识空间。记忆层没有按 branch 或 commit 自动分区。并发写入并非只有进程内 Map：文件层还有 <code>.lock</code> 目录、owner token、心跳及过期回收。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/storage/paths.ts#L35-L104">root 规则</a> · <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/storage/fs.ts#L164-L247">文件锁</a></p>
+<p>锁只证明写入有串行化机制，不证明多文件写入具备崩溃事务或不同写入者能正确合并语义。<code>MemoryOperations</code> 先规划、依次写 source、再重建索引与写 state；本轮没有测试 kill、锁窃取、并发 purge 或进程暂停超过 stale 阈值的情形。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-memory/src/capture/operations.ts">操作提交顺序</a></p>
+<h2 id="执行隔离与降级">执行隔离与降级</h2>
+<p>本节所有条目均为 <code>implemented + implemented</code>，固定到本轮 SHA；没有做 Linux/macOS confinement、Windows Job 或真实 credential/network 测试。</p>
+<table>
+<thead>
+<tr>
+<th>触发条件</th>
+<th>实现路径</th>
+<th>可以得出的边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>未显式开启 sandbox</td>
+<td>默认配置 <code>enabled=false</code>；执行器走 <code>unrestricted(effect)</code></td>
+<td>普通 worktree 中执行不自动受 OS sandbox 保护</td>
+</tr>
+<tr>
+<td>已保存 enabled，但 backend 不可用</td>
+<td><code>execute</code> 返回失败；backend 的 <code>prepare/confine</code> 同样检查 support</td>
+<td>这条路径是 fail closed，不能因 <code>unavailable().prepare</code> 返回原命令就断言静默裸跑</td>
+</tr>
+<tr>
+<td>平台不支持</td>
+<td>Windows backend 明确报告 unavailable；Linux 选 Bubblewrap，macOS 选 Seatbelt</td>
+<td>“选择了后端”不等于某次运行后端可用，也不证明跨平台同等限制</td>
+</tr>
+<tr>
+<td>UI 查询状态或请求打开</td>
+<td>状态返回 <code>enabled = stored.enabled &amp;&amp; support.available</code>；打开时若不支持，返回不可用状态</td>
+<td>UI 的 false 与持久配置的 true 需要区分；只看开关不足以复盘执行</td>
+</tr>
+<tr>
+<td>显式批准升级权限</td>
+<td><code>executeEscalated(true, effect)</code> 调用 <code>unrestricted</code></td>
+<td>这是显式绕过执行约束的入口；未逐个端到端验证授权来源</td>
+</tr>
+<tr>
+<td>linked worktree 中建立 profile</td>
+<td>writable 根选择当前工作目录，并限制额外路径扩大到主仓库；另允许 Kilo data/cache/state 等目录</td>
+<td>worktree 的写入范围只是 profile 的一部分，不能推导完整 filesystem/network/credential 隔离</td>
+</tr>
+</tbody>
+</table>
+<p>来源：<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/sandbox/config.ts#L19-L59">默认配置</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/sandbox/policy.ts#L601-L639">执行与升级入口</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-sandbox/src/backend.ts">backend 选择与拒绝</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/sandbox/policy.ts#L339-L443">status/toggle</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/sandbox/policy.ts#L192-L278">profile 与环境过滤</a>。backend 的上游测试确认 support 不可用时带 reason；sandbox Session 测试覆盖启用状态及子 Session 传播。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/kilo-sandbox/test/backend.test.ts#L331-L336">backend 测试</a> · <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/test/kilocode/sandbox/session.test.ts">Session 测试</a></p>
+<p>profile 的环境过滤明确列出若干 Kilo 配置与凭据变量，包括 browser broker URL/token；这不是“所有秘密均移除”的证明。进程、网络、文件读取、文件写入和凭据必须分别审计。本轮没有用真实用户文件或外部网络验证任何越界能力。</p>
+<h2 id="persistent-process-的-owner-与终态">Persistent process 的 owner 与终态</h2>
+<p>持久进程的“持久”是跨 Session 或 Kilo 进程保留可管理对象，并非每个 worktree 各自独立。scope 由 project ID 与规范化 project worktree 路径组合；global project 才使用当前目录。scope lease 与 manifest/token 属于后台进程模块，记忆 root 的路径 hash 不是它的所有权凭据。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L205-L208">scope</a> · <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L231-L281">lease</a></p>
+<table>
+<thead>
+<tr>
+<th>事件</th>
+<th>owner 的动作</th>
+<th>限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>owner Session 结束</td>
+<td>session lifetime 终止；parent lifetime 移交给 parent 并改为 session；persistent 存在 shared map，不在这一轮 Session 清理列表内</td>
+<td>Session close 不能证明 persistent 已清理</td>
+</tr>
+<tr>
+<td>Kilo runtime 关闭</td>
+<td>Instance finalizer 终止普通进程；shared finalizer 保存持久元数据、移除监听、释放 lease</td>
+<td>persistent 按设计留下，不是清理遗漏的同义词</td>
+</tr>
+<tr>
+<td>其他 Kilo 进程接管</td>
+<td>scope lease 排除同项目竞争；adopt 校验记录和 live process ownership</td>
+<td>同主机管理协议，不是跨主机 durable scheduler</td>
+</tr>
+<tr>
+<td>stop persistent</td>
+<td>先 probe ownership；foreign/gone 不杀，unknown 拒绝；Unix 在 SIGKILL 前复核，Windows 发 stop 控制文件并等待</td>
+<td>有 PID 不等于可以杀，scope/token 校验也不是 OS 安全隔离</td>
+</tr>
+<tr>
+<td>sandbox 内调用后台工具</td>
+<td>start、monitor、restart 被拒绝；list/status/logs/stop 仍按工具分支处理</td>
+<td>后台工具并未宣称自己能在 sandbox 内启动持久服务</td>
+</tr>
+</tbody>
+</table>
+<p>来源：<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L1290-L1308">Session 移交</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L1171-L1225">runtime finalizer</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L636-L783">ownership probe 与 stop</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/index.ts#L1090-L1169">adopt</a>、<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/tool/background-process.ts#L272-L340">tool gate</a>。以上均为 <code>implemented</code>；没有运行真实进程接管、stop、restart 或 Session 关闭实验。</p>
+<p>新代码在 Windows 上先让 runner 加入 Job Object，再启动命令。Job 已建立时，query/kill 暂时失败仍保留该 owner，不改用不可靠的 PID 遍历；创建或分配 Job 失败时，才记录原因并降级为带创建时间检查的进程表遍历。这是进程归属追踪的降级，不是 sandbox 的开关降级。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/windows.ts#L47-L108">Windows Job</a> · <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/src/kilocode/background-process/runner.ts#L197-L384">runner 路径</a></p>
+<p>降级路径不是无限保证：30 秒内仍无法确认 stop 或退出时，会记录未核验状态并返回失败。这里不能写“返回后所有后代一定回收”。正常 Job 路径的测试包含 detached grandchild、query/kill 故障与 stop-file 错误，但本轮只阅读了这些测试。<a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/test/kilocode/background-process-windows-handoff.test.ts#L18-L50">故障测试</a> · <a href="https://github.com/Kilo-Org/kilocode/blob/9723be621429771ea47a2614b0ac433448023cec/packages/opencode/test/kilocode/background-process-runner.test.ts#L17-L75">PID 重用测试</a></p>
+<h2 id="复现与产物">复现与产物</h2>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">node scripts</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">refresh</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">research.mjs kilo</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">code</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Get-Content</span><span style="--0:#D6DEEB;--1:#403F53"> .dev</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">latest</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">kilo</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">code.json</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">bun scripts</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">kilo</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">memory</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.mjs</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="node scripts/refresh-research.mjs kilo-codeGet-Content .dev/research-latest/kilo-code.jsonbun scripts/research/kilo-memory-probe.mjs"><div></div></button></div></figure></div>
+<p>脚本：<a href="/harnesswiki-site/_sources/scripts/research/kilo-memory-probe.mjs">kilo-memory-probe.mjs</a>。运行环境为 Windows、Bun <code>1.3.5</code>；刷新使用宿主 Node <code>v26.7.0</code>。Bun 内部 <code>process.version</code> 报 <code>v24.3.0</code>，不能据此把实验标为独立 Node 24 运行。</p>
+<p>探针从刷新记录读取 SHA，枚举 Git tree 后按依赖导出原始 TypeScript，用 Bun 直接载入真实模块，无模型、无凭据、无 npm 安装、无模块 mock。所有输入都是脚本创建的临时 Git 仓库、worktree、clone 与记忆目录；只对已确认位于该临时目录中的 owned memory root 做 purge。结果 JSON 保存逐文件 SHA-256、锚点、环境及八项断言结果。</p>
+<p>本轮有效运行：退出码 0，<code>8/8 passed</code>。已保存<a href="/harnesswiki-site/_sources/scripts/research/kilo-memory-probe-result.json">原始结果 JSON</a>，含 24 个原始模块的 SHA-256。临时原件位于本机 <code>C:\Users\unknown\AppData\Local\Temp\kilo-memory-probe-SxFmGx\result.json</code>，源码和 fixture 保留便于复核。首次探针在加载阶段因 Bun 不提供 <code>Bun.isBuiltin</code> 失败，改用 <code>node:module.isBuiltin</code> 后完整通过；首次结果不作为产品失败证据。</p>
+<table>
+<thead>
+<tr>
+<th>实验</th>
+<th>观察结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主树 / linked worktree / clone</td>
+<td>前两者同 root，clone 不同</td>
+</tr>
+<tr>
+<td>correct 旧事实</td>
+<td>旧事实与纠正同时在 source/index</td>
+</tr>
+<tr>
+<td>qualified forget</td>
+<td>删除 1 条 typed 事实，旧 digest 仍可召回</td>
+</tr>
+<tr>
+<td>turn-close remove</td>
+<td>过滤删除，纠正记录保留</td>
+</tr>
+<tr>
+<td>同 key 再纠正</td>
+<td>替换原纠正文本</td>
+</tr>
+<tr>
+<td>手动删除 source</td>
+<td>index 过期，fresh context 排除旧文本</td>
+</tr>
+<tr>
+<td>purge 非归属目录</td>
+<td>拒绝且保留 <code>keep.txt</code></td>
+</tr>
+<tr>
+<td>purge owned root</td>
+<td>root 不再存在</td>
+</tr>
+</tbody>
+</table>
+<p>未覆盖完整 CLI/IDE、provider 缓存、Session 移动、模型自动采集、跨进程写入竞争、OS sandbox enforcement 与真实进程清理。安全相关静态测试不计入上述八项实测。</p>
+<h2 id="固定来源">固定来源</h2>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

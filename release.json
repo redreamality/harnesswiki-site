@@ -1,6 +1,6 @@
 {
-  "commit": "11f789d7c0573f3c81bf6f417722e5193eeca551",
-  "message": "交付95篇文档与取消机制实测，补齐HTTPS入口和本地发布",
-  "pages": 95,
-  "builtAt": "2026-10-24T03:21:05.286Z"
+  "commit": "95a961b28a64b42cc5ea981b0a42e99c35d6b167",
+  "message": "完成六组最新源码刷新，补齐DeepSeek迁移与Stakpak实测",
+  "pages": 109,
+  "builtAt": "2026-10-24T06:22:14.990Z"
 }

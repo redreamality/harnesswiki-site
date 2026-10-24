@@ -1,0 +1,169 @@
+{
+  "anchor": "9723be621429771ea47a2614b0ac433448023cec",
+  "platform": "win32",
+  "bun": "1.3.5",
+  "node": "v24.3.0",
+  "temporary": "C:\\Users\\unknown\\AppData\\Local\\Temp\\kilo-memory-probe-SxFmGx",
+  "files": [
+    {
+      "path": "packages/kilo-memory/src/memory.ts",
+      "sha256": "2cd0d89c2d8020a59b7652884457c603ee35a4185730e334f38f0e23dd7e0464"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/store.ts",
+      "sha256": "0b0fabbd74efe30988e7c2db9baf270acaf10fdebcf7dab3ce543d7f72fa861c"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/audit.ts",
+      "sha256": "0e270ae5493725a61c92be925a12ae599ebb0f1f9183b7827db1e5517cfe499c"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/fs.ts",
+      "sha256": "fc23fe0b49e211e172df380c744dde7eb79b699d58f28a31457c12f1655727c8"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/sessions.ts",
+      "sha256": "f9095faf9dd7af8ee29d993f6129fb6d1a8bac5274086e81cd39b0399dc80f79"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/paths.ts",
+      "sha256": "58e475a39a7ca56e3b7d35aeb435a388b0d2c2541719bf807e2136692e2386e3"
+    },
+    {
+      "path": "packages/kilo-memory/src/slug.ts",
+      "sha256": "60ec23ee744c780a13481c002ecaabea1bf6399ecde639c8dae24c9016d24f82"
+    },
+    {
+      "path": "packages/kilo-memory/src/capture/redact.ts",
+      "sha256": "d879dbdfb4e18a003d70fcbb5540f37816a5222473aabb00230d49a626c4d31a"
+    },
+    {
+      "path": "packages/kilo-memory/src/text.ts",
+      "sha256": "15cb0b88b39cba3fdb0267d7ecc46bd6e428630f33506c74ed2a53bd0239a0c7"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/sources.ts",
+      "sha256": "9984b6f8b3910d423e2dc09d238fd7ef41e364f97055e19b2bb0c2a8463cf795"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/markdown.ts",
+      "sha256": "90b31f03b45089fde197a1855b0addb4202377f9a9371bc53d4ca821d5eefc57"
+    },
+    {
+      "path": "packages/kilo-memory/src/schema.ts",
+      "sha256": "d649cbb063bda8f8a02f53ce64d782d2520c74fe8040319ad7ddbe486b62fcf5"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/topics.ts",
+      "sha256": "641ee8693eda863c4bf48c685741d2236a0746c223d494d96f3cf8868e44f350"
+    },
+    {
+      "path": "packages/kilo-memory/src/storage/state.ts",
+      "sha256": "71607e4460d7908939057a4580c52868db5447eb791dda102266b87cba05d5c6"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/indexer.ts",
+      "sha256": "a7cff49720d378394a561c1aea81983ff9ea850f07f3532857fbdc22d829a276"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/budget.ts",
+      "sha256": "f49c916feaf3af52cd74254d0da7fc94423de35f5e935b5e4f11692a144a4ed2"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/token.ts",
+      "sha256": "401b3347b61cf56b58d3281d006203cefda6aa28bcf340be7871247f2082d8a1"
+    },
+    {
+      "path": "packages/kilo-memory/src/capture/digest.ts",
+      "sha256": "b0be9a757837f6af72ed08664e037af69998d70c3be414332b6cb1ee2a0e9967"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/index-format.ts",
+      "sha256": "05fa0a779aea8ae05a7b02592fe424d98aaa1ecc1b0c8af638c50f7a914bad2a"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/shared.ts",
+      "sha256": "2c8b830c8df75d478240f7a7cc29c0c481cf664a596f69049965a8a63257e905"
+    },
+    {
+      "path": "packages/kilo-memory/src/memory-notice.ts",
+      "sha256": "498907c97fe470db60003bae400341788aa451574f10f30d5a392141fb403f85"
+    },
+    {
+      "path": "packages/kilo-memory/src/capture/operations.ts",
+      "sha256": "29d19c1917f8ad20f94b8214947da8c21812f6ed450f06b9bd0a5942491e8e94"
+    },
+    {
+      "path": "packages/kilo-memory/src/capture/reject.ts",
+      "sha256": "ca4bc28c4736d3f8e778ca3f3297f67773453c5cb27fd7f2267ed99eac6c1c5d"
+    },
+    {
+      "path": "packages/kilo-memory/src/recall/recall.ts",
+      "sha256": "8542de3597031f3a543fe1a6e12d7c5d7d9f1d71588d4bcd1954d293d4b709a2"
+    }
+  ],
+  "checks": [
+    {
+      "name": "linked worktree shares memory; independent clone does not",
+      "status": "passed",
+      "evidence": {
+        "main": "C:\\Users\\unknown\\AppData\\Local\\Temp\\kilo-memory-probe-SxFmGx\\data\\memory\\main-fb7df01ad70e",
+        "linked": "C:\\Users\\unknown\\AppData\\Local\\Temp\\kilo-memory-probe-SxFmGx\\data\\memory\\main-fb7df01ad70e",
+        "clone": "C:\\Users\\unknown\\AppData\\Local\\Temp\\kilo-memory-probe-SxFmGx\\data\\memory\\clone-da0770d5e052"
+      }
+    },
+    {
+      "name": "correction coexists with old fact in source and index",
+      "status": "passed",
+      "evidence": {
+        "oldFact": true,
+        "correction": true
+      }
+    },
+    {
+      "name": "qualified forget removes typed fact but retains recallable digest",
+      "status": "passed",
+      "evidence": {
+        "removed": 1,
+        "recallHits": 2,
+        "oldTextInIndex": true
+      }
+    },
+    {
+      "name": "facade turn-close filters remove",
+      "status": "passed",
+      "evidence": {
+        "correctionRetained": true
+      }
+    },
+    {
+      "name": "same source/section/key upserts correction",
+      "status": "passed",
+      "evidence": {
+        "previousCorrectionRemoved": true
+      }
+    },
+    {
+      "name": "source deletion expires index and fresh context rebuilds",
+      "status": "passed",
+      "evidence": {
+        "oldTextInFreshBlocks": false
+      }
+    },
+    {
+      "name": "purge rejects unowned fixture directory",
+      "status": "passed",
+      "evidence": {
+        "retained": "keep.txt"
+      }
+    },
+    {
+      "name": "purge removes owned source/index/digest root",
+      "status": "passed",
+      "evidence": {
+        "rootAbsent": true
+      }
+    }
+  ],
+  "status": "passed"
+}

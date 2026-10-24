@@ -1,0 +1,27 @@
+{
+  "observedAt": "2026-10-24T05:24:30.352Z",
+  "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
+  "node": "v26.7.0",
+  "platform": "win32/x64",
+  "rustTarget": "x86_64-pc-windows-gnu",
+  "scope": "Unmodified upstream parser functions; serde attributes removed only from the data type. No model, daemon, filesystem freshness or concurrency experiment.",
+  "runs": [
+    {
+      "label": "baseline",
+      "sha": "5f5bbd0257c5d667c7b60903088c953533ffd5ce",
+      "sourcePath": "refact-agent/engine/src/chat/goal_verifier.rs",
+      "sourceSha256": "e734244debf61d9ce5bc6ec78259837e5cc1e1b0268abf09d6de5d7e2867ff3e",
+      "extractedFunctionsSha256": "b18294d807eaaadaaeca279d9ce593d6e11caec084953c5709246d732f52e512",
+      "output": "criteria_only=Unmet([\"CRITERION C1: MET\", \"CRITERION C2: UNMET - docs missing\"])\ncontradictory_overall=Met; criterion_met=false\nPASS: six scenarios, nine assertions"
+    },
+    {
+      "label": "refreshed",
+      "sha": "0d096c958c6d1af9b702e48607adab03cc689c86",
+      "sourcePath": "refact-agent/engine/src/chat/goal_verifier.rs",
+      "sourceSha256": "e98ebbcd049feac858e4ae065d3eb7d3df9ac8c33f452e1824d8642df036b6d3",
+      "extractedFunctionsSha256": "d4c31aaf211b61009f435b680e5549c3c1a91c844678fa6190dd71496634249e",
+      "output": "criteria_only=Unmet([\"C2: docs missing\"])\ncontradictory_overall=Met; criterion_met=false\nPASS: six scenarios, nine assertions"
+    }
+  ],
+  "checkoutUnchanged": "5f5bbd0257c5d667c7b60903088c953533ffd5ce"
+}

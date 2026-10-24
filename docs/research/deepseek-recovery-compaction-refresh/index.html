@@ -1,0 +1,362 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>DeepSeek：副作用未知终态、失效压缩候选与证据保留 | Harness Wiki</title><link rel="canonical" href="https://redreamality.com/harnesswiki-site/docs/research/deepseek-recovery-compaction-refresh/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="DeepSeek：副作用未知终态、失效压缩候选与证据保留"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.com/harnesswiki-site/docs/research/deepseek-recovery-compaction-refresh/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="0kpgtl8" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">版本演进</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="9"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#版本与刷新边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">版本与刷新边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#第二轮窄迁移" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">第二轮窄迁移</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验资产与执行边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验资产与执行边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界一外部成功不等于日志知道成功" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界一：外部成功不等于日志知道成功</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界二摘要等到回来时原区间可能已经变化" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界二：摘要等到回来时，原区间可能已经变化</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#两次压缩保留原始证据不自动恢复模型原文" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">两次压缩：保留原始证据，不自动恢复模型原文</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#尚未闭合与失败记录" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">尚未闭合与失败记录</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#版本与刷新边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">版本与刷新边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#第二轮窄迁移" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">第二轮窄迁移</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验资产与执行边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验资产与执行边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界一外部成功不等于日志知道成功" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界一：外部成功不等于日志知道成功</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#边界二摘要等到回来时原区间可能已经变化" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">边界二：摘要等到回来时，原区间可能已经变化</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#两次压缩保留原始证据不自动恢复模型原文" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">两次压缩：保留原始证据，不自动恢复模型原文</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#尚未闭合与失败记录" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">尚未闭合与失败记录</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">DeepSeek：副作用未知终态、失效压缩候选与证据保留</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="deepseek副作用未知终态失效压缩候选与证据保留"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/">首页</a> · <a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">画像</a> · <a href="/harnesswiki-site/docs/research/recovery-behavior-experiments/">既有恢复实验</a> · <a href="/harnesswiki-site/changelog/deepseek-harness/">版本演进</a><br>
+观察日期：2026-10-24 · 第二轮最新源码刷新：<code>fetched</code>，保留首轮两次直连失败历史<br>
+首轮 Claim 与行为锚点：<code>99f6f02fecdb7dff40c3fbc9470f5907c29f74ca</code>；第二轮 Claim 锚点：<code>22ddee3792402c3e70ec5f86a63c3e3e895a2f60</code></p>
+</blockquote>
+<p>本轮补上两类实质证据。第一类让本地服务真正完成一次写入，再杀死尚未记录 result 的日志生产进程。第二类暂停异步摘要，在等待期间改变投影，并连续运行两次压缩。全部调用固定提交中的真实模块，不使用模型凭据，不修改真实业务系统。</p>
+<h2 id="版本与刷新边界">版本与刷新边界</h2>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>固定值与核验</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>旧画像研究锚点</td>
+<td><code>47f943859bef60e4160492346772ded9b24f765a</code>，来自现有画像；本地 <code>cat-file -e</code> 确认对象存在</td>
+</tr>
+<tr>
+<td>旧行为锚点</td>
+<td><code>99f6f02fecdb7dff40c3fbc9470f5907c29f74ca</code>，来自既有恢复实验</td>
+</tr>
+<tr>
+<td>首轮行为锚点</td>
+<td>同旧行为锚点；下文原实验表保留该版本边界</td>
+</tr>
+<tr>
+<td>本地 checkout / 根仓库 gitlink</td>
+<td>均为 <code>99f6f02fecdb7dff40c3fbc9470f5907c29f74ca</code>；未 checkout，未更改 gitlink</td>
+</tr>
+<tr>
+<td>第二轮 fetched SHA</td>
+<td><code>22ddee3792402c3e70ec5f86a63c3e3e895a2f60</code>，协调者 <code>runId=7318a131-3402-447b-854b-4b99667e00e3</code>；<code>fetchedAt=2026-10-24T06:07:23.502Z</code></td>
+</tr>
+<tr>
+<td>远端默认分支</td>
+<td><code>master</code>；当前 commit 时间 <code>2026-10-23T19:48:59+08:00</code>，默认分支不称为 stable</td>
+</tr>
+<tr>
+<td>已核验历史发布</td>
+<td>官方 <code>dsh-v0.1.0-rc.7</code>，<code>prerelease: true</code>；不是本轮核验出的最新或稳定版</td>
+</tr>
+</tbody>
+</table>
+<p>首轮两次运行均为 <code>node scripts/refresh-research.mjs deepseek-harness</code>，均轮询至退出码 1 后读取 <code>.dev/research-latest/deepseek-harness.json</code>。第一次为 <code>2026-10-24T05:10:37.327Z</code> 至 <code>05:11:00.077Z</code>；第二次为 <code>05:11:22.870Z</code> 至 <code>05:11:45.310Z</code>。失败发生在 fetch 连接 <code>github.com:443</code>，分别等待约 21 秒。第二次终态仍保存在<a href="/harnesswiki-site/_sources/scripts/research/deepseek-boundary-evidence.json">旧机器证据</a>。</p>
+<p>第二轮由协调者更换为已验证连接路径：通过每进程 Git 配置使用 <code>http.proxy=http://127.0.0.1:15236</code> 与 <code>http.version=HTTP/1.1</code>，取得上述新 runId。本任务复用该成功记录，不再次刷新默认分支、不移动 checkout、不写全局配置。一次限定路径 diff 意外触发未带代理的缺失 blob 获取并连接失败；后续指定 blob 通过相同进程内代理成功物化。这次物化失败不撤销协调者已经完成的刷新。</p>
+<p>首轮官方 release API 和 tag ref API 核验结果仍存<a href="/harnesswiki-site/_sources/scripts/research/deepseek-release-evidence.json">旧发布证据</a>。release 发布时间为 <code>2026-08-17T12:01:58Z</code>，tag 指向旧行为 SHA。第二轮单页官方 release 查询与逐文件 diff 另存<a href="/harnesswiki-site/_sources/scripts/research/deepseek-refresh-new-evidence.json">新源码及发布证据</a>，不覆盖旧记录。</p>
+<h2 id="第二轮窄迁移">第二轮窄迁移</h2>
+<p>三个文件仍在原路径，blob 均已变化；完整 diff 与新旧 blob 见上述新证据。此处只迁移已检查的 Claim，不修改画像 baseline。</p>
+<p><a href="/harnesswiki-site/_sources/scripts/research/deepseek-refresh-evidence.mjs">源码差异取证脚本</a>可重建本轮三个文件的比较和有限发布查询；需要代理时沿用 <code>RESEARCH_HTTP_PROXY</code>，不更改全局 Git 设置。</p>
+<table>
+<thead>
+<tr>
+<th>范围</th>
+<th>当前源码结论</th>
+<th>证据等级与边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>恢复</td>
+<td><code>interruptedTurnClosers</code> 委托 <code>openTurnClosers</code> 和 <code>ToolCallRecovery</code>；增加 fork 原因，闭合 step 清除 pending；result 必须是同 turn/step 的 append 才消除 pending</td>
+<td>新版真实模块探针核验见下方独立证据；fork 分支和跨 step 特例仅 <code>implemented</code></td>
+</tr>
+<tr>
+<td>投影</td>
+<td>replacement 字段改为 <code>startSeq/endSeq</code>；增加插件 message projection、投影后的 message map 与内容代际；仍要求来源覆盖被遮蔽节点</td>
+<td>普通 replacement 的落盘重载与血缘拒绝单独实测；插件投影未实跑</td>
+</tr>
+<tr>
+<td>压缩</td>
+<td>保留 selected-span/whole-surface 二次校验；新增摘要失败后的 <code>recover</code>、重新验证与重新准备；拆开 heuristic 和 route token 计价；自动选区排除 system head，摘要输入从该消息取得系统提示</td>
+<td><code>implemented</code>；未将首轮三种异步结果和两次压缩迁移为新版 observed</td>
+</tr>
+</tbody>
+</table>
+<p>固定来源：<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/core/session/src/repair.ts">repair.ts</a>、<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/core/session/src/surface.ts">surface.ts</a>、<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/22ddee3792402c3e70ec5f86a63c3e3e895a2f60/packages/compaction/compaction-basic/src/region.ts">region.ts</a>。</p>
+<p>执行 <code>node scripts/research/deepseek-boundary-probe.mjs --latest</code>，独立输出为 <a href="/harnesswiki-site/_sources/scripts/research/deepseek-boundary-new-evidence.json">deepseek-boundary-new-evidence.json</a>。<code>--latest</code> 选择本页固定的新 SHA，并不自行追踪未来主干。需要代理时设置进程变量 <code>RESEARCH_HTTP_PROXY</code>，未设置则沿用已有连接配置；旧模式仍禁止 lazy-fetch。Session 适配器增加 <code>seq/eventAt</code>，replacement 使用新字段，meter 补 <code>heuristicTokens</code>；没有更改恢复断言来迎合新 SHA。部分修复仍是 <code>durableAppend</code> 后 <code>readEvents</code>，不是第二次杀进程。</p>
+<p>最终退出码 0，恢复后外部计数为 1、重复修复为空、盲重试对照为 2；新字段 replacement 的落盘重载投影为 <code>[3,2]</code>，原文仍在日志，缺少被遮蔽节点的来源引用被拒绝。这些是新 SHA 的 <code>observed</code>。第一次新版投影负向输入为空来源列表，先触发 <code>sourceEventSeqs must not be empty</code>；随后保留来源 0、删去来源 1，验证真正的覆盖约束，未放宽断言。</p>
+<p>新合成 result 为 <code>role: tool</code>，<code>toolCallId/isError</code> 在 message 上；旧版是 user 消息内的 <code>tool-result</code> 块。新版探针新增该格式断言，旧模式再次重跑也通过，未覆盖首轮证据。该格式差异不改变本例的 unknown 分类，但会影响旧日志消费者。</p>
+<p>新版压缩导入真实 LLM 入口时出现 <code>ERR_MODULE_NOT_FOUND: @deepseek-ai/dsh-typert-protocol</code>，探针将其保存为 <code>compaction.status=blocked</code>。退出码 0 只表示恢复与普通投影断言通过，不表示压缩通过，也不证明上游安装完整依赖后不能运行。受本轮范围限制，没有继续扩展到 Typert 服务图或真实模型。</p>
+<h2 id="实验资产与执行边界">实验资产与执行边界</h2>
+<p>可重跑入口：<a href="/harnesswiki-site/_sources/scripts/research/deepseek-boundary-probe.mjs">deepseek-boundary-probe.mjs</a>。成功记录：<a href="/harnesswiki-site/_sources/scripts/research/deepseek-boundary-evidence.json">deepseek-boundary-evidence.json</a>，执行时间以其中的 <code>executedAt</code> 为准，环境 <code>Node v26.7.0 / win32 x64 / TypeScript 5.9.3</code>。</p>
+<p>在仓库根目录执行：</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">New-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">ItemType Directory </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Force .dev</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">work</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">deepseek </span><span style="--0:#7FDBCA;--1:#096E72">|</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Out-Null</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">dir .dev</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">work</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">deepseek add </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">D typescript</span><span style="--1:#3B61B0"><span style="--0:#82AAFF">@5</span><span style="--0:#C5E478">.9.3</span></span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">ignore</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">scripts </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">config.fetch</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">retries</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#F78C6C;--1:#AA0982">0</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">config.fetch</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">timeout</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#F78C6C;--1:#AA0982">20000</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">node scripts</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">research</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">deepseek</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">boundary</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.mjs</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="New-Item -ItemType Directory -Force .dev/research-work/deepseek | Out-Nullpnpm --dir .dev/research-work/deepseek add -D typescript@5.9.3 --ignore-scripts --config.fetch-retries=0 --config.fetch-timeout=20000node scripts/research/deepseek-boundary-probe.mjs"><div></div></button></div></figure></div>
+<p>脚本先 <code>git ls-tree</code> 确认路径，再按完整 SHA <code>git show</code> 提取源码，记录每个源文件的 Git blob ID。读取设置 <code>GIT_NO_LAZY_FETCH=1</code>，不会借探针继续刷新远端。TypeScript 只做机械转译，不做类型检查，不替换上游函数。Session 恢复、投影、压缩事务、消息构造及 Cordis 等依赖来自同一提交。</p>
+<p>最终运行退出码为 0。完整临时产物位于脚本输出的 <code>.dev/research-work/deepseek/run-*/</code>：<code>observations.json</code>、<code>crash-session.jsonl</code>、<code>service-receipts.jsonl</code>、两个部分修复前缀 JSONL、三个异步用例 JSONL 与 <code>multiple-compaction.jsonl</code>。每次重跑创建独立目录。事件中的 <code>2026-10-24T00:00:00.000Z</code> 是确定性 fixture 时间；实际运行时间记录在 <code>executedAt</code>，两者不能混用。</p>
+<p>这属于 <code>observed</code> 真实模块探针。Session 端口由小型适配器提供，使用上游 <code>SurfaceManager</code> 验证投影操作；摘要返回确定性 ContentBlock，token meter 固定计数，磁盘写入由探针执行 <code>fsync</code>。没有启动完整 Agent、Loader、checkpoint policy 或上游 JSONL coordinator。旧实验的 assembled-app 证据仍单独成立，不能与本探针拼接成一次完整端到端运行。</p>
+<h2 id="边界一外部成功不等于日志知道成功">边界一：外部成功不等于日志知道成功</h2>
+<table>
+<thead>
+<tr>
+<th>Evidence Claim 字段</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness / Primitive</td>
+<td><a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness</a> / <a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态持久化与恢复</a></td>
+</tr>
+<tr>
+<td>Situation</td>
+<td>服务完成写入并确认响应，进程在记录工具 result 前被杀死</td>
+</tr>
+<tr>
+<td>Fact type</td>
+<td><code>observed</code>，实现探针；恢复策略由固定源码支持</td>
+</tr>
+<tr>
+<td>Claim</td>
+<td>修复函数补写 unknown 终态而非重放工具；再次修复已闭合日志不追加事件。这是日志修复幂等性，不是外部效果去重</td>
+</tr>
+<tr>
+<td>Source</td>
+<td><a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/core/session/src/repair.ts#L27-L132"><code>interruptedTurnClosers</code></a>、本轮探针与机器证据</td>
+</tr>
+<tr>
+<td>Limit</td>
+<td>不覆盖 coordinator 的并发恢复、真实工具调度或模型后续决策；服务是专属 loopback 计数器</td>
+</tr>
+</tbody>
+</table>
+<p>子进程先把 seq 0–4 写入并同步磁盘，最后一条为 <code>tool/call</code>。随后向 <code>127.0.0.1</code> 的临时端口发送 POST。服务将计数和收据落盘，返回 <code>count: 1</code>；子进程收到确认后通知父进程，父进程发送 <code>SIGKILL</code>，等待子进程退出，再读取日志。此时服务已经成功，但日志只有五条事件，没有 <code>tool/result</code>。</p>
+<table>
+<thead>
+<tr>
+<th>检查</th>
+<th>实际结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工具终态</td>
+<td>合成 seq 5，<code>TOOL_OUTCOME_UNKNOWN</code>，引用原 call seq 4；不把未知误报为外部失败</td>
+</tr>
+<tr>
+<td>旧执行闭合</td>
+<td>seq 6 为 <code>step/end</code>，seq 7 为 <code>turn/end</code>，原因 <code>interrupted</code></td>
+</tr>
+<tr>
+<td>外部效果</td>
+<td>修复后 GET 仍为 <code>count: 1</code>，服务收据只有一条；修复函数没有发起 POST</td>
+</tr>
+<tr>
+<td>相同输入</td>
+<td>对未修复的原日志重复调用，返回相同 closers</td>
+</tr>
+<tr>
+<td>已完整修复</td>
+<td>持久化 closers 后再读日志，修复返回 <code>[]</code></td>
+</tr>
+<tr>
+<td>模拟部分修复的完整记录边界</td>
+<td>将仅含合成 result 的前缀实际落盘并重读，剩余为 step/end、turn/end；另一个前缀多含 step/end 时只剩 turn/end。补齐后再落盘重读，修复均为空；这里没有第二次杀进程</td>
+</tr>
+<tr>
+<td>缺少 call 的对照</td>
+<td>去掉 seq 4 后，返回 <code>TOOL_NOT_STARTED</code>，与已记录调用的 unknown 分类不同</td>
+</tr>
+<tr>
+<td>故意盲重试</td>
+<td>探针另发一次 POST，计数变成 2；这是对照操作，不是 Harness 自动执行</td>
+</tr>
+</tbody>
+</table>
+<p>新增之处是“外部确实成功”已有独立落盘收据，且进程确实被终止。旧实验仅种下一个缺结果的调用，没有真实执行 <code>write_remote</code>。两者都支持谨慎处理 unknown，但只有本轮实测同时掌握独立外部状态。</p>
+<p>本地服务没有实现幂等键，合成 result 也不查询服务。<code>callId</code> 的相关性和修复日志的稳定性不能替代业务接口的去重协议。固定提交的<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/.agents/notes/implemented/bug-fix/2026-07-21-semantic-session-checkpoints.md">语义 checkpoint 设计记录</a>明确不承诺通用 exactly-once；本轮不推断其他 provider 是否另有去重能力。</p>
+<h2 id="边界二摘要等到回来时原区间可能已经变化">边界二：摘要等到回来时，原区间可能已经变化</h2>
+<table>
+<thead>
+<tr>
+<th>Evidence Claim 字段</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness / Primitive</td>
+<td><a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness</a> / <a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/">上下文压缩</a></td>
+</tr>
+<tr>
+<td>Situation</td>
+<td><code>compaction/start</code> 已追加，摘要 Promise 尚未完成，其他写入改变当前模型投影</td>
+</tr>
+<tr>
+<td>Fact type</td>
+<td><code>observed</code>，真实 <code>compactSurfaceRegion</code> 事务函数与真实投影管理器</td>
+</tr>
+<tr>
+<td>Claim</td>
+<td>selected-span 只容忍选区外的追加；选区改写使候选失效。whole-surface 连选区外追加也拒绝</td>
+</tr>
+<tr>
+<td>Source</td>
+<td><a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/compaction/compaction-basic/src/region.ts#L152-L246"><code>compactSurfaceRegion</code></a>、<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/compaction/compaction-basic/src/region.ts#L387-L424">两种稳定性检查</a></td>
+</tr>
+<tr>
+<td>Limit</td>
+<td>直接调用事务层；不验证 <code>Agent.runMaintenance</code> 的真实排队、UI 提示或模型生成质量</td>
+</tr>
+</tbody>
+</table>
+<p>先准备三条可见消息，选中前两条，摘要函数停在一个受控 Promise 上。在真正等待期间实施一次变更，再释放摘要。不是顺序构造两个完成后的快照。</p>
+<table>
+<thead>
+<tr>
+<th>用例</th>
+<th>owner / stability</th>
+<th>等待期间的变更</th>
+<th>终态与保留证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>selected-replaced</td>
+<td><code>null / selected-span</code></td>
+<td>另一个 replacement 替换选区头节点</td>
+<td><code>ManualCompactionError.code=changed</code>；只有 start、带 error 的 end，无 summary；竞争者的 replacement 保留</td>
+</tr>
+<tr>
+<td>selected-tail</td>
+<td><code>null / selected-span</code></td>
+<td>在选区外追加消息</td>
+<td>成功追加 summary、replacement、end；投影 <code>[6,2,4]</code> 保留原 tail 与并发追加消息</td>
+</tr>
+<tr>
+<td>whole-tail</td>
+<td><code>current-turn / whole-surface</code></td>
+<td>开放 turn 中在选区外追加消息</td>
+<td><code>SurfaceChangedError</code>；只有 start、带 error 的 end，无 summary；追加消息仍可见</td>
+</tr>
+</tbody>
+</table>
+<p>自动路径的异常没有被强行写成手动入口的 <code>changed</code> 分类。源码中自动 <code>compactRegion</code> 与手动 <code>compactNow</code> 分别采用上述参数。<code>compaction/start</code> 记录开始等待的事实，<code>compaction/end {error}</code> 保留失败尝试；拒绝候选不意味着日志回到尝试之前，也不意味着删除并发写入。</p>
+<h2 id="两次压缩保留原始证据不自动恢复模型原文">两次压缩：保留原始证据，不自动恢复模型原文</h2>
+<p>这是边界二的连续压缩扩展，关联<a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-lineage/">上下文血缘</a>与<a href="/harnesswiki-site/docs/primitives/composition-interop/durable-transcript/">耐久 Transcript</a>。事实类型为 <code>observed</code>；源码为<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/compaction/compaction-basic/src/region.ts#L427-L485">提交摘要与 replacement</a>、<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/core/session/src/surface.ts#L211-L272">投影重建与血缘校验</a>。</p>
+<p>初始消息是 <code>ORIGINAL_A</code>、<code>ORIGINAL_B</code>、<code>RETAINED_TAIL</code>。第一次压缩前两条，第二次压缩当前摘要与 tail。两次都执行真实事务提交逻辑，随后把全部事件写入 JSONL、重新读取，并调用真实 <code>foldSurface</code>。</p>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>实际结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一次压缩</td>
+<td>summary seq 4、replacement seq 5，遮蔽 <code>[0,1]</code></td>
+</tr>
+<tr>
+<td>第二次压缩</td>
+<td>summary seq 8、replacement seq 9，遮蔽 <code>[5,2]</code>；范围按投影位置解释，不按数字升序</td>
+</tr>
+<tr>
+<td>第二次摘要输入</td>
+<td>包含 <code>SUMMARY_ONE</code>，不包含 <code>ORIGINAL_A</code>；输入来自当前投影</td>
+</tr>
+<tr>
+<td>落盘后事件</td>
+<td>共 11 条，两个 <code>compaction/summary</code>；原始文本和第一份摘要仍在日志</td>
+</tr>
+<tr>
+<td>重载后的模型投影</td>
+<td>只有 seq 9，含 <code>SUMMARY_TWO</code>，没有原文或第一份摘要</td>
+</tr>
+<tr>
+<td>第二次 replacement 的来源</td>
+<td><code>[7,8,5,2]</code>，分别包含本轮 start、summary、上一轮 replacement 和 tail</td>
+</tr>
+<tr>
+<td>血缘负向对照</td>
+<td>删去 <code>[5,2]</code> 后重建投影，被 <code>must include every shadowed surface node</code> 拒绝</td>
+</tr>
+</tbody>
+</table>
+<p>保留链是 seq 9 引用 seq 5，seq 5 再引用原消息；不是每轮都复制所有祖先 seq。原始信息可以沿日志审计，不能从第二份摘要推断语义完全保留。摘要生成器是固定返回值，本轮没有测量摘要忠实度、多轮遗漏率或自动检索旧证据。</p>
+<h2 id="尚未闭合与失败记录">尚未闭合与失败记录</h2>
+<ul>
+<li>第二轮刷新已经成功；首轮异步压缩和两次压缩的 observed 仍只属于旧行为 SHA，新版压缩模块执行边界见第二轮证据。</li>
+<li>外部效果由探针子进程发起，日志由探针持久化；未验证真实工具执行、checkpoint policy、JSONL coordinator 与模型恢复串成的完整崩溃流程。</li>
+<li>部分修复实验显式构造完整记录前缀、落盘并重读，没有第二次杀进程、半行 JSON、磁盘故障或并发 coordinator，因此不证明存储修复具备原子性。</li>
+<li>异步压缩覆盖真实等待与区间变更，但不覆盖多进程竞争、flush 失败、真实 Agent 排队和执行期间再次崩溃。</li>
+<li>“两份摘要及原文仍在日志”不证明无限压缩后的语义完整性，也不证明产品 UI 提供递归证据召回。</li>
+<li>早期运行因隔离依赖缺失而在模块加载阶段失败；一次运行把摘要误构造成字符串，已改为上游要求的 ContentBlock 数组。只将最终成功运行保存为正向证据。</li>
+</ul>
+<p>本页保留首轮实验，不覆盖或撤回其历史结论。三个目标模块在旧画像与旧行为提交间 blob 完全相同，而第二轮默认分支三个 blob 均改变；版本区间及迁移边界见<a href="/harnesswiki-site/changelog/deepseek-harness/">版本记录</a>。</p>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>
