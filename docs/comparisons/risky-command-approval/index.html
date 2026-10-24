@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Situation：高风险命令触发审批 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/comparisons/risky-command-approval/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Situation：高风险命令触发审批"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/comparisons/risky-command-approval/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#情境定义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">情境定义</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#policy-与-sandbox-是两道不同边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Policy 与 Sandbox 是两道不同边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实现分支" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实现分支</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-cli审批策略与-os-沙箱正交" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI：审批策略与 OS 沙箱正交</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#opencode按工具与参数模式解析规则" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">OpenCode：按工具与参数模式解析规则</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#clinetool-policy-与宿主审批-callback" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Cline：Tool Policy 与宿主审批 callback</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code并发-approval-与断线终态的模块级实测" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code：并发 Approval 与断线终态的模块级实测</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi没有内置权限系统的明确反例" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi：没有内置权限系统的明确反例</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#拒绝后的循环语义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">拒绝后的循环语义</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#情境定义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">情境定义</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#policy-与-sandbox-是两道不同边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Policy 与 Sandbox 是两道不同边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实现分支" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实现分支</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-cli审批策略与-os-沙箱正交" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI：审批策略与 OS 沙箱正交</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#opencode按工具与参数模式解析规则" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">OpenCode：按工具与参数模式解析规则</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#clinetool-policy-与宿主审批-callback" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Cline：Tool Policy 与宿主审批 callback</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code并发-approval-与断线终态的模块级实测" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code：并发 Approval 与断线终态的模块级实测</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi没有内置权限系统的明确反例" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi：没有内置权限系统的明确反例</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#拒绝后的循环语义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">拒绝后的循环语义</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Situation：高风险命令触发审批</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="situation高风险命令触发审批"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/docs/comparisons/">Situation 索引</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/">控制与连续性</a> · <a href="/harnesswiki-site/docs/harnesses/">Harness 索引</a></p>
+</blockquote>
+<h2 id="情境定义">情境定义</h2>
+<table>
+<thead>
+<tr>
+<th>契约字段</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发</td>
+<td>模型提出可能删除文件、访问网络或越过工作区边界的命令。</td>
+</tr>
+<tr>
+<td>初始状态</td>
+<td>用户尚未授予这类效果的持续权限，Action 仍处于未执行状态。</td>
+</tr>
+<tr>
+<td>关键事件</td>
+<td>Harness 解析 Action、计算策略决策，必要时请求审批，并在允许后通过独立执行边界实施效果。</td>
+</tr>
+<tr>
+<td>可观察终态</td>
+<td>明确区分行动未执行、被临时允许、被长期策略允许、受隔离约束后执行，或因拒绝而进入替代路径。</td>
+</tr>
+</tbody>
+</table>
+<p>这个情境穿过<a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/">工具与能力运行时</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与沙箱</a>、<a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行内核</a>和<a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面</a>。</p>
+<h2 id="policy-与-sandbox-是两道不同边界">Policy 与 Sandbox 是两道不同边界</h2>
+<pre class="mermaid">sequenceDiagram
+    participant M as 模型
+    participant H as Harness
+    participant P as Policy
+    actor U as 用户
+    participant S as Sandbox
+    participant T as Tool Runtime
+
+    M->>H: Action intent(command, args)
+    H->>P: 按工具、参数、位置和会话策略判定
+    alt deny
+        P-->>H: 拒绝 + 理由
+        H-->>M: Observation: 未执行
+    else ask
+        P-->>U: 结构化审批请求
+        alt 用户拒绝
+            U-->>H: deny
+            H-->>M: Observation: 未执行
+        else 用户允许
+            U-->>H: allow once / rule
+            H->>S: 在执行边界内启动
+            S->>T: 执行允许的行动
+            T-->>H: Observation
+        end
+    else allow
+        H->>S: 在执行边界内启动
+        S->>T: 执行允许的行动
+        T-->>H: Observation
+    end</pre>
+<p>Policy 决定“应该不应该执行”；Sandbox 限制“即使执行，最多能影响什么”。审批允许不能自动关闭沙箱，沙箱存在也不能替代用户意图判断。</p>
+<h2 id="实现分支">实现分支</h2>
+<h3 id="codex-cli审批策略与-os-沙箱正交">Codex CLI：审批策略与 OS 沙箱正交</h3>
+<ul>
+<li><strong>状态</strong>：<code>implemented</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI 画像</a></li>
+</ul>
+<p>Codex 把 approval policy 与 sandbox policy 分开建模。行动可能因需要提升权限而请求批准，实际进程仍按当前平台的隔离与网络策略执行。结构化 App Server 事件还能把审批请求交给非 TUI 客户端处理。</p>
+<h3 id="opencode按工具与参数模式解析规则">OpenCode：按工具与参数模式解析规则</h3>
+<ul>
+<li><strong>状态</strong>：<code>implemented</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/opencode/">OpenCode 画像</a></li>
+</ul>
+<p>OpenCode 的权限规则可按工具和参数 pattern 得到 <code>allow</code>、<code>ask</code> 或 <code>deny</code>，并有 <code>external_directory</code>、<code>doom_loop</code> 等专门 guard。这里的策略输入不只是工具名；相同 Bash 工具因参数不同可得到不同决策。</p>
+<h3 id="clinetool-policy-与宿主审批-callback">Cline：Tool Policy 与宿主审批 callback</h3>
+<ul>
+<li><strong>状态</strong>：<code>implemented</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/cline/">Cline 画像</a></li>
+</ul>
+<p>Cline SDK 将工具 policy 与宿主 approval callback 分开。固定锚点中，未配置 policy 的工具默认 enabled 且 auto-approved；只有显式 <code>autoApprove:false</code> 才调用 callback，无 callback 时拒绝。VS Code 宿主可以把命令或 diff 呈现给用户，但不能把某个 UI 的审批体验外推成所有 SDK 宿主的默认行为。</p>
+<h3 id="qwen-code并发-approval-与断线终态的模块级实测">Qwen Code：并发 Approval 与断线终态的模块级实测</h3>
+<ul>
+<li><strong>状态</strong>：<code>implemented + observed</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code 画像</a>与<a href="/harnesswiki-site/docs/research/control-plane-behavior-experiments/">控制面行为实测</a></li>
+</ul>
+<p>固定行为锚点中，两个同时 pending 的 2-of-3 approval 按 <code>requestId</code> 分别闭合，事件订阅断开不取消 pending；Session close 才产生 <code>cancelled/session_closed</code>，晚到 vote 不能翻转终态。该实验没有执行被批准命令，也没有经过 HTTP/SSE，因此只验证 mediator 与 EventBus，不证明 sandbox 或网络断线恢复。</p>
+<h3 id="pi没有内置权限系统的明确反例">Pi：没有内置权限系统的明确反例</h3>
+<ul>
+<li><strong>状态</strong>：<code>absent</code>（内置权限系统）+ <code>alternative</code>（外部隔离）</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/pi/">Pi 画像</a></li>
+</ul>
+<p>Pi 官方明确说明默认工具继承启动用户的 filesystem、process、network 和 credential 权限，不内置对应 permission system。需要强边界时由容器、micro-VM 或外部 policy sandbox 提供。</p>
+<p>这不是 <code>unknown</code>，也不代表 Pi 不能安全部署；它把隔离责任放在 Harness 外部，证明 approval 并不是所有 Harness 的最低共同机制。</p>
+<h2 id="拒绝后的循环语义">拒绝后的循环语义</h2>
+<p>审批系统还必须决定拒绝如何成为 Observation：</p>
+<ul>
+<li>只返回“失败”会诱导模型原样重试，形成审批循环。</li>
+<li>返回稳定的策略理由，模型才有机会选择只读命令或缩小范围。</li>
+<li>“允许一次”与“建立规则”必须有不同耐久性，否则一次授权会意外扩散到后续 Turn。</li>
+<li>Qwen 的模块级结果选择“观察者断线保持 pending、Session close 取消”；其他 Harness 与真实 transport writer 断线仍可能采用自动拒绝或取消 Turn，属于控制面终态语义。</li>
+</ul>
+<p>除上面明确标为 <code>observed</code> 的模块路径外，这些问题仍需更多固定版本行为测试，不能从 UI 文案推断。</p>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与沙箱</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/">工具与能力运行时</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行环境与执行内核</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面与互操作协议</a></li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

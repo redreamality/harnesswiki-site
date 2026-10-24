@@ -1,0 +1,418 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>编码工作面、执行与工作区事务证据底稿 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/research/coding-surface-evidence/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="编码工作面、执行与工作区事务证据底稿"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/research/coding-surface-evidence/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#快照与检查范围" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">快照与检查范围</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#横向领域模型" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">横向领域模型</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#aider专用-repo-map编辑协议与-git-事务" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">aider：专用 Repo Map、编辑协议与 Git 事务</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#代码库智能tree-sitter-图与个性化-pagerank" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">代码库智能：Tree-sitter 图与个性化 PageRank</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#变更应用可替换-edit-format-与-dry-run" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">变更应用：可替换 edit format 与 dry-run</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#执行与验证宿主-shellauto-lint-默认开启" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">执行与验证：宿主 Shell、auto-lint 默认开启</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#工作区事务与恢复边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">工作区事务与恢复边界</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#clinesdk-tool-runtimediff-preview-与-run-level-checkpoint" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Cline：SDK tool runtime、Diff Preview 与 run-level Checkpoint</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#搜索ripgrep-优先短-ttl-文件列表回退" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">搜索：ripgrep 优先，短 TTL 文件列表回退</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#变更应用唯一替换与-context-patch" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">变更应用：唯一替换与 context patch</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#bashpolicy-与-plan-guard" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Bash、Policy 与 Plan guard</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#checkpoint-的真实触发与双恢复域" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Checkpoint 的真实触发与双恢复域</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#openhandscanvas-委托边界持久-terminal-与事件分支" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">OpenHands：Canvas 委托边界、持久 Terminal 与事件分支</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#canvas-不拥有-action-execution" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Canvas 不拥有 Action execution</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#代码发现与变更应用" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">代码发现与变更应用</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#持久-terminalplacement-与-process-continuity-分开" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">持久 Terminal：placement 与 process continuity 分开</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#confirmationpolicy-与默认值" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">ConfirmationPolicy 与默认值</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#event-persistencefork-与非幂等重放" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Event persistence、fork 与非幂等重放</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#mini-swe-agent单-bash每-action-新进程" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">mini-SWE-agent：单 Bash、每 Action 新进程</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#极简-agent-loop-与-trajectory" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">极简 Agent loop 与 trajectory</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#execution-environment容器持久不等于-shell-持久" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Execution environment：容器持久不等于 Shell 持久</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#审批编辑验证与恢复" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">审批、编辑、验证与恢复</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive-横向矩阵" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive 横向矩阵</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#差异反例与可提炼机制" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">差异、反例与可提炼机制</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#专用机制不是完成任务的必要条件" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">专用机制不是完成任务的必要条件</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#checkpoint-必须带覆盖范围" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Checkpoint 必须带覆盖范围</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#execution-world-至少有两个正交轴" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Execution World 至少有两个正交轴</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#预览policy-与-enforcement-不能合并" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">预览、Policy 与 enforcement 不能合并</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#unknown-清单" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">unknown 清单</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#可转写到正文的时序结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">可转写到正文的时序结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#来源入口" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">来源入口</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#快照与检查范围" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">快照与检查范围</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#横向领域模型" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">横向领域模型</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#aider专用-repo-map编辑协议与-git-事务" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">aider：专用 Repo Map、编辑协议与 Git 事务</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#代码库智能tree-sitter-图与个性化-pagerank" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">代码库智能：Tree-sitter 图与个性化 PageRank</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#变更应用可替换-edit-format-与-dry-run" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">变更应用：可替换 edit format 与 dry-run</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#执行与验证宿主-shellauto-lint-默认开启" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">执行与验证：宿主 Shell、auto-lint 默认开启</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#工作区事务与恢复边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">工作区事务与恢复边界</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#clinesdk-tool-runtimediff-preview-与-run-level-checkpoint" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Cline：SDK tool runtime、Diff Preview 与 run-level Checkpoint</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#搜索ripgrep-优先短-ttl-文件列表回退" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">搜索：ripgrep 优先，短 TTL 文件列表回退</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#变更应用唯一替换与-context-patch" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">变更应用：唯一替换与 context patch</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#bashpolicy-与-plan-guard" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Bash、Policy 与 Plan guard</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#checkpoint-的真实触发与双恢复域" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Checkpoint 的真实触发与双恢复域</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#openhandscanvas-委托边界持久-terminal-与事件分支" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">OpenHands：Canvas 委托边界、持久 Terminal 与事件分支</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#canvas-不拥有-action-execution" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Canvas 不拥有 Action execution</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#代码发现与变更应用" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">代码发现与变更应用</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#持久-terminalplacement-与-process-continuity-分开" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">持久 Terminal：placement 与 process continuity 分开</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#confirmationpolicy-与默认值" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">ConfirmationPolicy 与默认值</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#event-persistencefork-与非幂等重放" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Event persistence、fork 与非幂等重放</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#mini-swe-agent单-bash每-action-新进程" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">mini-SWE-agent：单 Bash、每 Action 新进程</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#极简-agent-loop-与-trajectory" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">极简 Agent loop 与 trajectory</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#execution-environment容器持久不等于-shell-持久" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Execution environment：容器持久不等于 Shell 持久</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#审批编辑验证与恢复" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">审批、编辑、验证与恢复</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive-横向矩阵" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive 横向矩阵</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#差异反例与可提炼机制" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">差异、反例与可提炼机制</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#专用机制不是完成任务的必要条件" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">专用机制不是完成任务的必要条件</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#checkpoint-必须带覆盖范围" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Checkpoint 必须带覆盖范围</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#execution-world-至少有两个正交轴" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Execution World 至少有两个正交轴</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#预览policy-与-enforcement-不能合并" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">预览、Policy 与 enforcement 不能合并</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#unknown-清单" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">unknown 清单</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#可转写到正文的时序结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">可转写到正文的时序结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#来源入口" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">来源入口</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">编码工作面、执行与工作区事务证据底稿</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="编码工作面执行与工作区事务证据底稿"></span></p>
+<blockquote>
+<p>快照日期：2026-08-17。导航：<a href="/harnesswiki-site/docs/research/">调研底稿</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/domain-model/">领域模型</a> · <a href="/harnesswiki-site/docs/primitives/coding-workspace/">编码工作面</a> · <a href="/harnesswiki-site/docs/harnesses/">Harness 索引</a></p>
+</blockquote>
+<p>本文固定 aider、Cline、OpenHands 与 mini-SWE-agent 的源码版本，研究同一个编码任务怎样经过代码发现、变更应用、命令执行、验证反馈和工作区恢复。结论只描述固定锚点能证明的机制；没有找到直接证据时写 <code>unknown</code>，不把零搜索结果写成 <code>absent</code>。</p>
+<h2 id="快照与检查范围">快照与检查范围</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>默认分支与研究锚点</th>
+<th>许可证</th>
+<th>本轮检查范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aider</td>
+<td><code>main@5dc9490bb35f9729ef2c95d00a19ccd30c26339c</code></td>
+<td>Apache-2.0</td>
+<td><code>repomap.py</code>、coder/edit formats、command execution、lint/test、Git commit/undo</td>
+</tr>
+<tr>
+<td>Cline</td>
+<td><code>main@8bbdde2a5c1f972864fe1b954f639c21fac61a40</code></td>
+<td>Apache-2.0</td>
+<td><code>sdk/packages/{agents,core,shared}</code>、VS Code diff/diagnostics adapter、SDK guides</td>
+</tr>
+<tr>
+<td>OpenHands Canvas</td>
+<td><code>main@0d15c5e79e91a659f238954e1db8a3da289c4801</code></td>
+<td>MIT</td>
+<td>Canvas 架构、Agent Server adapter、Git/change 与 conversation API</td>
+</tr>
+<tr>
+<td>OpenHands 委托 runtime</td>
+<td><code>OpenHands/software-agent-sdk v1.42.1@167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497</code></td>
+<td>MIT</td>
+<td>Agent loop、terminal、grep/editor/patch、confirmation policy、EventLog 与恢复</td>
+</tr>
+<tr>
+<td>mini-SWE-agent</td>
+<td><code>main@a83fcae82d2a08f0ee0c688f9d137b3566c097f8</code></td>
+<td>MIT</td>
+<td>Default/InteractiveAgent、Local/Docker environments、默认 prompt、trajectory 保存</td>
+</tr>
+</tbody>
+</table>
+<p>OpenHands 当前 canonical repo 是 <strong>Agent Canvas</strong>，其架构明确不直接执行 Action、也不提供 sandbox；默认 backend 来自官方 <code>software-agent-sdk</code>。两仓库在本研究中组成一个 OpenHands Harness，委托 runtime 不作为独立投票。aider、Cline、OpenHands、mini-SWE-agent 是四个独立机制来源；mini-SWE-agent 与 SWE-agent 的继承关系在扩展语料时仍需去重。</p>
+<h2 id="横向领域模型">横向领域模型</h2>
+<pre class="mermaid">flowchart LR
+    Task["任务与当前 workspace"] --> Discover["发现候选代码"]
+    Discover --> Context["有预算的代码表示"]
+    Context --> Model["模型决策"]
+    Model --> Apply["变更协议 / Shell 替代"]
+    Apply --> World["Execution World"]
+    World --> Verify["lint / test / command observation"]
+    Verify -->|可行动失败| Model
+    World --> Tx["baseline / checkpoint / commit"]
+    Tx --> Artifact["diff / commit / trajectory"]</pre>
+<p>四个项目对这条链的切分差异很大：aider 为 Repo Map、edit format、lint 和 Git 提供专用机制；Cline 把 SDK tools、IDE preview、Session artifacts 和 Git checkpoint 组合起来；OpenHands Canvas 委托给拥有持久 terminal 与事件状态的 runtime；mini-SWE-agent 则只给模型 Bash，把搜索、编辑、Git 和验证责任移到模型与外层 environment。</p>
+<h2 id="aider专用-repo-map编辑协议与-git-事务">aider：专用 Repo Map、编辑协议与 Git 事务</h2>
+<h3 id="代码库智能tree-sitter-图与个性化-pagerank">代码库智能：Tree-sitter 图与个性化 PageRank</h3>
+<p>aider 的 Repo Map 不是文件清单或 LSP 查询。<code>get_ranked_tags</code> 从 definitions/references 构建 <code>networkx.MultiDiGraph</code>，把 chat files、提及文件和提及 identifier 注入 personalization，再运行 PageRank。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/repomap.py#L365-L529"><code>implemented / implemented</code>，图构建与排序</a></p>
+<p>渲染阶段按候选 tag 数量构造 tree，并围绕 <code>max_map_tokens</code> 二分调整保留量；因此 Repo Map 是<strong>任务相关且有预算的有损表示</strong>，而不是全仓库 AST dump。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/repomap.py#L629-L704"><code>implemented / implemented</code>，预算裁剪</a></p>
+<p>本轮没有发现 LSP 参与 Repo Map 的证据，故 LSP 状态为 <code>unknown</code>，不能从“符号与引用”反推语言服务实现。</p>
+<h3 id="变更应用可替换-edit-format-与-dry-run">变更应用：可替换 edit format 与 dry-run</h3>
+<p><code>aider/coders</code> 为 whole-file、search/replace、unified diff、patch 等格式提供不同 coder。Search/replace 在 <code>apply_edits_dry_run</code> 中调用同一 applicator 而禁止写盘；正式应用尝试 exact/宽松定位，失败 block 被汇总成带文件与原块的反馈，要求模型只修复未匹配部分。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/coders/editblock_coder.py#L38-L122"><code>implemented / implemented</code></a></p>
+<p>Architect 模式把“方案”与“实施”分成两个角色：architect reply 完成后选择 editor model/edit format，创建新的 editor coder，并把方案作为第二次模型调用的输入。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/coders/architect_coder.py#L11-L48"><code>implemented / implemented</code></a></p>
+<pre class="mermaid">sequenceDiagram
+    participant M as Model / Coder
+    participant E as Edit parser
+    participant W as Workspace
+    participant G as Git
+    participant V as Lint / Test
+
+    M->>E: edit-format payload
+    E->>W: read current files and dry-run matches
+    alt unmatched or ambiguous
+        E-->>M: failed blocks + repair instruction（未写盘）
+    else applicable
+        E->>W: apply edits
+        W->>G: optional auto-commit boundary
+        W->>V: auto-lint, optional auto-test
+        alt diagnostics and user requests repair
+            V-->>M: reflected failure Observation
+        else terminal result
+            V-->>M: pass / hand control back
+        end
+    end</pre>
+<h3 id="执行与验证宿主-shellauto-lint-默认开启">执行与验证：宿主 Shell、auto-lint 默认开启</h3>
+<p>命令执行使用宿主机 <code>subprocess.Popen(..., shell=True)</code>；这证明它是宿主 Shell 执行，不是通用 sandbox。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/run_cmd.py#L62-L68"><code>implemented / implemented</code></a></p>
+<p>Coder 默认 <code>auto_lint=True</code>、<code>auto_test=False</code>。编辑后自动 lint；lint 或已配置测试失败时询问用户是否修复，确认后将诊断写入 <code>reflected_message</code>，进入后续模型循环。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/coders/base_coder.py#L1589-L1622"><code>implemented / implemented</code></a></p>
+<h3 id="工作区事务与恢复边界">工作区事务与恢复边界</h3>
+<p>默认 <code>auto_commits=True</code>。<code>/undo</code> 只接受当前 coder 记录的最后一个 aider commit；若相关文件又变脏或 commit 已推送，命令拒绝撤销，随后才对限定文件执行恢复并 soft-reset commit。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/commands.py#L560-L646"><code>implemented / implemented</code></a></p>
+<p><code>restore_chat_history</code> 能从 Markdown 恢复消息，并在过大时触发 chat summary；没有证据表明它恢复 shell cwd、工具进程或完整工作区状态，因此只算消息历史恢复，不算完整 Checkpoint。<a href="https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/coders/base_coder.py#L510-L523"><code>alternative / implemented</code></a></p>
+<h2 id="clinesdk-tool-runtimediff-preview-与-run-level-checkpoint">Cline：SDK tool runtime、Diff Preview 与 run-level Checkpoint</h2>
+<h3 id="搜索ripgrep-优先短-ttl-文件列表回退">搜索：ripgrep 优先，短 TTL 文件列表回退</h3>
+<p>Cline 的 <code>search</code> executor 优先调用 ripgrep 并解析 JSON；不可用或失败时，从文件索引逐文件执行正则搜索。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/extensions/tools/executors/search.ts#L335-L443"><code>implemented / implemented</code></a> 文件索引默认 TTL 为 15 秒，底层只是 <code>rg --files</code>，失败时递归 walk，并按 cwd 缓存；它没有符号关系或语义排名，不能称为 Repo Map。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/services/workspace/file-indexer.ts#L7-L9"><code>implemented / implemented</code></a> · <a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/services/workspace/file-indexer.ts#L83-L166">构建与缓存</a></p>
+<p>VS Code host 存在读取 <code>vscode.languages.getDiagnostics()</code> 的 API，但本轮未定位它必然被当前 SDK Agent loop 在编辑后调用；LSP/diagnostics 自动注入保持 <code>unknown</code>。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/apps/vscode/src/hosts/vscode/hostbridge/workspace/getDiagnostics.ts#L7-L49"><code>implemented</code> 的能力入口</a></p>
+<h3 id="变更应用唯一替换与-context-patch">变更应用：唯一替换与 context patch</h3>
+<p><code>editor</code> 支持 create、按一基行号 insert、唯一 <code>old_text</code> 替换；零匹配和多匹配都在写入前拒绝。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/extensions/tools/executors/editor.ts#L151-L265"><code>implemented / implemented</code></a></p>
+<p><code>apply_patch</code> 支持 add/update/delete/move。它先解析 patch、读取当前文件并用 <code>computePatchChanges</code> 计算内存 change set，再调用 <code>applyChanges</code> 写盘；context fuzz 会在结果中显式报告。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/extensions/tools/executors/apply-patch.ts#L328-L381"><code>implemented / implemented</code></a></p>
+<p>VS Code coordinator 在需要批准的 edit 前打开虚拟 diff；自动批准的 edit 只在执行时及写入后短暂展示 preview。源码还说明 preview 是 cosmetic，打开失败不能阻止 approval 或 edit。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/apps/vscode/src/sdk/sdk-diff-edit-coordinator.ts#L60-L76"><code>implemented / implemented</code></a> · <a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/apps/vscode/src/sdk/sdk-diff-edit-coordinator.ts#L115-L177">自动批准路径</a></p>
+<h3 id="bashpolicy-与-plan-guard">Bash、Policy 与 Plan guard</h3>
+<p>Bash executor 每次调用 Node <code>spawn</code> 新建子进程，继承宿主环境，并实现 timeout、AbortSignal 与跨平台进程树清理；它不是持久 shell，也没有由此获得 OS sandbox。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/extensions/tools/executors/bash.ts#L130-L232"><code>implemented / implemented</code></a></p>
+<p>当前 SDK 文档明确：未出现在 <code>toolPolicies</code> 中的工具默认 enabled 且 auto-approved；显式 <code>autoApprove:false</code> 才要求批准。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/docs/sdk/guides/permission-handling.mdx#L7-L33"><code>implemented / documented</code></a> Runtime 在需批准但没有 callback 时返回拒绝原因，不会静默执行。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/agents/src/agent-runtime.ts#L1662-L1700"><code>implemented / implemented</code></a></p>
+<p>Plan mode 的 command guard 是文件修改命令黑名单。源码主动声明它不是 shell interpreter，无法捕获 <code>python -c</code> 或藏在 quoted <code>bash -c</code> 中的所有写入；因此它是行为 guard，不是 security sandbox。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/extensions/tools/command-guard.ts#L1-L18"><code>implemented / implemented</code></a></p>
+<h3 id="checkpoint-的真实触发与双恢复域">Checkpoint 的真实触发与双恢复域</h3>
+<p>Checkpoint 不是“每个 tool 后快照”。Hook 在 root run 的第一次 model 调用前识别新的 user run，避免 resume 覆盖原有 pre-run snapshot，再创建 checkpoint 并把 history 写入 Session metadata。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/hooks/checkpoint-hooks.ts#L423-L477"><code>implemented / implemented</code></a></p>
+<p>底层创建 stash-compatible commit，额外构造第三 parent 保存 untracked 文件，并把对象固定到 <code>refs/cline/checkpoints/{sessionId}/{runCount}</code> 私有 ref，不污染用户的 <code>git stash list</code>。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/hooks/checkpoint-hooks.ts#L111-L168"><code>implemented / implemented</code></a> · <a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/hooks/checkpoint-hooks.ts#L397-L417">私有 ref</a></p>
+<p>恢复是破坏性工作树操作，因此 <code>beginWorktreeRestoreTransaction</code> 先为当前状态创建独立 private restore ref；<code>createCheckpointRestorePlan</code> 可以选择是否同时裁剪 messages。工作树恢复与消息恢复是两个正交域。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/session/checkpoint-restore.ts#L43-L113"><code>implemented / implemented</code></a> · <a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/session/checkpoint-restore.ts#L245-L300">消息裁剪与 plan</a></p>
+<p>Session metadata 存在 SQLite <code>sessions.db</code>，同时记录 manifest/messages paths；Agent runtime 另有 <code>restore(messages)</code> 与 <code>snapshot()</code>。这说明会话元数据、模型消息状态和 Git snapshot 相关但不相同。<a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/core/src/services/storage/sqlite-session-store.ts#L25-L93"><code>implemented / implemented</code></a> · <a href="https://github.com/cline/cline/blob/8bbdde2a5c1f972864fe1b954f639c21fac61a40/sdk/packages/agents/src/agent-runtime.ts#L537-L564">Agent restore/snapshot</a></p>
+<pre class="mermaid">sequenceDiagram
+    actor U as User / SDK host
+    participant R as Agent Runtime
+    participant C as Checkpoint Hook
+    participant P as Tool Policy
+    participant D as Diff Coordinator
+    participant T as Executor
+    participant S as Session Store
+
+    U->>R: new user run
+    R->>C: first model boundary
+    C->>C: create tracked + untracked snapshot
+    C->>S: private ref + checkpoint metadata
+    R->>P: model tool call
+    alt autoApprove false
+        P-->>U: approval callback
+        U-->>P: approve / reject
+    end
+    opt approved edit
+        P->>D: pre-approval or brief auto preview
+    end
+    P->>T: execute accepted call
+    T-->>R: tool result / error
+    R->>S: persist messages and runtime metadata</pre>
+<p>自动 build/test 策略、SDK loop 是否自动消费 VS Code diagnostics、以及 LSP integration 均为 <code>unknown</code>；命令或 editor error 作为 tool result 回流只能证明 Observation feedback，不能升级为自动 verifier。</p>
+<h2 id="openhandscanvas-委托边界持久-terminal-与事件分支">OpenHands：Canvas 委托边界、持久 Terminal 与事件分支</h2>
+<h3 id="canvas-不拥有-action-execution">Canvas 不拥有 Action execution</h3>
+<p>固定版本的 <code>docs/architecture.md</code> 明确：Agent Canvas 负责 UI、Agent Server API adapter 和运行呈现；它不直接执行 agent actions，也不提供 sandbox/workspace isolation。<a href="https://github.com/OpenHands/OpenHands/blob/0d15c5e79e91a659f238954e1db8a3da289c4801/docs/architecture.md#L1-L23"><code>implemented / documented</code></a></p>
+<p>README 同时区分宿主直跑与 Docker：不使用 sandbox 时 agent-server 直接运行在用户机器上并有完整 filesystem access；Docker 是可选部署边界，agent 仍能访问显式挂载的 <code>PROJECTS_PATH</code>。<a href="https://github.com/OpenHands/OpenHands/blob/0d15c5e79e91a659f238954e1db8a3da289c4801/README.md#L63-L109"><code>implemented / documented</code></a></p>
+<p>因此本文把 Canvas 的 conversation/API 事实与 <code>software-agent-sdk v1.42.1</code> 的 runtime 事实组合，但每条 Claim 标明所有者。以后若 Canvas 连接任意 ACP backend，不能沿用默认 OpenHands runtime 的 tool、policy 或 terminal 结论。</p>
+<h3 id="代码发现与变更应用">代码发现与变更应用</h3>
+<p>Runtime 的 grep executor 按 ripgrep → system grep → Python filesystem walk 回退，并把候选限制到最多 100 个文件、按 mtime 排序。它是有上限的文本检索，不是符号图或 LSP。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-tools/openhands/tools/grep/impl.py"><code>implemented / implemented</code></a></p>
+<p>File editor protocol 提供 <code>view/create/str_replace/insert/undo_edit</code>；独立 apply_patch tool 实现 context-based patch 与 fuzz。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-tools/openhands/tools/file_editor/definition.py"><code>implemented / implemented</code>，File editor</a> · <a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-tools/openhands/tools/apply_patch/core.py">apply_patch</a></p>
+<p><code>undo_edit</code> 使用 editor 自己的文件历史，只覆盖该工具拥有的局部变更；没有证据表明它撤销 terminal、Git 或其他工具的效果，不能称为通用 workspace rollback。</p>
+<h3 id="持久-terminalplacement-与-process-continuity-分开">持久 Terminal：placement 与 process continuity 分开</h3>
+<p>Terminal 文档把命令会话定义为持久 shell，cwd、environment variables 与 virtualenv activation 可跨命令保留。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-tools/openhands/tools/terminal/README.md"><code>implemented / documented</code></a> Factory 优先选择 tmux，回退到 subprocess PTY；这是 process continuity，不能自动推导 deployment isolation。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-tools/openhands/tools/terminal/terminal/factory.py"><code>implemented / implemented</code></a></p>
+<pre class="mermaid">sequenceDiagram
+    participant C as Canvas / Client
+    participant S as Agent Server
+    participant A as Agent
+    participant P as ConfirmationPolicy
+    participant T as Persistent Terminal / Tool
+    participant E as Event Store
+
+    C->>S: send message / resume conversation
+    S->>A: run against ConversationState
+    A->>P: ActionEvent + risk/UNKNOWN
+    alt confirmation required
+        P-->>C: WAITING_FOR_CONFIRMATION
+        alt rejected
+            C-->>S: reject
+            S->>E: UserRejectObservation
+        else approved
+            C-->>S: approve
+            S->>T: execute in persistent session
+            T-->>E: ObservationEvent
+        end
+    else no confirmation
+        A->>T: execute
+        T-->>E: ObservationEvent
+    end</pre>
+<h3 id="confirmationpolicy-与默认值">ConfirmationPolicy 与默认值</h3>
+<p>Runtime 把 <code>AlwaysConfirm</code>、<code>NeverConfirm</code>、<code>ConfirmRisky</code> 建模为策略对象。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-sdk/openhands/sdk/security/confirmation_policy.py"><code>implemented / implemented</code></a> 固定版本 <code>ConversationState</code> 默认 <code>NeverConfirm()</code>，security analyzer 默认 <code>None</code>；若配置 analyzer 则 Agent 计算风险，否则为 <code>UNKNOWN</code>，需要确认时进入等待状态。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-sdk/openhands/sdk/conversation/state.py"><code>implemented / implemented</code></a> · <a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-sdk/openhands/sdk/agent/agent.py">Agent policy integration</a></p>
+<p>拒绝产生 <code>UserRejectObservation</code> 并进入事件/模型历史，而不是抛出一个与执行失败相同的异常。这里可以确认 confirmation loop，但不能从策略对象推断 Canvas 的每种部署都启用了 analyzer 或 sandbox。</p>
+<h3 id="event-persistencefork-与非幂等重放">Event persistence、fork 与非幂等重放</h3>
+<p>Conversation event store 按事件持久化 JSON；事件树通过 <code>parent_id</code> 表达分支，active branch 决定当前投影。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-sdk/openhands/sdk/conversation/event_store.py"><code>implemented / implemented</code></a> <code>ConversationState.create</code> 能从持久化状态重建并检查 agent/tool 兼容性。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/openhands-sdk/openhands/sdk/conversation/state.py"><code>implemented / implemented</code></a></p>
+<p>Canvas API 支持从指定 event fork conversation。<a href="https://github.com/OpenHands/OpenHands/blob/0d15c5e79e91a659f238954e1db8a3da289c4801/src/api/conversation-service/agent-server-conversation-service.api.ts#L763-L800"><code>implemented / implemented</code></a> Runtime 的 <code>rerun_actions</code> 可以重放 Action，但实现与测试明确把非幂等副作用视为风险；它不是工作树 Checkpoint restore。<a href="https://github.com/OpenHands/software-agent-sdk/blob/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497/tests/sdk/conversation/local/test_rerun_actions.py"><code>implemented / implemented</code></a></p>
+<p>Canvas/Agent Server 还提供 Git changes/diff 与 conversation worktree 入口，但本轮没有定位到覆盖 tracked/untracked 工作树的通用 checkpoint/rollback。因此工作树恢复为 <code>unknown</code>；事件 fork 不能填补这个空白。统一自动 lint/test policy 同样为 <code>unknown</code>。</p>
+<h2 id="mini-swe-agent单-bash每-action-新进程">mini-SWE-agent：单 Bash、每 Action 新进程</h2>
+<h3 id="极简-agent-loop-与-trajectory">极简 Agent loop 与 trajectory</h3>
+<p><code>DefaultAgent</code> 将 messages 同时用作模型历史和 trajectory；主循环执行 query → parse/execute actions → append observation，并在每步 <code>finally</code> 中保存 trajectory。<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/agents/default.py"><code>implemented / implemented</code></a></p>
+<p>默认 <code>mini.yaml</code> 只向模型暴露 Bash，并在 prompt 中明确每条命令运行于新 subshell，<code>cd</code> 与环境变量不会跨 Action 保留。<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/config/mini.yaml"><code>implemented / documented</code></a></p>
+<pre class="mermaid">sequenceDiagram
+    participant A as DefaultAgent
+    participant M as Model
+    actor U as User（confirm mode）
+    participant E as Environment
+    participant P as New shell process
+    participant J as Trajectory file
+
+    A->>M: current messages
+    M-->>A: one Bash Action / final response
+    opt InteractiveAgent confirm
+        A-->>U: approve complete command?
+        U-->>A: yes / no
+    end
+    A->>E: execute(Action)
+    E->>P: create new subprocess / docker exec
+    P-->>E: merged stdout + stderr, return code
+    E-->>A: Observation
+    A->>J: save messages in finally</pre>
+<h3 id="execution-environment容器持久不等于-shell-持久">Execution environment：容器持久不等于 Shell 持久</h3>
+<p><code>LocalEnvironment._run</code> 当前使用 <code>subprocess.Popen</code> 为每个 Action 创建进程，stdout/stderr 合流；不能继续沿用旧资料中的 <code>subprocess.run</code> 描述。<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/environments/local.py"><code>implemented / implemented</code></a></p>
+<p>Docker environment 会保留容器和文件系统，但每次 Action 仍调用新的 <code>docker exec ... bash -lc</code>；因此 workspace placement 与 process continuity 是两个独立维度。<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/environments/docker.py"><code>implemented / implemented</code></a></p>
+<p>本地环境默认没有隔离。Docker、Bubblewrap、Singularity 与远端 SWE-ReX 是替代 environment，实际 filesystem/network/credential 边界取决于所选实现和配置。<a href="https://github.com/SWE-agent/mini-swe-agent/tree/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/environments"><code>alternative / documented</code></a></p>
+<h3 id="审批编辑验证与恢复">审批、编辑、验证与恢复</h3>
+<p>InteractiveAgent 默认 <code>confirm</code>，对整条 Bash 命令请求用户确认；<code>--yolo</code> 关闭确认。它没有工具参数级风险分类。<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/agents/interactive.py"><code>implemented / implemented</code></a> · <a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/run/mini.py">CLI 入口</a></p>
+<p>没有专用 Repo Map/LSP 或 edit protocol：模型通过 Bash 选择 <code>find</code>、<code>grep</code>、<code>sed</code>、脚本或 Git。默认 prompt 建议模型自行运行测试，return code 和输出成为下一轮 Observation；核心没有独立自动 verifier。这些都是同一 Situation 的 <code>alternative</code>，不是“不能搜索/编辑/验证”。</p>
+<p>Trajectory 可持续导出，但本轮没有找到从 trajectory 重新构造 Agent 并继续执行的直接路径，因此 resume 为 <code>unknown</code>。Git transaction/checkpoint 也未作为核心 Primitive 实现；模型可用 Bash 调 Git，外层 benchmark runner 可为样本提供独立环境。</p>
+<h2 id="primitive-横向矩阵">Primitive 横向矩阵</h2>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>aider</th>
+<th>Cline</th>
+<th>OpenHands</th>
+<th>mini-SWE-agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>代码库智能</td>
+<td>Tree-sitter tags + PageRank Repo Map</td>
+<td><code>rg --json</code> + TTL 文件列表；LSP <code>unknown</code></td>
+<td>grep fallback + 只读探索；LSP <code>unknown</code></td>
+<td>Bash 按需搜索（alternative）</td>
+</tr>
+<tr>
+<td>变更生成与应用</td>
+<td>多 edit format；dry-run + 明确失败</td>
+<td>unique editor + context apply_patch + IDE preview</td>
+<td>file editor + apply_patch</td>
+<td>Bash 命令（alternative）</td>
+</tr>
+<tr>
+<td>进程持续性</td>
+<td>每命令宿主 shell</td>
+<td>每 tool call 新 child process</td>
+<td>持久 tmux/PTY terminal</td>
+<td>每 Action 新 subshell</td>
+</tr>
+<tr>
+<td>执行放置</td>
+<td>本机</td>
+<td>本机 SDK host</td>
+<td>本机 / Docker / VM / remote backend</td>
+<td>Local / Docker / Bubblewrap / Singularity / SWE-ReX</td>
+</tr>
+<tr>
+<td>自动验证 policy</td>
+<td>auto-lint 默认开，auto-test 默认关</td>
+<td><code>unknown</code></td>
+<td><code>unknown</code></td>
+<td>无独立 verifier；模型驱动</td>
+</tr>
+<tr>
+<td>Approval 默认</td>
+<td>建议命令可确认；无通用 policy engine</td>
+<td>未配置 tool 默认 auto-approved</td>
+<td>runtime 默认 NeverConfirm，无 analyzer</td>
+<td>interactive 默认整命令 confirm；<code>--yolo</code> 关闭</td>
+</tr>
+<tr>
+<td>工作区事务</td>
+<td>auto-commit + 受限 <code>/undo</code></td>
+<td>user-run 前 Git checkpoint，含 untracked</td>
+<td>worktree/diff 有入口；rollback <code>unknown</code></td>
+<td>核心无独立 transaction</td>
+</tr>
+<tr>
+<td>Session/trajectory 恢复</td>
+<td>Markdown 消息历史；完整状态否</td>
+<td>metadata/artifacts + runtime message restore</td>
+<td>EventLog branch + compatibility check</td>
+<td>trajectory 导出；resume <code>unknown</code></td>
+</tr>
+</tbody>
+</table>
+<p>矩阵比较的是状态所有权和替代路径，不是功能评分。特别是：容器不自动等于持久 shell；diff preview 不等于审批或 checkpoint；事件 branch 不等于工作树 fork；能运行测试不等于自动验证。</p>
+<h2 id="差异反例与可提炼机制">差异、反例与可提炼机制</h2>
+<h3 id="专用机制不是完成任务的必要条件">专用机制不是完成任务的必要条件</h3>
+<p>mini-SWE-agent 证明代码发现、编辑、验证和 Git 可以全部通过 Bash 完成。它没有否定这些 Primitive，而是把状态与错误处理责任从 Harness 专用组件转给模型、Shell 和外层 runner。因此 Primitive 应按<strong>谁拥有状态与契约</strong>分类，不能按最终能否完成任务勾选。</p>
+<h3 id="checkpoint-必须带覆盖范围">Checkpoint 必须带覆盖范围</h3>
+<p>Cline checkpoint 覆盖 tracked/untracked 工作树，并可选择裁剪 messages；aider <code>/undo</code> 只撤销满足条件的最后一个 aider commit；OpenHands event fork 保存 conversation 因果但工作树 rollback 为 <code>unknown</code>；mini 的 trajectory 只证明记录可导出。四者不能统一写成“支持恢复”。</p>
+<h3 id="execution-world-至少有两个正交轴">Execution World 至少有两个正交轴</h3>
+<p>OpenHands 持久 terminal 与 mini Docker 的对照最清楚：前者可以在宿主机持续 cwd/env，后者可以保留容器文件系统却每次创建新 shell。Wiki 应分别记录 <strong>placement/isolation</strong> 与 <strong>process continuity</strong>。</p>
+<h3 id="预览policy-与-enforcement-不能合并">预览、Policy 与 enforcement 不能合并</h3>
+<p>Cline virtual diff 是透明度和交互入口，preview 失败不阻止执行；OpenHands ConfirmationPolicy 决定是否等待用户；Docker/OS boundary 决定允许后的最大效果。三者分别回答“看见什么”“该不该执行”“最多能影响什么”。</p>
+<h2 id="unknown-清单"><code>unknown</code> 清单</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>本轮仍不能确认的事项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aider</td>
+<td>LSP；通用 sandbox；chat history 之外的进程/工具状态恢复</td>
+</tr>
+<tr>
+<td>Cline</td>
+<td>当前 SDK loop 的 LSP/diagnostics 自动注入；自动 lint/build/test policy；所有宿主是否使用同一 checkpoint lifecycle</td>
+</tr>
+<tr>
+<td>OpenHands</td>
+<td>通用工作树 checkpoint/rollback；统一自动验证；所有 backend 的 isolation 等价性；Action 重放幂等性</td>
+</tr>
+<tr>
+<td>mini-SWE-agent</td>
+<td>从 trajectory resume；核心工作区 checkpoint；专用代码索引与 edit protocol（只能确认替代路径）</td>
+</tr>
+</tbody>
+</table>
+<p><code>unknown</code> 是证据状态，不是产品缺陷或 <code>absent</code>。只有源码或官方文档明确声明缺席、或检查范围可被穷尽时，才升级为 <code>absent</code>。</p>
+<h2 id="可转写到正文的时序结论">可转写到正文的时序结论</h2>
+<ol>
+<li><strong>aider</strong>：模型 payload → edit dry-run → 写盘 → optional auto-commit → lint/test → 失败经用户确认反射。</li>
+<li><strong>Cline</strong>：新 user run → checkpoint → model tool call → policy/callback → diff preview → executor → tool result + Session persistence。</li>
+<li><strong>OpenHands</strong>：ActionEvent → optional risk → ConfirmationPolicy → waiting/approve/reject → persistent tool → ObservationEvent/EventLog。</li>
+<li><strong>mini-SWE-agent</strong>：model → 单 Bash Action → 新 subshell → merged Observation → trajectory save。</li>
+</ol>
+<p>这些图表达领域事件，不声明四个项目实现共同接口。Interface 至少还需要统一 workspace identity、Action terminal reason、checkpoint coverage 和 Observation schema 的更多证据。</p>
+<h2 id="来源入口">来源入口</h2>
+<ul>
+<li><a href="https://github.com/Aider-AI/aider/tree/5dc9490bb35f9729ef2c95d00a19ccd30c26339c">aider 固定提交</a></li>
+<li><a href="https://github.com/cline/cline/tree/8bbdde2a5c1f972864fe1b954f639c21fac61a40">Cline 固定提交</a></li>
+<li><a href="https://github.com/OpenHands/OpenHands/tree/0d15c5e79e91a659f238954e1db8a3da289c4801">OpenHands Canvas 固定提交</a></li>
+<li><a href="https://github.com/OpenHands/software-agent-sdk/tree/167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497">OpenHands runtime <code>v1.42.1</code> 固定提交</a></li>
+<li><a href="https://github.com/SWE-agent/mini-swe-agent/tree/a83fcae82d2a08f0ee0c688f9d137b3566c097f8">mini-SWE-agent 固定提交</a></li>
+</ul>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/repository-intelligence/">代码库智能</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/change-application/">变更生成与应用</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行环境与执行内核</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/verification-feedback/">验证与反馈</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/workspace-transactions/">版本控制与工作区事务</a></li>
+<li><a href="/harnesswiki-site/docs/comparisons/unfamiliar-repository-fix/">首次进入陌生仓库并完成修复</a></li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

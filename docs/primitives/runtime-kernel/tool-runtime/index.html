@@ -1,0 +1,307 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Primitive：工具与能力运行时 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Primitive：工具与能力运行时"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#领域模型" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">领域模型</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#不变量" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">不变量</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#显露差异的-situation" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">显露差异的 Situation</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#把本地能力迁移到远程沙箱" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">把本地能力迁移到远程沙箱</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#一个工具产生长时间流式输出" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">一个工具产生长时间流式输出</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#各-harness-的实现" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">各 Harness 的实现</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#deepseek-harness" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">DeepSeek Harness</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#mini-swe-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">mini-SWE-agent</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#claude-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Claude Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#antigravity-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Antigravity CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#minimax-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">MiniMax Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#mistral-vibe" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Mistral Vibe</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#browser-use" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Browser Use</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#refact" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Refact</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#zed-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Zed Agent</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#stakpak-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Stakpak Agent</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#设计策略与取舍" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">设计策略与取舍</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#反例与边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">反例与边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">来源</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#领域模型" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">领域模型</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#不变量" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">不变量</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#显露差异的-situation" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">显露差异的 Situation</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#把本地能力迁移到远程沙箱" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">把本地能力迁移到远程沙箱</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#一个工具产生长时间流式输出" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">一个工具产生长时间流式输出</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#各-harness-的实现" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">各 Harness 的实现</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#deepseek-harness" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">DeepSeek Harness</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#mini-swe-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">mini-SWE-agent</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#claude-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Claude Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#antigravity-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Antigravity CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#minimax-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">MiniMax Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#mistral-vibe" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Mistral Vibe</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#browser-use" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Browser Use</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#refact" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Refact</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#zed-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Zed Agent</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#stakpak-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Stakpak Agent</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#设计策略与取舍" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">设计策略与取舍</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#反例与边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">反例与边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">来源</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Primitive：工具与能力运行时</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="primitive工具与能力运行时"></span></p>
+<blockquote>
+<p>Theme：<a href="/harnesswiki-site/docs/primitives/runtime-kernel/">运行内核</a> · 成熟度：<code>Accepted Primitive</code> · <a href="/harnesswiki-site/docs/primitives/runtime-kernel/agent-loop-modes/">Agent 循环</a></p>
+<p>共识 Family：<code>Codex</code>、<code>DeepSeek</code>、<code>Pi</code>、<code>mini-SWE-agent</code></p>
+</blockquote>
+<p>工具与能力运行时把模型的结构化行动意图解析、路由到能力实现，并将真实效果规范化为 Observation；它是模型协议与 Execution World 之间的适配边界。</p>
+<h2 id="领域模型">领域模型</h2>
+<pre class="mermaid">flowchart LR
+    Registry["Tool / Capability Registry"] --> Schema["Model-visible schema"]
+    Schema --> Model["Model"]
+    Model --> Call["Action intent"]
+    Call --> Validate["Parse + validate"]
+    Validate --> Policy["Policy decision"]
+    Policy --> Dispatch["Dispatch / provider resolution"]
+    Dispatch --> World["Execution World"]
+    World --> Normalize["Result normalization"]
+    Normalize --> Observation["Observation"]</pre>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Registry</td>
+<td>可用工具、schema、实现 provider 与生命周期</td>
+</tr>
+<tr>
+<td>Call identity</td>
+<td>将流式参数、执行结果和 Session 事件关联起来</td>
+</tr>
+<tr>
+<td>Execution handle</td>
+<td>长进程、取消、输出流和 background job 的句柄</td>
+</tr>
+<tr>
+<td>Observation</td>
+<td>供模型继续决策的有界结果，不必等同原始输出</td>
+</tr>
+</tbody>
+</table>
+<h3 id="不变量">不变量</h3>
+<ul>
+<li>schema 暴露给模型的参数必须与执行端验证一致，不能只靠 prompt 约定。</li>
+<li>工具注册不等于允许执行；Policy 在 dispatch 前拥有独立决策点。</li>
+<li>结果过大、流式或二进制时需要明确的 Observation/Artifact 边界。</li>
+<li>替换 filesystem provider 与 subprocess provider 时，二者应指向一致 Execution World，否则模型会读到与命令执行不同的代码。</li>
+<li>MCP 是一种外部 capability provider 协议，不等于 Harness 控制平面。</li>
+</ul>
+<h2 id="显露差异的-situation">显露差异的 Situation</h2>
+<h3 id="把本地能力迁移到远程沙箱">把本地能力迁移到远程沙箱</h3>
+<p>若只替换 Bash provider，而 read/edit/LSP 仍指向本地目录，Harness 会形成两个世界。应观察 provider 是否以 execution world 为组合单位迁移。</p>
+<h3 id="一个工具产生长时间流式输出">一个工具产生长时间流式输出</h3>
+<p>Runtime 必须决定何时回传增量、如何截断、怎样取消和最终 Observation 怎样落入 Session；单次函数返回模型无法解释全部生命周期。</p>
+<h2 id="各-harness-的实现">各 Harness 的实现</h2>
+<h3 id="codex-cli"><a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：CLI、IDE 与桌面客户端共用 Codex core/app-server 的工具运行时，只计一个 Family。</li>
+</ul>
+<p>Codex <code>ToolRouter</code> 把 function、custom 与 client tool-search item 归一化为带 <code>tool_name</code>、<code>call_id</code> 和 typed payload 的 <code>ToolCall</code>，再从 registry 选择 runtime，并显式暴露 parallel 与 cancellation capability。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/tools/router.rs#L31-L205">ToolCall 归一化与 runtime 选择</a>实际运行另经统一 orchestrator 的 approval、sandbox selection 与 retry 顺序。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/tools/orchestrator.rs#L1-L142">运行管线</a></p>
+<h3 id="deepseek-harness"><a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + documented</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness 画像</a></li>
+</ul>
+<p>DeepSeek 的 <code>ctx.tools</code> 是带作用域的 registry 与 guarded pipeline，每个 Step 重新组装 schema，调用经过 <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L43-L59"><code>tools/pre-execute → execute → post-execute</code></a>。它使用 capability service/provider/consumer seam；filesystem 与 subprocess provider 共享<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L98-L102">同一 execution world</a>，远程沙箱替换可让 Bash、PTY 和 LSP 一起迁移。Tool registry、agent loop 和 session log 都是插件，因此 provider 的装载与撤销有显式生命周期。</p>
+<h3 id="pi"><a href="/harnesswiki-site/docs/harnesses/pi/">Pi</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + documented</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/pi/">Pi 画像</a></li>
+</ul>
+<p>Pi 默认只向模型提供 <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/README.md#L80-L95"><code>read</code>、<code>write</code>、<code>edit</code>、<code>bash</code> 四个工具</a>，TypeScript extension 可以注册新工具并<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/extensions.md#L749-L847">拦截 tool call/result 事件</a>。极简默认面与可扩展 registry 分离，说明工具数量不是 Runtime 深度的指标。</p>
+<h3 id="mini-swe-agent"><a href="/harnesswiki-site/docs/harnesses/mini-swe-agent/">mini-SWE-agent</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>alternative + implemented</code></li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/mini-swe-agent/">mini-SWE-agent 画像</a></li>
+</ul>
+<p>mini-SWE-agent 的<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/config/mini.yaml">默认配置</a>只提供一个 Bash 工具；<a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/agents/default.py">默认 Agent 循环</a>把行动交给 environment，而本地环境为每个行动启动独立的 <a href="https://github.com/SWE-agent/mini-swe-agent/blob/a83fcae82d2a08f0ee0c688f9d137b3566c097f8/src/minisweagent/environments/local.py"><code>subprocess.Popen</code></a>。文件读写、搜索和测试都是 Bash 参数中的行为，不建立多个工具 schema；它用最小 dispatch 面处理同一“行动进入环境”问题。</p>
+<h3 id="gemini-cli"><a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：Gemini CLI 与 Qwen Code 共同继承的基础 registry/scheduler 只计一个 Family；Qwen 当前分化另述。</li>
+</ul>
+<p>Gemini Scheduler 从 registry 按名称解析工具并用声明对象构建 invocation；批处理状态机支持排队、并行批次和取消，单次调用依次经过 BeforeTool hook、policy、用户 confirmation 与 executor。<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/scheduler/scheduler.ts#L195-L450">解析、校验、批处理与取消</a> · <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/scheduler/scheduler.ts#L610-L760">hook、policy、confirmation 与执行</a>因此 schema 暴露、授权和能力执行是可分离阶段，Scheduler 也显式拥有 call lifecycle，而不只是调用一个函数。</p>
+<h3 id="qwen-code"><a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：Qwen 从 Gemini CLI fork 后独立演化；继承的基础 runtime 不作第二份独立证据，lazy/deferred tool 与当前 permission/hook pipeline 作为分化证据。</li>
+</ul>
+<p>Qwen ToolRegistry 统一 eager tool、lazy factory、MCP/命令发现与模型可见 schema，并以稳定顺序和 disabled-tool gate 控制声明面；CoreToolScheduler 对 call id 去重后执行 permission、confirmation、hook、执行与终态清理。<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/tools/tool-registry.ts#L195-L360">registry、lazy factory 与禁用入口</a> · <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/core/coreToolScheduler.ts#L2297-L2327">调度与审批分支</a> · <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/core/coreToolScheduler.ts#L4416-L4555">PreToolUse 与执行边界</a>这证明工具集合可动态演化，但新注册工具仍必须经过统一的运行时生命周期。</p>
+<h3 id="claude-code"><a href="/harnesswiki-site/docs/harnesses/claude-code/">Claude Code</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + documented</code></li>
+<li><strong>谱系计数</strong>：terminal、IDE、GitHub 与 Remote Control 共用同一 Claude Code 产品能力面，只计一个 Family。</li>
+</ul>
+<p>Claude Code 的固定仓库把 plugin 定义为可提供 commands、agents、hooks 与 MCP servers 的扩展，并展示 skill 等资源类型。<a href="https://github.com/anthropics/claude-code/blob/354757e5b2d9aa1ebb62e5d05ecd384f0e11c0f7/plugins/README.md#L1-L20">Plugin 能力面</a>发布记录又把 tool definitions 作为实际 request model settings 的独立组成。<a href="https://github.com/anthropics/claude-code/blob/354757e5b2d9aa1ebb62e5d05ecd384f0e11c0f7/CHANGELOG.md#L242-L250">tool definitions 边界</a>这能证明可扩展工具集合，不能证明闭源 dispatcher、取消与长输出 retention 的内部实现。</p>
+<h3 id="antigravity-cli"><a href="/harnesswiki-site/docs/harnesses/antigravity-cli/">Antigravity CLI</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + documented</code></li>
+<li><strong>谱系计数</strong>：CLI 与 GUI 的 native/MCP/tooling 属于共享 engine，只计一个 Family。</li>
+</ul>
+<p>Antigravity 的 <code>stream-json</code> 会在 <code>init</code> 中报告当前 build 的工具，并为每个 tool call 输出 canonical name、parameters 与 output；同一固定版本还记录 MCP、plugin 与 skill 的装载行为。<a href="https://github.com/google-antigravity/antigravity-cli/blob/76ff39c65b5d52482172b6408c27ded9b17c303d/CHANGELOG.md#L125-L139">结构化工具投影</a> · <a href="https://github.com/google-antigravity/antigravity-cli/blob/76ff39c65b5d52482172b6408c27ded9b17c303d/CHANGELOG.md#L199-L216">customization 与 MCP 生命周期</a>这支撑工具能力集合及可见调用，核心 dispatcher 和 schema transaction 仍未公开。</p>
+<h3 id="minimax-code"><a href="/harnesswiki-site/docs/harnesses/minimax-code/">MiniMax Code</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + documented</code></li>
+<li><strong>谱系计数</strong>：文件、终端、Browser Use、MCP 与 Skill 均属于同一 MiniMax Code Family 的能力集合。</li>
+</ul>
+<p>官方更新日志和产品页把文件、终端、Browser Use、MCP 与 Skill 列为可用能力。<a href="https://agent.minimaxi.com/docs/changelog">官方更新日志（桌面 <code>v3.0.65</code>，快照 2026-08-19）</a> · <a href="https://agent.minimaxi.com/download">官方产品页（快照 2026-08-19）</a>这属于 <code>documented</code> 工具面；工具注册、schema 版本、取消和 output retention 的内部契约未公开。</p>
+<h3 id="mistral-vibe"><a href="/harnesswiki-site/docs/harnesses/mistral-vibe/">Mistral Vibe</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：内建工具、MCP、skills、hooks 与 client-hosted tools 组成同一 Mistral Vibe capability runtime，只计一个 Family。</li>
+</ul>
+<p>Mistral Vibe 以类型化参数、结果、配置和状态约束工具，并在统一 loop 中把 call、stream、approval block、result 与 terminal state 关联到同一 effect identity。<a href="https://github.com/mistralai/mistral-vibe/blob/5e6aa0f6beb3454454f4c1de74a7652ba577ab05/docs/adr/0004-typed-permissioned-tools.md">typed permissioned tools ADR</a>与<a href="https://github.com/mistralai/mistral-vibe/blob/5e6aa0f6beb3454454f4c1de74a7652ba577ab05/vibe/core/agent_loop/_loop.py">Agent loop</a>说明扩展工具也进入共同执行生命周期；permission decision 与工具发现/调用仍是两个职责。</p>
+<h3 id="browser-use"><a href="/harnesswiki-site/docs/harnesses/browser-use/">Browser Use</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：内建与 custom browser actions 共用一个 browser-use registry/runtime，只计一个 Family。</li>
+<li><strong>适用边界</strong>：它是跨域 Corpus Harness，只支撑通用类型化工具与浏览器 action 语义，不支撑 coding-specific Shell、patch 或 build runtime 结论。</li>
+</ul>
+<p>browser-use registry 把 Pydantic action model、注入参数与 <code>terminates_sequence</code> 等元数据绑定，统一调度 navigate、click、input、upload、extract、evaluate 与 done，并允许注册 custom action。<a href="https://github.com/browser-use/browser-use/blob/3c989dc0adc594d592be62272d70e28caaa5553b/browser_use/tools/registry/service.py">Action registry</a>和<a href="https://github.com/browser-use/browser-use/blob/3c989dc0adc594d592be62272d70e28caaa5553b/browser_use/tools/service.py">工具实现</a>证明 schema、dispatch 与结果回流；它没有代码仓库工具的事务或验证契约。</p>
+<h3 id="refact"><a href="/harnesswiki-site/docs/harnesses/refact/">Refact</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：内建文件/进程/浏览器工具、MCP、delegation、task tools 与客户端入口共用一个 Refact capability runtime，只计一个 Family。</li>
+</ul>
+<p>Refact project worker 在同一 Chat Session runtime 中恢复 thread mode、自动批准设置、hooks、goal 与 background-agent state，使工具面和调用策略随 Session 一起重建。<a href="https://github.com/JegernOUTT/refact/blob/5f5bbd0257c5d667c7b60903088c953533ffd5ce/refact-agent/engine/src/chat/session_runtime.rs#L120-L286">Session runtime 与工具策略状态</a>固定 README 将 reads、edits、shells、integrations、subagents 与可配置 confirmation rules 放在同一本地 engine 中。<a href="https://github.com/JegernOUTT/refact/blob/5f5bbd0257c5d667c7b60903088c953533ffd5ce/README.md">本地能力与策略面</a>这证明能力集合与 Session policy 共同进入 runtime；具体 Action 是否允许以及在哪个工作区执行仍由授权和<a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-placement/">执行放置</a>分别决定。</p>
+<h3 id="zed-agent"><a href="/harnesswiki-site/docs/harnesses/zed/">Zed Agent</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：编辑器内 Agent Panel、ThreadStore、sandbox 与 subagent 工具共用同一个 Agent runtime，只计一个 Zed Agent Family。</li>
+</ul>
+<p>Zed 每轮模型请求重新取得可用工具，把流式 tool input 归入带 id 的 tool future，再等待执行结果写回同一 RunningTurn；有结果时可以用 <code>ToolResults</code> intent 继续下一次模型请求。<a href="https://github.com/zed-industries/zed/blob/3624a5bfda8a4610bf9926499517a776c7028321/crates/agent/src/thread.rs#L2848-L2959">模型流与 tool future</a> · <a href="https://github.com/zed-industries/zed/blob/3624a5bfda8a4610bf9926499517a776c7028321/crates/agent/src/thread.rs#L3027-L3082">结果回注与继续条件</a> Tool Runtime 负责 capability discovery、调用 identity、执行与结果回流；Allow/Deny/Confirm 审批和 terminal sandbox 分别属于执行前 policy 与最大效果边界，不由工具注册本身决定。</p>
+<h3 id="stakpak-agent"><a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak Agent</a></h3>
+<ul>
+<li><strong>状态 / 事实类型</strong>：<code>implemented + implemented</code></li>
+<li><strong>谱系计数</strong>：agent-core、CLI tools、MCP 与 hooks 组成一个 Stakpak Agent capability runtime，只计一个 Family。</li>
+</ul>
+<p>模型 tool call 先规范化为 <code>ProposedToolCall</code>，再经审批 state machine、hook 与 <code>ToolExecutor</code>，Accept、Reject 或 CustomResult 都写回配对 result。<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/agent-core/src/agent.rs#L485-L657">审批、执行与结果配对</a> <code>SecretManager</code> 仅在模型/日志侧 placeholder 与工具侧原值之间转换 payload，<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/shared/src/secret_manager.rs#L7-L108">map 与恢复边界</a>不决定 Action 是否获准，也不提供 Warden 的进程、文件或网络 enforcement；其 map 更新还明确未证明线程安全。</p>
+<h2 id="设计策略与取舍">设计策略与取舍</h2>
+<p>模型输出一个 tool call，并不等于某个函数马上执行。中间至少要回答五个问题：<strong>模型看见什么能力、参数是否合法、这次是否获准、由哪个执行者运行、什么结果回到模型</strong>。Harness 的独特设计主要体现在：这些问题是集中在一个调度器中，还是分散给 registry、policy、provider 和结果转换层。</p>
+<p>下表按 Harness Family 去重：同一 Family 的多个客户端或内建/custom tools 不重复；<a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI</a>与<a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code</a>只在正文已证明的分化点分别出现。同一行里，“策略路线”与“代表 Harness / Family”按分号分组对应；收益与代价依据本页已有的 schema、状态机和 provider 边界，不把未公开的 dispatcher 行为当作事实。</p>
+<table>
+<thead>
+<tr>
+<th>比较轴</th>
+<th>策略路线</th>
+<th>代表 Harness / Family</th>
+<th>收益</th>
+<th>代价 / 失败模式</th>
+<th>适用条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型可见工具面的大小</td>
+<td>单一 Bash；四个核心文件/命令工具 + extension；动态类型化 registry；面向浏览器的领域 action；产品级多能力集合</td>
+<td><a href="/harnesswiki-site/docs/harnesses/mini-swe-agent/">mini-SWE-agent</a>；<a href="/harnesswiki-site/docs/harnesses/pi/">Pi</a>；<a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code</a>；<a href="/harnesswiki-site/docs/harnesses/browser-use/">Browser Use</a>；<a href="/harnesswiki-site/docs/harnesses/minimax-code/">MiniMax Code</a></td>
+<td>小工具面降低 schema 和选错工具的负担；类型化或领域工具能表达更精确的参数与终止语义</td>
+<td>单 Bash 把解析、引用和安全细节交给模型；工具越多，发现、禁用、命名冲突和 schema 预算越难管理；产品能力清单本身不能证明调用生命周期</td>
+<td>通用极简 Agent 可从 Shell 起步；需要稳定自动化、领域约束或第三方扩展时采用类型化 registry</td>
+</tr>
+<tr>
+<td>声明与实现何时绑定</td>
+<td>每 Step 重建 scoped schema 并由 provider 生命周期装卸；声明对象在调用时构造 invocation；eager/lazy/MCP discovery 共存；plugin/MCP 只公开扩展入口</td>
+<td><a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness</a>；<a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI</a>；<a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code</a>；<a href="/harnesswiki-site/docs/harnesses/claude-code/">Claude Code</a>、<a href="/harnesswiki-site/docs/harnesses/antigravity-cli/">Antigravity CLI</a></td>
+<td>能按当前 Session、配置或远端环境缩小能力面；lazy provider 可推迟昂贵初始化</td>
+<td>schema 可能在轮次间变化；发现失败、provider 被撤销或 disabled gate 不一致时，模型看到的声明可能无法执行；只有扩展文档时不能推断内部原子性</td>
+<td>工具集合依项目、租户或连接状态变化时；生命周期应与<a href="/harnesswiki-site/docs/primitives/composition-interop/extension-lifecycle/">扩展与生命周期</a>共同设计</td>
+</tr>
+<tr>
+<td>调用怎样获得稳定身份</td>
+<td>function/custom/client call 先归一化为 typed <code>ToolCall + call_id</code>；提案与结果成对；流式参数进入带 id 的 tool future</td>
+<td><a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI</a>；<a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak Agent</a>；<a href="/harnesswiki-site/docs/harnesses/zed/">Zed Agent</a></td>
+<td>流式参数、审批、执行结果和取消可以指向同一 effect，便于重试和审计</td>
+<td>去重、迟到结果和终态清理都要进入状态机；只按工具名调用会丢失并发调用之间的对应关系</td>
+<td>并行工具、远程客户端、流式参数或需要精确 trajectory 时</td>
+</tr>
+<tr>
+<td>Policy 放在执行管线的哪里</td>
+<td>router 后统一执行 approval/sandbox/retry；scheduler 内依次 hook → policy → confirmation → execute；类型化工具共享 permission state；审批可返回 Accept/Reject/CustomResult</td>
+<td><a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI</a>；<a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI</a>、<a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code</a>；<a href="/harnesswiki-site/docs/harnesses/mistral-vibe/">Mistral Vibe</a>；<a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak Agent</a></td>
+<td>新工具进入共同治理点，不必各自重写授权；拒绝也能作为结构化 Observation 回到模型</td>
+<td>hook、用户确认和 sandbox 的先后顺序会影响语义；注册成功仍可能在执行前被拒绝，模型必须处理该结果</td>
+<td>有危险文件、进程或网络效果时；决策语义还需由<a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与沙箱</a>定义</td>
+</tr>
+<tr>
+<td>谁拥有排队、并行与取消</td>
+<td>router/runtime 宣告 parallel/cancellation capability；Scheduler 维护队列和并行批次；RunningTurn 持有 tool future；每个 action 单独启动 subprocess</td>
+<td><a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI</a>；<a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI</a>；<a href="/harnesswiki-site/docs/harnesses/zed/">Zed Agent</a>；<a href="/harnesswiki-site/docs/harnesses/mini-swe-agent/">mini-SWE-agent</a></td>
+<td>中央调度器可以统一传播取消并避免不安全并行；逐 action 进程模型简单、隔离边界直观</td>
+<td>中央状态机更复杂；取消 future 或请求不自动撤销已发生副作用；独立 subprocess 不保留长进程上下文</td>
+<td>多工具批处理或交互式停止需要显式 scheduler；短命令、低并发任务可采用更薄的 environment</td>
+</tr>
+<tr>
+<td>能力是否作为同一 Execution World 迁移</td>
+<td>filesystem、subprocess、PTY、LSP 由一组 provider 共同切换；project worker 持有本地能力与 Session policy；browser action 固定在浏览器世界；Bash 统一落到 environment</td>
+<td><a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness</a>；<a href="/harnesswiki-site/docs/harnesses/refact/">Refact</a>；<a href="/harnesswiki-site/docs/harnesses/browser-use/">Browser Use</a>；<a href="/harnesswiki-site/docs/harnesses/mini-swe-agent/">mini-SWE-agent</a></td>
+<td>成组迁移可以避免“命令在远端、读文件在本地”；领域 runtime 可把专用状态留在正确执行者</td>
+<td>只替换一个 provider 会形成两个世界；领域 runtime 不能自动推出代码仓库事务能力；project worker 恢复也不等于旧工具进程仍在</td>
+<td>远程沙箱、浏览器或项目常驻服务；物理落点由<a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-placement/">执行放置</a>与<a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行环境与执行内核</a>继续约束</td>
+</tr>
+<tr>
+<td>结果如何变成 Observation</td>
+<td>canonical tool name/parameters/output 事件；tool result 驱动下一轮 <code>ToolResults</code>；Accept/Reject/CustomResult 配对并做 secret placeholder 转换；action metadata 可标记 sequence 终止</td>
+<td><a href="/harnesswiki-site/docs/harnesses/antigravity-cli/">Antigravity CLI</a>；<a href="/harnesswiki-site/docs/harnesses/zed/">Zed Agent</a>；<a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak Agent</a>；<a href="/harnesswiki-site/docs/harnesses/browser-use/">Browser Use</a></td>
+<td>模型得到结构一致、可继续推理的结果；敏感原值不必直接进入模型或日志</td>
+<td>规范化可能丢失原始流细节；终止标志和自定义结果必须与 call identity 配对；本页证据未证明 secret map 的并发安全</td>
+<td>输出需要跨客户端传输、含敏感值或决定循环是否继续时；长期截断与保留另见<a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-output-retention/">工具输出留存</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="反例与边界">反例与边界</h2>
+<ul>
+<li>Tool Runtime 不决定一个危险调用是否值得允许；见<a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与沙箱</a>。</li>
+<li><code>subprocess.run</code> 在哪里执行、环境变量是否持续属于<a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行内核</a>。</li>
+<li>何时自动运行 test、失败是否继续属于<a href="/harnesswiki-site/docs/primitives/coding-workspace/verification-feedback/">验证反馈</a>。</li>
+<li>子 Agent、goal 和 background job 可能以工具表面暴露，但拥有独立身份和生命周期时应进入<a href="/harnesswiki-site/docs/primitives/control-continuity/task-orchestration/">任务编排</a>。</li>
+</ul>
+<h2 id="来源">来源</h2>
+<ul>
+<li>DeepSeek、Pi：固定提交证据见<a href="/harnesswiki-site/docs/research/runtime-primitives-evidence/">运行内核调研底稿</a>。</li>
+<li>mini-SWE-agent：固定提交证据见<a href="/harnesswiki-site/docs/research/coding-surface-evidence/">编码工作面调研底稿</a>。</li>
+</ul>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行环境与执行内核</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与沙箱</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/extension-lifecycle/">扩展与生命周期</a></li>
+<li><a href="/harnesswiki-site/docs/comparisons/risky-command-approval/">高风险命令审批</a></li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

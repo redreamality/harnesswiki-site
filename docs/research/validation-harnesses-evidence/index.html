@@ -1,0 +1,801 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Gemini CLI 与 Qwen Code：独立验证样本证据 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/research/validation-harnesses-evidence/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Gemini CLI 与 Qwen Code：独立验证样本证据"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/research/validation-harnesses-evidence/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究问题与结论摘要" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究问题与结论摘要</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究锚点" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究锚点</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#gemini-cli-完整画像" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Gemini CLI 完整画像</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#定位与拥有的运行语义" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">定位与拥有的运行语义</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域对象与关系" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域对象与关系</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#session恢复与工作区事务" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Session、恢复与工作区事务</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#context-graph-与压缩机制" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Context Graph 与压缩机制</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli-primitive-证据表" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI Primitive 证据表</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#qwen-code-完整画像" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Qwen Code 完整画像</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#定位谱系与进程边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">定位、谱系与进程边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域对象持久会话live-session-与客户端附着" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域对象：持久会话、live session 与客户端附着</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#四种名为-compaction-的机制" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">四种名为 compaction 的机制</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#多客户端权限时序" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">多客户端权限时序</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#goal-completion-是证据协议不是测试-runner" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Goal completion 是证据协议，不是测试 runner</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code-primitive-证据表" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code Primitive 证据表</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#taskactor-与-workspace-的组合边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Task、actor 与 workspace 的组合边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#memoryskillhook-与-extension-的边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Memory、Skill、Hook 与 Extension 的边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可观测性证据" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可观测性证据</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#对首批八个-anchor-harness-的验证与反例" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">对首批八个 Anchor Harness 的验证与反例</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#对现有领域模型的具体修订建议" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">对现有领域模型的具体修订建议</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#运行内核--上下文" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">运行内核 / 上下文</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#控制与连续性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">控制与连续性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#组合与互操作" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">组合与互操作</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#建议优先形成的-situation" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">建议优先形成的 Situation</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#仍为-unknown-的结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">仍为 unknown 的结论</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究限制" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究限制</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#回链建议" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">回链建议</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究问题与结论摘要" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究问题与结论摘要</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究锚点" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究锚点</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#gemini-cli-完整画像" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Gemini CLI 完整画像</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#定位与拥有的运行语义" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">定位与拥有的运行语义</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域对象与关系" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域对象与关系</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#session恢复与工作区事务" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Session、恢复与工作区事务</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#context-graph-与压缩机制" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Context Graph 与压缩机制</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli-primitive-证据表" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI Primitive 证据表</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#qwen-code-完整画像" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Qwen Code 完整画像</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#定位谱系与进程边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">定位、谱系与进程边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域对象持久会话live-session-与客户端附着" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域对象：持久会话、live session 与客户端附着</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#四种名为-compaction-的机制" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">四种名为 compaction 的机制</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#多客户端权限时序" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">多客户端权限时序</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#goal-completion-是证据协议不是测试-runner" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Goal completion 是证据协议，不是测试 runner</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code-primitive-证据表" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code Primitive 证据表</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#taskactor-与-workspace-的组合边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Task、actor 与 workspace 的组合边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#memoryskillhook-与-extension-的边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Memory、Skill、Hook 与 Extension 的边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可观测性证据" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可观测性证据</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#对首批八个-anchor-harness-的验证与反例" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">对首批八个 Anchor Harness 的验证与反例</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#对现有领域模型的具体修订建议" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">对现有领域模型的具体修订建议</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#运行内核--上下文" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">运行内核 / 上下文</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#控制与连续性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">控制与连续性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#组合与互操作" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">组合与互操作</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#建议优先形成的-situation" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">建议优先形成的 Situation</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#仍为-unknown-的结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">仍为 unknown 的结论</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究限制" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究限制</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#回链建议" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">回链建议</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Gemini CLI 与 Qwen Code：独立验证样本证据</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="gemini-cli-与-qwen-code独立验证样本证据"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/">首页</a> · <a href="/harnesswiki-site/docs/research/">调研索引</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/domain-model/">领域模型</a> · <a href="/harnesswiki-site/docs/module-map/">机制地图</a><br>
+调研日期：2026-08-17<br>
+事实类型：<code>documented</code>、<code>implemented</code>；本轮未做运行期 <code>observed</code> 实验</p>
+</blockquote>
+<p>本文用 Gemini CLI 和 Qwen Code 检查首批八个 Anchor Harness 中形成的领域语言与 Primitive 是否过拟合。它不是产品功能表：研究单位仍是“固定版本中的机制怎样处理一个 Situation”，并分别记录实现状态与事实类型。</p>
+<h2 id="研究问题与结论摘要">研究问题与结论摘要</h2>
+<p>本轮重点回答三个问题：</p>
+<ol>
+<li>首批八个样本形成的 Session、Turn、Step、Action、Observation、Control Plane 等边界，能否解释新的完整 Harness？</li>
+<li>“上下文管理”“多 Agent”“安全”“可观测性”等大主题，是否还压扁了拥有独立状态与生命周期的机制？</li>
+<li>新样本是否提供反例，迫使现有 Primitive 缩小边界、拆分或降级成熟度？</li>
+</ol>
+<p>结论如下：</p>
+<ul>
+<li><strong>运行模型基本成立，但事件与历史不能继续画成一条线。</strong> Gemini CLI 的新 <code>AgentProtocol</code> 把 Session 内的 activity stream、subagent thread 与 Trajectory event 分开；其实验 Context Graph 又用 <code>replacesId</code>、<code>abstractsIds</code> 保存变换血缘。线性消息数组只是某一种模型投影视图。</li>
+<li><strong>“压缩”必须至少拆成四个 Primitive 候选。</strong> Qwen Code 同时存在旧工具结果/媒体的 microcompaction、模型上下文的语义 state snapshot、压缩前后的媒体与运行状态重挂，以及 daemon 事件回放的 turn-boundary compaction。最后一种不减少模型输入，不能归入上下文压缩。</li>
+<li><strong>Repository Intelligence 不能等同于 grep、repo map 或“把文件放进上下文”。</strong> Gemini CLI 在本次锚点可确认 glob、grep、read 与 IDE context；原生 LSP 为 <code>unknown</code>。Qwen Code 则有实验性原生 LSP，统一提供 definition、reference、symbol、diagnostic 与 code action。</li>
+<li><strong>Action Policy、Execution Sandbox、Approval Ownership 是三个边界。</strong> Gemini CLI 清楚地区分 policy decision 与 OS/container sandbox；Qwen daemon 进一步证明，多客户端下“谁有资格批准”属于 Control Plane 的一致性与身份问题。</li>
+<li><strong>验证至少有两种不同语义。</strong> shell、lint、test、LSP diagnostic 是对 Execution World 的环境检查；Qwen Goal Verifier 则验证“complete/blocked 声明是否被指定 provenance 的证据支撑”。后者不是普通 Turn 默认测试控制器。</li>
+<li><strong>两项目不能作为两张完全独立的设计票。</strong> Qwen Code 官方说明其起点是 Gemini CLI v0.8.2，Qwen v0.1 后停止同步并独立发展。因此，共同继承的机制按一个 Harness Family 计数；daemon、Goal、原生 LSP、microcompaction 等后续分化可以作为差异证据。</li>
+</ul>
+<h2 id="研究锚点">研究锚点</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>规范仓库与默认分支</th>
+<th>固定提交</th>
+<th>提交时间</th>
+<th>包版本</th>
+<th>许可证</th>
+<th>谱系说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gemini CLI</td>
+<td><code>google-gemini/gemini-cli</code>，<code>main</code></td>
+<td><a href="https://github.com/google-gemini/gemini-cli/commit/2a87e7be103308b8734246097ba723cc7deb4122"><code>2a87e7be103308b8734246097ba723cc7deb4122</code></a></td>
+<td>2026-08-14T23:37:11Z</td>
+<td><code>0.56.0-nightly.20260806.g761f604c1</code></td>
+<td>Apache-2.0</td>
+<td>Family 上游</td>
+</tr>
+<tr>
+<td>Qwen Code</td>
+<td><code>QwenLM/qwen-code</code>，<code>main</code></td>
+<td><a href="https://github.com/QwenLM/qwen-code/commit/f2a6e6c727c4964ccc7d7e516740678aaf80763b"><code>f2a6e6c727c4964ccc7d7e516740678aaf80763b</code></a></td>
+<td>2026-08-16T16:10:15Z</td>
+<td><code>0.21.11</code></td>
+<td>Apache-2.0</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/README.md">官方 README</a>说明源自 Gemini CLI v0.8.2，v0.1 后独立发展</td>
+</tr>
+</tbody>
+</table>
+<p>仓库身份、版本与许可证来自各锚点的 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/package.json"><code>package.json</code></a>、<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/LICENSE"><code>LICENSE</code></a>、Qwen <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/package.json"><code>package.json</code></a> 与 <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/LICENSE"><code>LICENSE</code></a>。<code>main</code> 上的包版本可能是 nightly 或尚未发布版本；本文以完整 commit 而非版本字符串作为实现权威。</p>
+<h2 id="gemini-cli-完整画像">Gemini CLI 完整画像</h2>
+<h3 id="定位与拥有的运行语义">定位与拥有的运行语义</h3>
+<p>Gemini CLI 是本地交互式、headless 与 ACP 可控形态共用 core 的 Coding Harness。它不只封装模型请求：core 拥有模型循环、工具调度、上下文构建、policy、checkpoint、会话录制与恢复；CLI/ACP 是进入同一运行内核的不同控制面。</p>
+<p>在固定提交中，<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/agent/types.ts"><code>AgentProtocol</code></a>直接继承 <code>Trajectory</code>：<code>send()</code> 返回 activity <code>streamId</code>，事件还可以带 subagent <code>threadId</code>；一个 stream 从 <code>agent_start</code> 到 <code>agent_end</code>，其间可出现 <code>tool_request</code>、<code>tool_update</code>、<code>tool_response</code>。这是 <code>implemented</code> 事实，但它是新协议层，不能反推所有旧会话文件已经按同一事件结构持久化。</p>
+<p>旧 core 路径仍由 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/core/client.ts"><code>client.ts</code></a> 和 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/core/turn.ts"><code>turn.ts</code></a>推进：一个外部输入可以跨多次模型请求和工具反馈；<code>Turn</code> 产生内容、思考、工具请求、工具确认、工具响应和结束事件，client 负责循环检测、模型选择、剩余 turn budget 与无工具时的继续发言。因此 Wiki 的 <code>Turn != 单次模型请求</code> 得到直接实现验证。</p>
+<h3 id="领域对象与关系">领域对象与关系</h3>
+<p>下面是对固定提交的领域映射，不声称与某个 TypeScript 类一一对应：</p>
+<pre class="mermaid">classDiagram
+    class Session {
+      projectScopedIdentity
+      recordedConversation
+      recoveryBoundary
+    }
+    class ActivityStream {
+      streamId
+      startReason
+      endReason
+    }
+    class AgentThread {
+      threadId
+      isolatedContext
+    }
+    class TrajectoryEvent {
+      eventId
+      timestamp
+      eventType
+    }
+    class ContextGraph {
+      activeProjection
+      transformationLineage
+    }
+    class ContextNode {
+      nodeType
+      tokenAccounting
+      replacesId
+      abstractsIds
+    }
+    class Checkpoint {
+      shadowGitCommit
+      conversationHistory
+      pendingToolCall
+    }
+
+    Session "1" *-- "0..*" ActivityStream
+    Session "1" *-- "0..*" AgentThread
+    ActivityStream "1" *-- "1..*" TrajectoryEvent
+    AgentThread "0..1" &#x3C;-- TrajectoryEvent : threadId
+    Session "1" --> "0..1" ContextGraph
+    ContextGraph "1" *-- "0..*" ContextNode
+    Session "1" --> "0..*" Checkpoint</pre>
+<p>关键不变量：</p>
+<ul>
+<li><code>streamId</code> 关联一段正在发生的 Agent activity；<code>threadId</code> 关联 actor/context 分支；两者不是 Session id 的别名。</li>
+<li>Trajectory 是事件集合，而 Context Graph 是为模型输入服务的可变语义投影。工具状态更新可以是 transient event，却不必永久占据 Context Snapshot。</li>
+<li>Checkpoint 的覆盖范围必须明说。Gemini checkpoint 同时保存 shadow Git snapshot、conversation history 和待执行 tool call；普通 session resume 只保证恢复记录内容，不自动等于工作区事务回滚。</li>
+</ul>
+<h3 id="session恢复与工作区事务">Session、恢复与工作区事务</h3>
+<p><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/session-management.md"><code>session-management.md</code></a>记录了项目级自动保存：完整消息、工具输入/输出、token 统计和可用时的 reasoning summary；支持按最近、索引、UUID 恢复，也支持命名 chat checkpoint，默认保留 30 天。该文档证明的是 <code>documented</code> 用户契约，不证明磁盘格式永不变化。</p>
+<p><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/checkpointing.md"><code>checkpointing.md</code></a>与 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/services/gitService.ts"><code>gitService.ts</code></a>显示，编辑工具执行前可在 <code>~/.gemini/history/&lt;project_hash&gt;</code> 的独立 shadow Git repository 创建完整项目 commit，同时保存会话与工具调用；它不写入用户仓库的 Git 历史。另一个 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/rewind.md"><code>rewind</code></a>入口允许只回退 conversation、只回退 AI file edits 或两者都做，但明确不撤销手工修改与 shell 造成的变化。</p>
+<p>实验性 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/git-worktrees.md"><code>git-worktrees.md</code></a>则为并行 Session 创建独立目录/分支。由此可见 checkpoint、rewind、worktree isolation 是三个相关但不可互换的 Primitive。</p>
+<h3 id="context-graph-与压缩机制">Context Graph 与压缩机制</h3>
+<p>Gemini CLI 这个锚点最重要的反例，是它没有把“当前模型历史”只实现成不断原地缩短的消息数组。<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/context/graph/types.ts"><code>graph/types.ts</code></a>把 API part 映射为 <code>USER_PROMPT</code>、<code>AGENT_THOUGHT</code>、<code>TOOL_EXECUTION</code>、<code>AGENT_YIELD</code>、<code>SNAPSHOT</code> 等节点；节点可用 <code>replacesId</code> 表示替换来源，用 <code>abstractsIds</code> 表示摘要覆盖的多个旧节点。这使压缩产物能够保留 provenance，而不只是“剩下哪些字符串”。</p>
+<p>默认 Generalist profile 在 <a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/context/config/profiles.ts"><code>context/config/profiles.ts</code></a>中设置 <code>retainedTokens=65000</code>、<code>maxTokens=150000</code>，并按不同触发器运行不同 pipeline：</p>
+<table>
+<thead>
+<tr>
+<th>触发器</th>
+<th>Pipeline</th>
+<th>机制</th>
+<th>改变的对象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new_message</code></td>
+<td>Immediate Sanitization</td>
+<td>mask 超大工具输出、降级 blob、蒸馏超过阈值的单节点</td>
+<td>单个 Context Node 的表示</td>
+</tr>
+<tr>
+<td><code>retained_exceeded</code></td>
+<td>Normalization</td>
+<td>蒸馏较大节点并限制每节点 token</td>
+<td>retained projection</td>
+</tr>
+<tr>
+<td><code>nodes_aged_out</code></td>
+<td>Async Background GC</td>
+<td>累积生成 state snapshot candidate</td>
+<td>后台 Inbox 中的候选摘要，不立即改活动图</td>
+</tr>
+<tr>
+<td><code>gc_backstop</code></td>
+<td>Emergency Backstop</td>
+<td>同步生成 state snapshot</td>
+<td><code>maxTokens</code> 即将失守时的活动图</td>
+</tr>
+</tbody>
+</table>
+<p>异步路径值得单独记录，因为它包含一致性校验而不是盲目套用缓存：<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/context/processors/stateSnapshotAsyncProcessor.ts"><code>stateSnapshotAsyncProcessor.ts</code></a>在后台累积旧 snapshot 与 aged-out nodes，并向 Inbox 发布 <code>PROPOSED_SNAPSHOT {newText, consumedIds}</code>；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/context/processors/stateSnapshotProcessor.ts"><code>stateSnapshotProcessor.ts</code></a>应用候选前检查所有 <code>consumedIds</code> 仍在当前 targets 中。候选失效或 Inbox 为空时走同步生成，应用时创建带 <code>abstractsIds</code> 的 <code>SNAPSHOT</code> 节点。</p>
+<pre class="mermaid">sequenceDiagram
+    participant G as Context Graph
+    participant A as Async GC
+    participant I as Processor Inbox
+    participant S as Sync/Apply Processor
+    participant M as Summary Model
+
+    G-->>A: nodes_aged_out + previous live snapshot
+    A->>M: synthesize accumulated state
+    M-->>A: candidate snapshot text
+    A->>I: publish(newText, consumedIds)
+    Note over G,I: 新消息或其他 processor 可能已改变活动图
+    G->>S: retained/max budget pressure
+    S->>I: read newest proposed snapshot
+    S->>G: validate every consumedId still exists
+    alt candidate valid
+        S->>G: replace consumed nodes with SNAPSHOT(abstractsIds)
+        S->>I: consume proposal
+    else stale or absent
+        S->>M: synchronously recompute state snapshot
+        M-->>S: fresh snapshot
+        S->>G: splice fresh SNAPSHOT into graph
+    end</pre>
+<p>这条时序揭示两个不变量：异步摘要是 speculative result，不是事实源；<code>abstractsIds</code> 是压缩后的解释血缘，不能因节点正文被回收而丢掉。Wiki 后续应把“摘要生成”“摘要应用/一致性验证”“表示降级”拆开描述，即使它们仍导航在同一个 Theme 下。</p>
+<h3 id="gemini-cli-primitive-证据表">Gemini CLI Primitive 证据表</h3>
+<p>状态列是 Implementation status；括号内为 fact type。每一行只覆盖链接所能证明的范围。</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>状态</th>
+<th>固定锚点事实</th>
+<th>限制或反例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会话与运行拓扑</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/session-management.md">Session 管理</a>提供项目级持久会话；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/agent/types.ts"><code>AgentProtocol</code></a>把 session event、activity stream 和 subagent thread 分开。</td>
+<td>新协议事件与旧磁盘记录的逐字段映射为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>Agent 循环与工作模式</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/core/client.ts"><code>client.ts</code></a>在工具反馈后继续模型轮次，并含 loop detection、next-speaker continuation 与 turn budget；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/plan-mode.md"><code>plan-mode.md</code></a>把 Plan Mode 与 read-only policy 绑定。</td>
+<td>模式不只是 prompt 名称；它同时改变允许的 Action。</td>
+</tr>
+<tr>
+<td>模型接入与路由</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td>client 在每个 Turn 选择活动模型并重建 tool declarations；运行事件记录 model routing。</td>
+<td>本轮未穷尽 provider fallback 的全部优先级，细节为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>上下文压缩</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td>Context Graph profile 分阶段 mask、degrade、distill、truncate 与 snapshot；节点保留 <code>replacesId/abstractsIds</code> 血缘。</td>
+<td>不能退化成单一“阈值摘要”字段；实验 profile 的稳定性不由源码存在本身保证。</td>
+</tr>
+<tr>
+<td>指令发现与组装</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/gemini-md.md"><code>gemini-md.md</code></a>定义 global、workspace/父目录、JIT 目录指令，支持 <code>@</code> import 与包括 <code>AGENTS.md</code> 在内的自定义文件名。</td>
+<td>指令文件属于 Context Snapshot 来源，不等于长期 memory。</td>
+</tr>
+<tr>
+<td>工具与能力运行时</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/packages/core/src/scheduler/scheduler.ts"><code>scheduler.ts</code></a>执行 BeforeTool hook、policy、confirmation、tool execute；可并行的连续调用成批执行，编辑类调用保持顺序。</td>
+<td>MCP 是 capability provider，不是控制 Session 的协议。</td>
+</tr>
+<tr>
+<td>代码库智能</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/tools/file-system.md"><code>file-system.md</code></a>提供 glob、<code>git grep</code>/grep fallback、range read；IDE companion 可注入编辑器上下文。</td>
+<td>固定锚点未定位到可核实的原生 LSP 工具，因此 LSP 为 <code>unknown</code>，不是 <code>absent</code>。</td>
+</tr>
+<tr>
+<td>变更生成与应用</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/tools/file-system.md"><code>replace</code></a>要求精确 <code>old_string/new_string</code>，默认唯一匹配；<code>write_file</code>/<code>replace</code>在确认面展示 diff。</td>
+<td>精确文本替换不是 AST/structured edit。</td>
+</tr>
+<tr>
+<td>执行环境与执行内核</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td>shell 工具在 Execution World 中执行命令；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/sandbox.md"><code>sandbox.md</code></a>覆盖 Seatbelt、Docker/Podman、Windows native、gVisor 与 LXC 放置。</td>
+<td>本轮未把 shell 持久进程语义完整定版，persistent kernel 为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>验证与反馈</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td>模型可调用 shell/read 工具取得 build/test/command Observation，再由 client 进入下一 Step。</td>
+<td>未找到“每次编辑后自动运行 lint/test”的通用 controller；自动策略为 <code>unknown</code>，不能由仓库自身有测试脚本推断。</td>
+</tr>
+<tr>
+<td>版本控制与工作区事务</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td>shadow Git checkpoint、选择性 rewind 与 per-session worktree 是三个不同机制。</td>
+<td>rewind 不撤销手工与 shell 修改，故不是完整 Execution World snapshot。</td>
+</tr>
+<tr>
+<td>权限、审批与沙箱</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/reference/policy-engine.md"><code>policy-engine.md</code></a>给出 <code>allow/deny/ask_user</code>、层级 priority、mode/subagent/MCP 匹配；headless 中 <code>ask_user</code> 按 deny；sandbox denial 可请求临时扩权。</td>
+<td>Policy decision 与 sandbox enforcement 必须分栏，二者不能互证。</td>
+</tr>
+<tr>
+<td>状态持久化与恢复</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td>自动 session recording、resume、manual chat checkpoint、rewind 跨 compression point 重建 history。</td>
+<td>resume 恢复聊天不保证恢复所有外部进程与 shell side effect。</td>
+</tr>
+<tr>
+<td>任务、目标与多 Agent</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/core/subagents.md"><code>subagents.md</code></a>定义独立 prompt、tools、context window，本地/远程 subagent 作为工具返回结果，并禁止 subagent 再调用 subagent。</td>
+<td>通用 durable Goal/evidence verifier 在此锚点为 <code>unknown</code>；subagent actor 不等于 task graph。</td>
+</tr>
+<tr>
+<td>配置、资源发现与项目信任</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/settings.md"><code>settings.md</code></a>规定 workspace 覆盖 user；project hooks 用 fingerprint 重新建立信任。</td>
+<td>“workspace 优先”不能泛化到所有 enterprise/system setting，部分启动项只读全局。</td>
+</tr>
+<tr>
+<td>扩展与生命周期</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/extensions/index.md"><code>extensions</code></a>可打包 prompts、MCP、commands、themes、hooks、subagents、skills；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/hooks/index.md"><code>hooks</code></a>同步运行 Before/After Agent、Model、Tool 与 PreCompress 等事件；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/skills.md"><code>skills</code></a>按 metadata-first progressive disclosure 并在激活时取得 consent。</td>
+<td>package discovery、skill disclosure、runtime hook 是三个生命周期。</td>
+</tr>
+<tr>
+<td>控制平面与互操作</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/acp-mode.md"><code>acp-mode.md</code></a>使用 stdio JSON-RPC 2.0，覆盖 initialize/auth/new/load/prompt/cancel/mode/model，并可将文件系统调用代理给 client。</td>
+<td>文档引用的旧内部文件名已漂移；协议行为可引用，内部实现定位需用实际 <code>packages/cli/src/acp/</code>。</td>
+</tr>
+<tr>
+<td>Trajectory、回放与评测适配</td>
+<td><code>implemented</code> (<code>implemented</code> + <code>documented</code>)</td>
+<td><code>AgentProtocol.events</code> 明确定义 Trajectory；<a href="https://github.com/google-gemini/gemini-cli/blob/2a87e7be103308b8734246097ba723cc7deb4122/docs/cli/telemetry.md"><code>telemetry.md</code></a>提供默认关闭的 OTel logs/metrics/traces，覆盖 tool、API、token、file、compression、agent 等事件。</td>
+<td>telemetry 记录、可恢复 session history 与可重放 trajectory 不是同一对象；详细 trace attributes 需显式开启。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="qwen-code-完整画像">Qwen Code 完整画像</h2>
+<h3 id="定位谱系与进程边界">定位、谱系与进程边界</h3>
+<p>Qwen Code 是从 Gemini CLI 谱系独立演化出的多形态 Coding Harness。其 <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/architecture.md"><code>architecture.md</code></a>区分两条执行路径：TUI/headless 直接构造 core；ACP 由 <code>qwen --acp</code> 承载同一 core。<code>qwen serve</code> 再在 ACP 外增加 HTTP + SSE、workspace-scoped runtime 与多客户端长生命周期控制面。<code>packages/core</code>、<code>packages/acp-bridge</code>、CLI daemon、TypeScript SDK、WebUI 与 messaging channels 各自拥有明确边界。</p>
+<pre class="mermaid">flowchart LR
+    subgraph Clients["客户端与交互面"]
+      TUI["TUI / headless"]
+      WEB["Web / IDE"]
+      CH["Messaging channel"]
+      SDK["SDK / custom client"]
+    end
+    subgraph Control["控制平面"]
+      SERVE["qwen serve&#x3C;br/>HTTP + SSE"]
+      BRIDGE["ACP bridge&#x3C;br/>session + permission + event"]
+    end
+    ACP["qwen --acp child"]
+    CORE["packages/core&#x3C;br/>agent loop + context + tools"]
+    WORLD["Execution World"]
+
+    TUI --> CORE
+    WEB --> SDK
+    CH --> SDK
+    SDK --> SERVE
+    SERVE --> BRIDGE
+    BRIDGE --> ACP
+    ACP --> CORE
+    CORE &#x3C;--> WORLD</pre>
+<p>这张图说明“同一 core 有多个客户端”和“多个 Harness”不是一回事；也说明 daemon 的 session/permission/replay 语义不应被塞进 UI 页面。</p>
+<h3 id="领域对象持久会话live-session-与客户端附着">领域对象：持久会话、live session 与客户端附着</h3>
+<p>Qwen direct session 的持久记录是 JSONL。固定锚点的 <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/services/sessionService.ts"><code>sessionService.ts</code></a>按 <code>parentUuid</code> 重建活动链；branch 会复制选中的 active branch、重建 parent chain、改写新 <code>sessionId</code>，并用 <code>forkedFrom {sessionId,messageUuid}</code>保留来源。旧分支记录可以仍留在源 JSONL 中，但 active projection 由 parent chain 决定。</p>
+<p>daemon session 则是绑定一个 ACP <code>sessionId</code> 的 live control object。<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/daemon/08-session-lifecycle.md"><code>08-session-lifecycle.md</code></a>说明每个 <code>SessionEntry</code>同时拥有 prompt FIFO、model-change FIFO、EventBus、pending permissions、attached clients、heartbeat、restore state 与 terminal-frame tombstone。默认 <code>sessionScope='single'</code> 会让多个 client attach 同一个 default session；<code>thread</code> scope 才为 thread 创建不同 session。</p>
+<pre class="mermaid">classDiagram
+    class PersistedSession {
+      jsonlTranscript
+      parentUuidActiveChain
+      branchProvenance
+    }
+    class DaemonSessionEntry {
+      acpSessionId
+      promptFifo
+      modelFifo
+      eventBus
+      permissionState
+      tombstones
+    }
+    class ClientAttachment {
+      selfReportedClientId
+      heartbeat
+      attachCount
+    }
+    class ReplayWindow {
+      compactedTurns
+      liveJournal
+      byteCap
+    }
+    class WorktreeBinding {
+      sessionSidecar
+      path
+      branch
+    }
+
+    PersistedSession "0..1" &#x3C;-- DaemonSessionEntry : load/resume
+    DaemonSessionEntry "1" *-- "0..*" ClientAttachment
+    DaemonSessionEntry "1" *-- "1" ReplayWindow
+    PersistedSession "0..1" --> "0..1" WorktreeBinding</pre>
+<p>HTTP prompt 是异步控制命令：<code>POST /session/:id/prompt</code>返回 <code>202 {promptId,lastEventId}</code>，最终通过 SSE <code>turn_complete</code> 或 <code>turn_error</code>关联返回。load、resume、rewind、archive/unarchive、recap、side question、tasks、stats 与 LSP status 都是独立 session operation。由此验证：Control Plane command completion 与 Agent Turn completion必须分开建模。</p>
+<h3 id="四种名为-compaction-的机制">四种名为 compaction 的机制</h3>
+<p>Qwen 固定锚点把“压缩不是一个开关”展示得最清楚：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>实现对象</th>
+<th>触发与变换</th>
+<th>产物/不变量</th>
+<th>一手证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool/media microcompaction</td>
+<td>当前模型历史里的旧 <code>functionResponse</code> 与 media part</td>
+<td><code>force</code>、默认 60 分钟 idle gap，或工具结果累计默认 500,000 chars；默认各保留最近 5 个，size path 清到 50% low-watermark</td>
+<td>用显式 placeholder 替换旧内容；清掉 file-tool result 时使对应 read cache fast-path 失效，避免悬空 placeholder</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/services/microcompaction/microcompact.ts"><code>microcompact.ts</code></a>、<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/config/clearContextDefaults.ts"><code>clearContextDefaults.ts</code></a></td>
+</tr>
+<tr>
+<td>Semantic context compression</td>
+<td>整段 model-visible history</td>
+<td>默认优先 85% window，同时受 20k summary reserve、13k auto buffer、20k warn buffer、3k hard buffer约束；连续失败 3 次后 cheap gate 熔断</td>
+<td>side query 输出 <code>&lt;state_snapshot&gt;</code>；空摘要、输出撞 20k cap、压缩后膨胀会被拒绝</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/services/chatCompressionService.ts"><code>chatCompressionService.ts</code></a></td>
+</tr>
+<tr>
+<td>Attachment/state restoration</td>
+<td>进入 summarizer 的输入与压缩后的新 history</td>
+<td>summarizer 前把 inline/nested media 换成描述 placeholder；成功后重挂最近文件/图片、plan-mode reminder 与 active background-subagent snapshot</td>
+<td>压缩后 history 是 summary + ack + restores；不保留原始 tail；cache-sharing provider 失败时回退 cold summarizer</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/services/compactionInputSlimming.ts"><code>compactionInputSlimming.ts</code></a>、<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/services/postCompactAttachments.ts"><code>postCompactAttachments.ts</code></a></td>
+</tr>
+<tr>
+<td>Control-plane replay compaction</td>
+<td>daemon SSE/restore event journal</td>
+<td>每个 <code>turn_complete/turn_error</code>边界合并连续 text/thought chunk、把 tool lifecycle 折叠成最终状态、丢弃 transient signal</td>
+<td>默认 4 MiB live-session bounded window；从 O(streaming tokens)降为 O(turns)，文档称典型 25–30x；超限插入 <code>history_truncated</code></td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/acp-bridge/src/compactionEngine.ts"><code>compactionEngine.ts</code></a>、<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/daemon/08-session-lifecycle.md"><code>08-session-lifecycle.md</code></a></td>
+</tr>
+</tbody>
+</table>
+<pre class="mermaid">flowchart TD
+    H["完整 model-visible history"] --> MC{"idle / size / force?"}
+    MC -->|yes| P["旧 tool/media -> placeholder&#x3C;br/>保留最近项并失效相关 file cache"]
+    MC -->|no| P
+    P --> B{"semantic threshold?"}
+    B -->|no| NEXT["下一次模型请求"]
+    B -->|yes| SLIM["剥离 media，收集可恢复附件"]
+    SLIM --> SQ["全历史 side query -> state_snapshot"]
+    SQ --> V{"非空、未撞 cap、确实缩小?"}
+    V -->|no| OLD["保留旧 history&#x3C;br/>记录失败/熔断"]
+    V -->|yes| RESTORE["summary + ack + files/images&#x3C;br/>+ plan/subagent reminder"]
+    RESTORE --> NEXT
+
+    EVENTS["SSE streaming events"] --> TB["turn boundary fold"]
+    TB --> RW["bounded replay window"]
+    RW -. 不进入模型上下文压缩 .-> NEXT</pre>
+<p>特别重要的边界：replay compaction 只优化客户端重连/恢复所见的事件投影，不减少下一次模型调用的 token；microcompaction 清除旧 observation bytes，却不声称理解其语义；semantic snapshot 才是模型参与的语义压缩。</p>
+<h3 id="多客户端权限时序">多客户端权限时序</h3>
+<p>Qwen daemon 还给出首批锚点中较弱的 Approval Ownership 反例。<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/daemon/04-permission-mediation.md"><code>04-permission-mediation.md</code></a>定义四种策略：默认 <code>first-responder</code>、<code>designated</code>、N-of-M <code>consensus</code> 与 <code>local-only</code>。mediator 持有 pending/resolved state、同步设置 timeout、记录 issue-time voter snapshot，并把 partial/forbidden 事件发到 per-session EventBus。</p>
+<pre class="mermaid">sequenceDiagram
+    participant C as Remote client
+    participant D as qwen serve
+    participant B as ACP bridge / mediator
+    participant A as ACP child agent
+    participant E as Session EventBus
+
+    C->>D: POST prompt (clientId, sessionId)
+    D->>B: enqueue prompt, return 202
+    B->>A: ACP prompt
+    A->>B: requestPermission(options)
+    B->>B: capture policy + votersAtIssue, arm timeout
+    B->>E: permission_request
+    E-->>C: SSE permission request
+    C->>D: vote(requestId, optionId)
+    D->>B: validate session/client/option
+    B->>B: first/designated/consensus/local-only
+    alt resolved
+        B-->>A: selected option
+        B->>E: resolved event
+    else partial or forbidden
+        B->>E: partial_vote / forbidden
+    else timeout/session close
+        B-->>A: cancelled(reason)
+    end
+    A-->>B: turn complete/error
+    B->>E: turn_complete / turn_error
+    E-->>C: final SSE frame</pre>
+<p>但该实现同时提供安全反例：v1 的 <code>X-Qwen-Client-Id</code> 是客户端自报，没有 proof-of-possession；观察到 originator id 的客户端可以冒用，<code>designated/consensus</code> 不能单独提供强身份隔离。文档建议绑定 loopback 或放在认证 reverse proxy 后。也就是说，approval routing policy 不等于 authentication。</p>
+<h3 id="goal-completion-是证据协议不是测试-runner">Goal completion 是证据协议，不是测试 runner</h3>
+<p>固定锚点的 <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/goals/goal-protocol.ts"><code>goal-protocol.ts</code></a>把 Goal 建模为 <code>goalId + revision + status + activity + turn permit + evidence checkpoint</code>；terminal proposal 必须是 <code>complete</code> 或 <code>blocked</code> 并引用 evidence。<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/goals/goal-verifier.ts"><code>goal-verifier.ts</code></a>使用独立、单次 side query 审查 bounded JSON，要求每个事实声明都有被引用证据，并区分：</p>
+<ul>
+<li><code>user_input</code>：只能用来证明用户确实提供、确认或选择了某事；</li>
+<li><code>delivered_output</code>：只能证明内容已经交付，不能证明测试、文件、工具或远程状态发生变化；</li>
+<li><code>external_fact</code>：可证明测试结果、文件状态等外部事实。</li>
+</ul>
+<p>因此它验证的是“terminal claim 的证据充分性”，不是替模型运行测试。普通没有 Goal 的 Turn 仍靠 shell/LSP/tool Observation 验证 Execution World；不能把 Goal Verifier 描述成所有任务的默认完成判定器。</p>
+<h3 id="qwen-code-primitive-证据表">Qwen Code Primitive 证据表</h3>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>状态</th>
+<th>固定锚点事实</th>
+<th>限制或反例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>会话与运行拓扑</td>
+<td><code>implemented</code> (<code>implemented</code> + <code>documented</code>)</td>
+<td>core JSONL 用 <code>parentUuid</code>选择 active branch；daemon <code>SessionEntry</code>绑定 ACP session 并持有 FIFO、EventBus、permissions、clients 与 tombstone。</td>
+<td>durable transcript、live control object 与 replay projection 是三个对象。</td>
+</tr>
+<tr>
+<td>Agent 循环与工作模式</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/architecture.md"><code>architecture.md</code></a>明确 core 拥有 agent/tool loop；Plan/approval modes 改变工具边界。</td>
+<td>mode 可能改变 prompt、model、permission 与终态条件，不能只按标签比较。</td>
+</tr>
+<tr>
+<td>模型接入与路由</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td>direct/ACP 共用 provider integration；daemon 有独立 model-change FIFO，支持 session model operation。</td>
+<td>本轮未穷尽 provider fallback 与动态换模全部状态，细节为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>上下文压缩</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td>microcompaction、semantic state snapshot、attachment restoration 三层共同维护 model-visible context。</td>
+<td>daemon replay compaction明确排除在本 Primitive 外。</td>
+</tr>
+<tr>
+<td>指令发现与组装</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/memory.md"><code>memory.md</code></a>定义 global/project <code>QWEN.md</code>、后加载的 <code>.qwen/QWEN.local.md</code>、<code>AGENTS.md</code>兼容和 <code>@</code> import。</td>
+<td>QWEN.md 是显式 instruction；Auto-memory 是 Harness 写入的长期状态。</td>
+</tr>
+<tr>
+<td>工具与能力运行时</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td>core 注册 filesystem、shell、LSP、agent、MCP 等工具并处理 permissions；hook 可在 tool lifecycle 介入。</td>
+<td>tool declaration、runtime execution 与 extension package 仍应分开。</td>
+</tr>
+<tr>
+<td>代码库智能</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/lsp.md"><code>lsp.md</code></a>与 <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/packages/core/src/tools/lsp.ts"><code>lsp.ts</code></a>提供实验统一 LSP tool：definition、references、hover、symbols、call hierarchy、diagnostics、code actions；<code>.lsp.json</code>配置并延迟使用。</td>
+<td>实验功能必须显式启用且依赖外部 language server；这不是 built-in repo map。</td>
+</tr>
+<tr>
+<td>变更生成与应用</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/tools/file-system.md"><code>file-system.md</code></a>的 <code>edit</code>先做精确 old/new 唯一替换，失败时可走模型辅助多阶段修正；<code>write/edit</code>展示 diff；Notebook 用 prior-read + cell ID 的专用 <code>notebook_edit</code>。</td>
+<td>模型修正提高命中率但扩大了 edit protocol；不能再说它只是确定性 string replace。</td>
+</tr>
+<tr>
+<td>执行环境与执行内核</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td>shell 在直接或 owning daemon workspace 执行；<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/sandbox.md"><code>sandbox.md</code></a>提供 Seatbelt 与 Docker/Podman。</td>
+<td>daemon 的 <code>/session/:id/shell</code>文档明确没有 path sandbox；是否启用 sandbox需看实际配置，不能由功能存在推断。</td>
+</tr>
+<tr>
+<td>验证与反馈</td>
+<td><code>implemented</code> (<code>implemented</code>)</td>
+<td>shell/LSP diagnostics 将环境检查反馈给 loop；Goal Verifier另行检查 terminal proposal 与 evidence provenance。</td>
+<td>没有证据证明所有普通编辑都会自动运行 lint/test；普通自动策略为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>版本控制与工作区事务</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/worktree.md"><code>worktree.md</code></a>覆盖 startup <code>--worktree</code>、显式 enter/exit 与 subagent isolation；sidecar 支持 resume，删除前检查 session ownership、dirty tree、unmerged commits。</td>
+<td>mid-session enter 只改变模型路由约定，不改变 <code>process.cwd()</code>；worktree不是容器 sandbox。</td>
+</tr>
+<tr>
+<td>权限、审批与沙箱</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td>direct core permission与 OS/container sandbox分层；daemon mediator实现 four-policy multi-client approval ownership。</td>
+<td>自报 client id 无 possession proof，是明确安全限制，不应标成 authenticated approver。</td>
+</tr>
+<tr>
+<td>状态持久化与恢复</td>
+<td><code>implemented</code> (<code>implemented</code> + <code>documented</code>)</td>
+<td>JSONL active-chain recovery、branch provenance、daemon load/resume/archive、worktree sidecar、rewind共同提供不同范围恢复。</td>
+<td>rewind 可先移动 conversation 再报告部分文件失败，且不撤销 shell/Git/manual change，不能称原子全状态 rollback。</td>
+</tr>
+<tr>
+<td>任务、目标与多 Agent</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/tools/task.md"><code>agent</code> tool</a>支持 named fresh-context agent、inherited-context fork、前后台运行、继续/取消与可选 worktree；Goal 是独立 revision/evidence protocol；team teammate 又有并发消息拓扑。</td>
+<td>fork 不能递归 fork；后台嵌套受限。Actor、Task、Goal、Background Job 应继续分栏。</td>
+</tr>
+<tr>
+<td>配置、资源发现与项目信任</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td>personal/project skills、user/workspace settings、extension resources各自有 discovery 与 precedence；auto-skill maintenance在 trusted workspace 才可写。</td>
+<td>不同资源的 precedence 不完全相同，不能用一个全局 merge ladder 代替逐资源契约。</td>
+</tr>
+<tr>
+<td>扩展与生命周期</td>
+<td><code>implemented</code> (<code>documented</code>)</td>
+<td><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/extension/introduction.md"><code>extension introduction</code></a>可封装 MCP、context、commands、skills、agents、channels 并 hot reload；<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/hooks.md"><code>hooks.md</code></a>有 tool/session/model/subagent/compact/permission 等 lifecycle；skills可按 path 激活。</td>
+<td>portable Agent Plugins v1只激活 skills 与 stdio/Streamable HTTP MCP，忽略 commands/agents/hooks；“能安装 package”不等于其全部能力已加载。</td>
+</tr>
+<tr>
+<td>控制平面与互操作</td>
+<td><code>implemented</code> (<code>documented</code> + <code>implemented</code>)</td>
+<td>ACP bridge承载 session/permission/event；<code>qwen serve</code>通过 HTTP command + SSE event服务多客户端、workspace runtime 和恢复。</td>
+<td>MCP 提供 tool/resource；ACP/daemon控制 Harness，两者协议职责不同。</td>
+</tr>
+<tr>
+<td>Trajectory、回放与评测适配</td>
+<td><code>implemented</code> (<code>implemented</code> + <code>documented</code>)</td>
+<td>direct session JSONL、daemon compacted replay、SSE live journal与 OTel logs/metrics/traces均可定位；daemon还暴露 session stats与 bounded permission audit。</td>
+<td>replay是客户端投影，JSONL是持久历史，OTel是观测信号；三者不可互称“完整 trajectory”。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="taskactor-与-workspace-的组合边界">Task、actor 与 workspace 的组合边界</h3>
+<p>Qwen 的 <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/sub-agents.md"><code>sub-agents.md</code></a>显示三类容易混淆的 actor：named subagent 以新 context 和专用 prompt/tools运行；fork继承父 conversation并默认 detached；teammate属于显式 team，保持可互发消息的并发身份。<code>agent</code> tool还允许后台 registry continuation和非 fork的 isolated worktree。</p>
+<p>这产生以下建模约束：</p>
+<ul>
+<li><code>fork_turns</code>选择的是继承多少父 context，不是复制多少工作区状态。</li>
+<li><code>fork_tools</code>/fork profile是 caller 选择的 per-call capability narrowing，不是管理员不可绕过的 sandbox。</li>
+<li>worktree isolation改变 filesystem/VCS transaction boundary，但 named subagent自己的 context isolation与它正交。</li>
+<li>background completion notification是控制面事件；subagent final result才是回到父 Agent 的 Observation。</li>
+<li>Goal revision与 evidence checkpoint约束“任务何时可宣告结束”，但不会自动把工作拆给多个 actor。</li>
+</ul>
+<h3 id="memoryskillhook-与-extension-的边界">Memory、Skill、Hook 与 Extension 的边界</h3>
+<p>Qwen <a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/memory.md"><code>memory.md</code></a>把显式 <code>QWEN.md</code>和 Harness 写入的 Auto-memory分开；Auto-memory还有 pinned records、Dream consolidation与可选 Git-backed team memory，team writes会做 secret scan。它证明“长期记忆”至少包含来源所有权、保留策略与共享范围，不能只用一个 <code>memory=true</code>字段。</p>
+<p><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/skills.md"><code>skills.md</code></a>中的 Skill由模型按 description调用，也可由用户 slash command直接调用；path-gated Skill在工具触碰匹配文件后才对模型可见，并保持到 session结束或 cache refresh。Skill因此是带 disclosure/activation state 的资源，不只是 prompt文件。</p>
+<p><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/users/features/hooks.md"><code>hooks.md</code></a>则定义 command、HTTP、internal function与prompt executor，事件覆盖 <code>PreToolUse</code>、<code>PostToolUse</code>、<code>SessionStart/End</code>、<code>SubagentStart/Stop</code>、<code>PreCompact</code>、<code>PermissionRequest</code>、<code>Stop</code>等。hook可以阻止、改写或注入 context，属于运行期 lifecycle automation。Extension是分发/发现容器；三者之间是“package contains resource / resource activation / runtime callback”的关系。</p>
+<h3 id="可观测性证据">可观测性证据</h3>
+<p><a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/development/telemetry.md"><code>telemetry.md</code></a>提供默认关闭的 OpenTelemetry，覆盖 logs、metrics、traces、HTTP instrumentation与敏感 span attributes开关；session id默认不进入 metrics以避免高基数，但仍可在 spans/logs中关联。<a href="https://github.com/QwenLM/qwen-code/blob/f2a6e6c727c4964ccc7d7e516740678aaf80763b/docs/developers/daemon/19-observability.md"><code>daemon observability</code></a>另有结构化 rotate file log、request spans、event-loop/pipe/prompt queue metrics、health/preflight/status endpoints、SSE与512项内存 permission audit ring。</p>
+<p>反例同样明确：daemon没有 Prometheus scrape endpoint，permission audit没有外部 sink且重启即丢；因此“有 OTel”和“具备持久审计/完整回放”不是同一结论。</p>
+<h2 id="对首批八个-anchor-harness-的验证与反例">对首批八个 Anchor Harness 的验证与反例</h2>
+<p>Gemini CLI 与 Qwen Code属于同一谱系，以下表格只把共同继承部分算一份证据；Qwen独立增加或重写的机制用于检验边界，而不是机械增加“支持数量”。</p>
+<table>
+<thead>
+<tr>
+<th>首批 Anchor 提出的观察</th>
+<th>新样本怎样验证</th>
+<th>新样本带来的反例或修正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Codex CLI：local policy与 app-server/control protocol是独立深模块。</strong></td>
+<td>Gemini scheduler明确按 hook → policy → confirmation → execute排序；Gemini ACP和 Qwen ACP/daemon都证明 control command/event需要协议边界。</td>
+<td>Qwen多客户端 permission mediation显示，tool policy只回答“Action可否执行”，还需由控制平面回答“哪个 client有权批准”；identity proof又是第三层。</td>
+</tr>
+<tr>
+<td><strong>OpenCode：Session可由 server寻址，client只是投影与控制者。</strong></td>
+<td><code>qwen serve</code>允许多 client attach同一 ACP session，HTTP prompt 202、SSE终态、load/resume/archive均独立。</td>
+<td>bounded compacted replay不是 durable transcript；重连 UI看到的是投影。未来 Session页必须分别记录 persisted state、live owner与client replay。</td>
+</tr>
+<tr>
+<td><strong>aider：Repository Intelligence、edit protocol、lint/test feedback、Git transaction各自有状态。</strong></td>
+<td>Gemini/Qwen仍使用精确字符串 edit；Qwen diagnostics和 shell Observation进入循环；两者均有工作区事务。</td>
+<td>Qwen原生 LSP说明 repo map不是通用实现；Qwen edit correction又说明“string replace”可以包含模型辅助定位；验证命令与terminal evidence verifier不是一个 Primitive。</td>
+</tr>
+<tr>
+<td><strong>DeepSeek Harness：durable event、live event与plugin/capability seam不应混在一起。</strong></td>
+<td>Gemini Trajectory/Context Graph、Qwen JSONL/SSE/replay/OTel重复验证不同事件面；extension、Skill、Hook也各有加载阶段。</td>
+<td>Gemini Context Graph带 transformation lineage，不只是从event log重放出的线性history；Primitive需要允许graph projection实现。</td>
+</tr>
+<tr>
+<td><strong>Pi：极简core、session tree、独立subagent context，以及无内置permission的反例。</strong></td>
+<td>Gemini/Qwen的subagent都验证“隔离context + 限定tools + final result回流”是重复模式；Qwen branch也明确保留来源。</td>
+<td>更复杂系统出现fork、named agent、teammate、background registry与Goal，说明“多Agent”大页至少混了actor topology、work topology、lifecycle与completion proof。</td>
+</tr>
+<tr>
+<td><strong>Cline：IDE diff review、checkpoint与逐Action审批是完整Harness语义，不只是UI。</strong></td>
+<td>Gemini IDE diff、shadow checkpoint和 Qwen write/edit confirmation重复验证编辑确认链。</td>
+<td>Qwen daemon证明approval可以由不同client竞态响应；“有确认对话框”无法说明approval owner和resolution policy。</td>
+</tr>
+<tr>
+<td><strong>OpenHands：Execution World与runtime placement应独立建模。</strong></td>
+<td>Gemini/Qwen的本机、Seatbelt、container路径都要求说明filesystem/process/network观察的是哪个world。</td>
+<td>Qwen worktree只隔离Git/filesystem branch，不隔离进程/网络；mid-session enter甚至不改变process cwd。不能把worktree称作sandbox或remote runtime。</td>
+</tr>
+<tr>
+<td><strong>mini-SWE-agent：一个Bash也足以形成完整Harness，机制缺席不等于不完整。</strong></td>
+<td>Gemini/Qwen普通验证仍可退化为模型调用shell并读取Observation，支持“tool runtime可以很小”的抽象。</td>
+<td>Qwen Goal Verifier是可选的完成声明证明层；它加深了Goal控制，却不是Harness成立的必要条件，也不能升级为所有产品必填项。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="对现有领域模型的具体修订建议">对现有领域模型的具体修订建议</h2>
+<p>现有 <code>Theme → Primitive → Situation → Implementation</code>研究模型继续成立；需要调整的是 Primitive 粒度，而不是再增加一个更大的 Module 层。以下候选均已由本轮证据显示独立状态或失败模式：</p>
+<h3 id="运行内核--上下文">运行内核 / 上下文</h3>
+<ol>
+<li><strong>Tool-output retention</strong>：选择哪些旧工具结果保留、mask或替换成placeholder；状态包含最近项预算与file-cache有效性。</li>
+<li><strong>Semantic context snapshot</strong>：让模型从历史提炼可继续执行的状态；状态包含触发预算、summary validity与failure breaker。</li>
+<li><strong>Context representation degradation</strong>：图片/blob/超大node怎样降低表示成本，以及何时重新挂载。</li>
+<li><strong>Context lineage</strong>：snapshot/distillation如何声明自己替代或抽象了哪些旧node。Gemini <code>abstractsIds</code>是明确实现。</li>
+<li><strong>Instruction discovery</strong> 与 <strong>long-term memory</strong>继续分离；前者是每次Context Snapshot的权威输入，后者有跨Session保留和写入所有权。</li>
+</ol>
+<h3 id="控制与连续性">控制与连续性</h3>
+<ol>
+<li><strong>Action authorization</strong>：按tool/args/mode/subagent决定 allow/deny/ask。</li>
+<li><strong>Approval mediation</strong>：pending request由哪个client、多少票、何种timeout解决。</li>
+<li><strong>Approver identity</strong>：client identity如何认证与绑定session；自报header是反例，不是可靠实现。</li>
+<li><strong>Execution isolation</strong>：OS/container强制哪些filesystem/network/process边界。</li>
+<li><strong>Workspace transaction</strong>：checkpoint、rewind、worktree的覆盖范围、原子性与删除guard。</li>
+<li><strong>Goal evidence protocol</strong>：terminal proposal、proof kind、evidence checkpoint与独立verifier；保持为可选Primitive。</li>
+</ol>
+<h3 id="组合与互操作">组合与互操作</h3>
+<ol>
+<li><strong>Durable transcript</strong>：恢复Agent历史的事实源。</li>
+<li><strong>Live event stream</strong>：正在发生的tool/text/thought/control事件。</li>
+<li><strong>Replay projection</strong>：为重连client保留的bounded、可压缩事件视图。</li>
+<li><strong>Telemetry export</strong>：面向诊断/运营的logs、metrics、traces，允许采样与脱敏。</li>
+<li><strong>Evaluation trajectory</strong>：用于批量评测或训练的动作/观察记录；需要环境锚点和可重放契约，不能由“有日志”推断。</li>
+</ol>
+<h3 id="建议优先形成的-situation">建议优先形成的 Situation</h3>
+<ul>
+<li><strong>后台摘要完成前又发生两次编辑和一次工具输出清理</strong>：检验snapshot candidate如何判 stale、lineage是否仍可解释。</li>
+<li><strong>两个远程client同时响应同一高风险Action</strong>：检验approval owner、identity、quorum、late vote与timeout。</li>
+<li><strong>恢复一个绑定worktree的会话，但worktree目录已被外部删除</strong>：检验Session恢复和Workspace恢复能否部分成功并如实暴露状态。</li>
+<li><strong>semantic compaction成功，但最近一张图片和active subagent仍被后续任务需要</strong>：检验media/state restoration而非只比较token前后值。</li>
+<li><strong>SSE replay window已截断，但完整JSONL transcript仍存在</strong>：检验client如何显示history gap且不进入无限resync。</li>
+<li><strong>Goal声称“测试通过”，唯一证据只是最终回复中写了“测试通过”</strong>：检验 <code>delivered_output</code>不能替代 <code>external_fact</code>。</li>
+</ul>
+<h2 id="仍为-unknown-的结论">仍为 unknown 的结论</h2>
+<h3 id="gemini-cli">Gemini CLI</h3>
+<ul>
+<li>固定提交中是否存在面向模型的原生LSP/符号服务：本次在文档与已知tool路径未定位到直接证据，记为 <code>unknown</code>，不写 <code>absent</code>。</li>
+<li>新 <code>AgentProtocol.events</code>、旧 session recorder与Context Graph节点之间是否有稳定、公开的一一持久化映射：<code>unknown</code>。</li>
+<li>是否存在对所有普通编码任务默认启用的自动 lint/build/test controller：<code>unknown</code>。能让模型调用shell验证只证明 tool-mediated feedback。</li>
+<li>shell/background process的完整持久性、中断和恢复契约：本轮未完成穷尽检查，记为 <code>unknown</code>。</li>
+<li>Context Graph profile仍带实验性质；源码证明实现存在，不证明所有发布通道默认启用，也不证明未来schema稳定。</li>
+</ul>
+<h3 id="qwen-code">Qwen Code</h3>
+<ul>
+<li>普通无Goal Session是否使用Goal Verifier：源码边界表明它属于Goal子系统；不能外推为默认，普通Turn自动terminal proof记为 <code>unknown/不适用</code>。</li>
+<li>所有启动形态下sandbox的实际启用状态：由flag、env与settings决定；没有运行配置时为 <code>unknown</code>。</li>
+<li>team teammate、named subagent、fork在所有恢复场景下的最大并发、保留期限和跨进程revival保证：本轮只确认公开契约中的部分路径，完整矩阵为 <code>unknown</code>。</li>
+<li>daemon compacted replay能否在所有event type上作为完整evaluation trajectory：文档明确它会丢transient与折叠lifecycle，结论应为“不足以单独证明”，而非完整支持。</li>
+<li>LSP可用性取决于实验flag、<code>.lsp.json</code>与外部server；在未配置项目上的可用状态为 <code>unknown</code>，不能把实现存在写成always available。</li>
+</ul>
+<h2 id="研究限制">研究限制</h2>
+<ul>
+<li>本轮所有实现性结论绑定上述两个完整commit，仅使用同仓官方文档、源码和测试作为一手来源；没有使用GitHub匿名REST API或二手文章。</li>
+<li>本轮没有启动两个CLI做行为实测，因此没有 <code>observed</code>事实；文档行为与源码机制分别标为 <code>documented</code>和<code>implemented</code>。</li>
+<li>两仓都在快速变化，<code>main</code>文档可能描述尚未进入稳定release的能力。固定commit保证可追溯，但不保证用户当前安装版本具有相同行为。</li>
+<li>Qwen与Gemini具有谱系关系。本文能用Qwen独立分化检验边界，却不能把继承的exact edit、基础tool loop等共同代码算作两份独立共识证据。</li>
+<li><code>unknown</code>只表示本次界定范围内证据不足；零搜索结果没有被升级为明确缺席。</li>
+</ul>
+<h2 id="回链建议">回链建议</h2>
+<p>本底稿进入正式Wiki时，应至少形成以下双链：</p>
+<ul>
+<li>Gemini CLI、Qwen Code Harness画像回链本底稿，并分别链接<a href="/harnesswiki-site/docs/primitives/runtime-kernel/session-topology/">会话拓扑</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/">上下文压缩</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限与沙箱</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面</a>。</li>
+<li>上下文压缩页回链本底稿的“四种compaction”表，并明确control-plane replay不属于model context。</li>
+<li>验证与反馈页回链Goal evidence协议，解释environment verification与terminal-claim verification的区别。</li>
+<li>任务编排页回链Task/actor/workspace组合边界；Trajectory页回链durable transcript/live event/replay/telemetry四分法。</li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Harness Wiki Goal | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/goal/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Harness Wiki Goal"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/goal/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" aria-current="page" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#1-愿景" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">1. 愿景</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#2-要解决的问题" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">2. 要解决的问题</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#3-核心目标" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">3. 核心目标</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#4-非目标" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">4. 非目标</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#5-研究对象边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">5. 研究对象边界</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#51-纳入标准" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">5.1 纳入标准</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#52-排除或降级为相关项目" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">5.2 排除或降级为相关项目</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#53-形态维度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">5.3 形态维度</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#6-共识形成方法" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">6. 共识形成方法</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#7-证据规则" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">7. 证据规则</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#71-来源优先级" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">7.1 来源优先级</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#72-每条实现记录" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">7.2 每条实现记录</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#8-primitive-页规范" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">8. Primitive 页规范</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#9-harness-页规范" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">9. Harness 页规范</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#10-当前-themeprimitive-与协调指南" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">10. 当前 Theme、Primitive 与协调指南</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#101-运行内核" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.1 运行内核</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#102-编码工作面" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.2 编码工作面</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#103-控制与连续性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.3 控制与连续性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#104-组合与互操作" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.4 组合与互操作</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#105-协调指南" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.5 协调指南</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#11-corpus-策略" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">11. Corpus 策略</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#111-当前-corpus-快照" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.1 当前 Corpus 快照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#112-上游仓库与相邻样本" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.2 上游仓库与相邻样本</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#113-后续验证样本" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.3 后续验证样本</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#114-phistory-发现池" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.4 Phistory 发现池</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#115-明确的邻接层" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.5 明确的邻接层</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#12-信息架构" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">12. 信息架构</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#13-研究工作流" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">13. 研究工作流</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#14-分阶段交付" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">14. 分阶段交付</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-0研究地基" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 0：研究地基</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-1锚点语料已达到可用规模持续扩展" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 1：锚点语料（已达到可用规模，持续扩展）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-2primitive-atlas当前结构里程碑已达成" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 2：Primitive Atlas（当前结构里程碑已达成）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-3候选抽象" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 3：候选抽象</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-4可执行验证" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 4：可执行验证</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#15-当前达成状态与后续门槛" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">15. 当前达成状态与后续门槛</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#16-主要风险" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">16. 主要风险</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#17-文档站点交付与持续研究" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">17. 文档站点交付与持续研究</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#1-愿景" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">1. 愿景</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#2-要解决的问题" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">2. 要解决的问题</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#3-核心目标" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">3. 核心目标</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#4-非目标" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">4. 非目标</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#5-研究对象边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">5. 研究对象边界</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#51-纳入标准" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">5.1 纳入标准</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#52-排除或降级为相关项目" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">5.2 排除或降级为相关项目</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#53-形态维度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">5.3 形态维度</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#6-共识形成方法" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">6. 共识形成方法</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#7-证据规则" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">7. 证据规则</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#71-来源优先级" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">7.1 来源优先级</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#72-每条实现记录" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">7.2 每条实现记录</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#8-primitive-页规范" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">8. Primitive 页规范</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#9-harness-页规范" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">9. Harness 页规范</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#10-当前-themeprimitive-与协调指南" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">10. 当前 Theme、Primitive 与协调指南</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#101-运行内核" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.1 运行内核</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#102-编码工作面" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.2 编码工作面</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#103-控制与连续性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.3 控制与连续性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#104-组合与互操作" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.4 组合与互操作</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#105-协调指南" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">10.5 协调指南</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#11-corpus-策略" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">11. Corpus 策略</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#111-当前-corpus-快照" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.1 当前 Corpus 快照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#112-上游仓库与相邻样本" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.2 上游仓库与相邻样本</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#113-后续验证样本" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.3 后续验证样本</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#114-phistory-发现池" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.4 Phistory 发现池</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#115-明确的邻接层" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">11.5 明确的邻接层</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#12-信息架构" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">12. 信息架构</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#13-研究工作流" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">13. 研究工作流</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#14-分阶段交付" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">14. 分阶段交付</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-0研究地基" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 0：研究地基</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-1锚点语料已达到可用规模持续扩展" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 1：锚点语料（已达到可用规模，持续扩展）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-2primitive-atlas当前结构里程碑已达成" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 2：Primitive Atlas（当前结构里程碑已达成）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-3候选抽象" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 3：候选抽象</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#phase-4可执行验证" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Phase 4：可执行验证</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#15-当前达成状态与后续门槛" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">15. 当前达成状态与后续门槛</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#16-主要风险" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">16. 主要风险</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#17-文档站点交付与持续研究" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">17. 文档站点交付与持续研究</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Harness Wiki Goal</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="harness-wiki-goal"></span></p>
+<blockquote>
+<p>状态：Phase 2 Primitive Atlas 可用版；证据深化与行为验证持续进行<br>
+当前快照：2026-08-25<br>
+当前规模：35 个正式 Primitive、4 个协调指南、20 个 Corpus 画像、7 个 Situation<br>
+领域术语：<a href="/harnesswiki-site/context/">CONTEXT.md</a><br>
+机制地图：<a href="/harnesswiki-site/docs/module-map/">docs/module-map.md</a><br>
+调研底稿：<a href="/harnesswiki-site/docs/research/">证据索引</a></p>
+</blockquote>
+<h2 id="1-愿景">1. 愿景</h2>
+<p>Harness Wiki 要建立一张可验证、可演进的 AI 编码 Harness 机制地图：把不同 Harness 中解决相似问题的机制放在一起，解释它们为什么存在、在什么情境下出现，以及各项目如何实现；再从多种实现和反例中逐步提炼稳定的 Primitive。</p>
+<p>它首先是一份比较研究和工程知识库，而不是功能排行榜、产品百科或预先设计好的统一标准。</p>
+<h2 id="2-要解决的问题">2. 要解决的问题</h2>
+<p>当前 Harness 的知识通常散落在产品文档、源码、系统提示词、发布记录和实际运行行为中。不同项目使用不同名词描述相似机制，也会用相同名词描述完全不同的行为，导致以下问题：</p>
+<ul>
+<li>很难判断一个机制是模型能力、Harness 行为，还是界面包装。</li>
+<li>产品级功能表只能回答“有没有”，不能解释原理和实现差异。</li>
+<li>只研究少数头部产品，容易把单个产品的结构误认为行业共识。</li>
+<li>过早定义统一接口，会把可选机制（如特定重试策略）强加给并不存在该机制的 Harness。</li>
+<li>缺少版本和一手证据时，结论会随产品更新迅速失真。</li>
+</ul>
+<h2 id="3-核心目标">3. 核心目标</h2>
+<ol>
+<li>建立稳定的 Harness 领域语言和纳入边界。</li>
+<li>建立覆盖不同形态、不同设计取向的 Corpus Harness。</li>
+<li>按 Theme → Primitive 而非按厂商组织核心知识，并保留 Harness 反向索引。</li>
+<li>用具体 Situation 比较不同实现，包括显式实现、替代机制、明确缺席和当前未知。</li>
+<li>区分 Observed Pattern、Proposed Abstraction 和 Accepted Primitive，让抽象成熟度可见。</li>
+<li>让关键结论能够回溯到特定版本的一手文档、源码或可复现实测。</li>
+</ol>
+<h2 id="4-非目标">4. 非目标</h2>
+<ul>
+<li>不制作“最佳 Harness”总榜或以 Star 数代替架构判断。</li>
+<li>不要求所有 Harness 具备统一功能集合。</li>
+<li>不把每个命令、工具或 UI 开关都提升为 Primitive。</li>
+<li>不把普通 Agent 框架、模型 SDK、提示词集合或单纯 GUI 壳自动视为 Harness。</li>
+<li>不在只有一个实现时提前设计跨 Harness Interface。</li>
+<li>不追求一次完成整个生态；先形成可重复的研究方法，再扩展覆盖。</li>
+</ul>
+<h2 id="5-研究对象边界">5. 研究对象边界</h2>
+<h3 id="51-纳入标准">5.1 纳入标准</h3>
+<p>一个项目进入 Corpus Harness，应同时满足：</p>
+<ol>
+<li>它通过一次或多次模型调用形成可执行的 Agent 工作过程，而非只提供模型请求封装。</li>
+<li>它面向代码仓库、开发工作区或可执行任务环境开展工作。</li>
+<li>它实际拥有以下机制中的至少两类：上下文构建、循环控制、工具调度、编辑应用、会话状态、权限策略、任务编排。</li>
+<li>它有足够的一手材料支撑研究，例如公开源码、官方文档、版本化发布物或可复现实测。</li>
+<li>研究结论能够绑定到明确的版本、提交或观察日期。</li>
+</ol>
+<p>开源状态不是 Corpus Harness 的纳入条件。闭源、黑盒或 source-available Harness 只要满足上述运行边界和证据要求，也可以建立产品画像、记录可观察行为并参与 Situation 比较。</p>
+<h3 id="52-排除或降级为相关项目">5.2 排除或降级为相关项目</h3>
+<ul>
+<li>只提供模型客户端、工具定义或工作流原语的库。</li>
+<li>必须由使用者自行实现 Agent 循环的通用框架。</li>
+<li>不拥有运行语义、仅调用另一个 Harness 的界面壳或配置包。</li>
+<li>只收集提示词、跑分或历史版本的研究工具。</li>
+<li>无法确认具体实现且无法稳定复现实测的产品。</li>
+</ul>
+<p>最后两类仍可作为证据源或 Candidate Harness，但不能直接支撑共识结论。</p>
+<h3 id="53-形态维度">5.3 形态维度</h3>
+<p>“CLI、IDE、桌面端、服务端”是 Harness 的承载形态，不是 Theme 或 Primitive。语料应主动覆盖：</p>
+<ul>
+<li>本地交互式 CLI</li>
+<li>Headless CLI、SDK 或可嵌入运行时</li>
+<li>IDE / 编辑器内 Harness</li>
+<li>远程工作区或服务端 Harness</li>
+<li>同时提供多种交互面的混合 Harness</li>
+</ul>
+<h2 id="6-共识形成方法">6. 共识形成方法</h2>
+<p>Wiki 不用“多数产品都有”直接定义共识，而采用分级过程：</p>
+<ol>
+<li><strong>Implementation</strong>：先准确记录单个 Harness 的具体实现或明确缺席。</li>
+<li><strong>Observed Pattern</strong>：至少两个独立 Harness 出现相似原理或行为。</li>
+<li><strong>Proposed Abstraction</strong>：提出能够同时解释这些实现的候选 Primitive 抽象，并主动寻找反例。</li>
+<li><strong>Accepted Primitive</strong>：至少三个独立 Harness 的实现得到解释，且经过差异 Situation 和反例检验后仍保持稳定。</li>
+</ol>
+<p>只有出现至少两个真实实现时，才考虑提炼共同 Interface。某个机制仅存在于一个 Harness 时，保留为该 Harness 的实现笔记，不制造假想的可替换接缝。</p>
+<p>“不存在”和“尚未发现”必须分开记录：</p>
+<ul>
+<li><strong>implemented</strong>：找到直接实现证据。</li>
+<li><strong>alternative</strong>：用不同机制解决了同一 Situation。</li>
+<li><strong>absent</strong>：在指定版本和检查范围内有足够证据确认缺席。</li>
+<li><strong>unknown</strong>：证据不足，不能判断。</li>
+</ul>
+<h2 id="7-证据规则">7. 证据规则</h2>
+<h3 id="71-来源优先级">7.1 来源优先级</h3>
+<ol>
+<li>固定提交或版本标签下的源码与测试。</li>
+<li>对应版本的官方文档、架构说明和协议规范。</li>
+<li>官方发布说明、维护者讨论和公开 Issue。</li>
+<li>可复现的运行 Trace、系统提示词和行为实验。</li>
+<li>第三方文章只用于发现线索，不能单独证明实现结论。</li>
+</ol>
+<p><a href="https://phistory.cc/">Phistory</a> 及其<a href="https://github.com/WEIFENG2333/phistory">开源捕获仓库</a>属于候选发现与版本化 Trace 来源；由它发现的项目和机制仍需回到上游仓库、官方文档或独立实测核实。</p>
+<h3 id="72-每条实现记录">7.2 每条实现记录</h3>
+<p>实现记录至少附带：</p>
+<ul>
+<li>Harness 名称</li>
+<li>版本、提交或观察日期</li>
+<li>事实类型：<code>documented</code>、<code>implemented</code>、<code>observed</code> 或 <code>inferred</code></li>
+<li>一手来源链接，源码引用尽量固定到提交</li>
+</ul>
+<p>容易随时间变化的 Star 数、下载量和笼统的“活跃”描述不作为模块判断依据。维护状态只记录可核实的最后发布、最后提交、归档状态及采样日期。</p>
+<h2 id="8-primitive-页规范">8. Primitive 页规范</h2>
+<p>Primitive 页解释拥有独立状态、契约或生命周期的细粒度机制，列出能够显露差异的 Situation，并对照各 Harness 的 Implementation。</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="md"><code><div class="ec-line"><div class="code"><span style="--0:#82B1FF;--1:#3B61B0"># Primitive：{名称}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">一句话说明该 Primitive 解决的问题与成熟度。</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82B1FF;--1:#3B61B0">## 领域模型</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">解释输入、状态、输出、不变量和边界，不展开产品功能清单。</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82B1FF;--1:#3B61B0">## 情境</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D9F5DD;--1:#111111">-</span><span style="--0:#D6DEEB;--1:#403F53"> {只有确实能显露该 Primitive 行为时才列出}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82B1FF;--1:#3B61B0">## 各 Harness 的实现</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82B1FF;--1:#3B61B0">### {Harness + 版本}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">描述它如何实现、用什么机制替代，或在有充分证据时确认缺席。</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82B1FF;--1:#3B61B0">## 来源</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D9F5DD;--1:#111111">-</span><span style="--0:#D6DEEB;--1:#403F53"> {固定版本的一手来源}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="# Primitive：{名称}一句话说明该 Primitive 解决的问题与成熟度。## 领域模型解释输入、状态、输出、不变量和边界，不展开产品功能清单。## 情境- {只有确实能显露该 Primitive 行为时才列出}## 各 Harness 的实现### {Harness + 版本}描述它如何实现、用什么机制替代，或在有充分证据时确认缺席。## 来源- {固定版本的一手来源}"><div></div></button></div></figure></div>
+<p>约束：</p>
+<ul>
+<li>不设置“重试、超时、安全、性能”等通用必填栏目；它们只在与该 Primitive 原理或 Situation 直接相关时出现。</li>
+<li>不要求每个页面覆盖所有 Harness，只写有可靠证据或有解释价值的实现。</li>
+<li><code>unknown</code> 不写成“不支持”，产品文案中的同名功能也不直接视为同一 Primitive。</li>
+<li>分歧尚未收敛时，可增加可选的“未决问题”小节。</li>
+<li>Interface 只在 Proposed Abstraction 已有多个实现支撑时单独记录，不塞进所有 Primitive 页。</li>
+</ul>
+<h2 id="9-harness-页规范">9. Harness 页规范</h2>
+<p>Harness 页是实现画像和反向索引，不复制 Primitive 正文。它包含：</p>
+<ul>
+<li>项目定位、承载形态和纳入理由</li>
+<li>研究所依据的版本、许可证与来源入口</li>
+<li>架构概览及其拥有的关键运行语义</li>
+<li>已研究 Primitive 的链接</li>
+<li>该 Harness 特有、暂时无法归类的机制</li>
+<li>已知证据空白</li>
+</ul>
+<h2 id="10-当前-themeprimitive-与协调指南">10. 当前 Theme、Primitive 与协调指南</h2>
+<p>Theme 是导航边界，不是架构层或能力清单；Primitive 才是研究页单位。当前四个 Theme 共包含 <strong>35 个正式 Primitive</strong>，另有 <strong>4 个协调指南</strong>串联相邻机制。页面存在不等于已经达到 <code>Accepted Primitive</code>；每页成熟度仍按证据和反例独立判断。逐页入口与成熟度说明见<a href="/harnesswiki-site/docs/module-map/">机制地图</a>。</p>
+<h3 id="101-运行内核">10.1 运行内核</h3>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/session-topology/">会话与运行拓扑</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/agent-loop-modes/">Agent 循环与工作模式</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/model-routing/">模型接入与路由</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/">上下文压缩</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-output-retention/">工具输出保留</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/semantic-context-snapshot/">语义上下文快照</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-representation-degradation/">上下文表示降级</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-lineage/">上下文血缘</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/instruction-assembly/">指令发现与组装</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/">工具与能力运行时</a></li>
+</ul>
+<h3 id="102-编码工作面">10.2 编码工作面</h3>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/repository-intelligence/">代码库智能</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/change-application/">变更生成与应用</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-placement/">执行放置</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/process-continuity/">进程连续性</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/verification-feedback/">验证与反馈</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/workspace-transactions/">版本控制与工作区事务</a></li>
+</ul>
+<h3 id="103-控制与连续性">10.3 控制与连续性</h3>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/action-authorization/">Action 授权</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/approval-mediation/">审批协调</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/approver-identity/">审批者身份</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/execution-isolation/">执行隔离</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态持久化与恢复</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/goal-evidence/">Goal 证据协议</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/work-topology/">工作拓扑</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/actor-delegation/">Actor 委派</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/background-job-lifecycle/">后台 Job 生命周期</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/configuration-trust/">配置、资源发现与项目信任</a></li>
+</ul>
+<h3 id="104-组合与互操作">10.4 组合与互操作</h3>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/extension-lifecycle/">扩展与生命周期</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面与互操作协议</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/durable-transcript/">耐久 Transcript</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/live-event-stream/">在线事件流</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">重连投影</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/telemetry-export/">遥测导出</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/evaluation-trajectory/">评测 Trajectory</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/artifact-delivery/">产物交付</a></li>
+</ul>
+<h3 id="105-协调指南">10.5 协调指南</h3>
+<p>协调指南解释多个 Primitive 怎样组合，不拥有新的独立状态或契约，也不计入 35 个正式 Primitive：</p>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行环境、放置与连续性</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与隔离边界</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/task-orchestration/">任务、目标与多 Actor 编排</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/trajectory-replay/">运行记录与回放边界</a></li>
+</ul>
+<p><a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a>和<a href="/harnesswiki-site/docs/primitives/composition-interop/artifact-delivery/">产物交付</a>已经具备独立状态、契约和多实现证据，属于正式 Primitive，不再位于发现池。感知/计算机控制、交互呈现等候选仍需达到证据门槛后再拆页；外部 benchmark 和 Wiki 自身 conformance 归入研究方法。重试、超时等策略只在改变某个 Primitive 状态时出现，不是所有页面的固定字段。</p>
+<h2 id="11-corpus-策略">11. Corpus 策略</h2>
+<p>完整的项目核验、版本和来源见<a href="/harnesswiki-site/docs/research/harness-landscape/">生态调研</a>。Corpus 按证据用途分层；同一谱系的项目不能作为多份独立“设计投票”。</p>
+<h3 id="111-当前-corpus-快照">11.1 当前 Corpus 快照</h3>
+<p>当前共有 <strong>20 个 Corpus 画像</strong>：<strong>19 个 Coding Harness + 1 个跨域 browser-use</strong>。逐页版本、许可证、证据强度和 Primitive 反向索引见<a href="/harnesswiki-site/docs/harnesses/">Harness 索引</a>：</p>
+<ul>
+<li><strong>17 个源码可读画像</strong>：<a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI</a>、<a href="/harnesswiki-site/docs/harnesses/opencode/">OpenCode</a>、<a href="/harnesswiki-site/docs/harnesses/aider/">aider</a>、<a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness</a>、<a href="/harnesswiki-site/docs/harnesses/pi/">Pi</a>、<a href="/harnesswiki-site/docs/harnesses/cline/">Cline</a>、<a href="/harnesswiki-site/docs/harnesses/openhands/">OpenHands</a>、<a href="/harnesswiki-site/docs/harnesses/mini-swe-agent/">mini-SWE-agent</a>、<a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI</a>、<a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code</a>、<a href="/harnesswiki-site/docs/harnesses/kilo-code/">Kilo Code</a>、<a href="/harnesswiki-site/docs/harnesses/loopal/">Loopal</a>、<a href="/harnesswiki-site/docs/harnesses/mistral-vibe/">Mistral Vibe</a>、<a href="/harnesswiki-site/docs/harnesses/refact/">Refact</a>、<a href="/harnesswiki-site/docs/harnesses/zed/">Zed Agent</a>、<a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak Agent</a>和<a href="/harnesswiki-site/docs/harnesses/browser-use/">browser-use</a>。前 16 个是 Coding Harness，browser-use 是跨域 Corpus Harness，只检验通用机制与边界，不支撑 coding-specific 结论。源码可读不等于开源；Loopal 使用专有许可证。</li>
+<li><strong>3 个闭源/黑盒画像</strong>：<a href="/harnesswiki-site/docs/harnesses/claude-code/">Claude Code</a>、<a href="/harnesswiki-site/docs/harnesses/antigravity-cli/">Antigravity CLI</a>和<a href="/harnesswiki-site/docs/harnesses/minimax-code/">MiniMax Code</a>。它们只依据固定版本的官方材料、公开契约和后续可复现实测，不反推不可见内部实现。</li>
+</ul>
+<p>画像数量不等于独立机制证据数量。OpenCode/Kilo Code、Pi/Oh My Pi/Prime Agent、SWE-agent/mini-SWE-agent 等 Family 的继承机制只计一次；只有可定位的分化实现才能增加独立证据。</p>
+<h3 id="112-上游仓库与相邻样本">11.2 上游仓库与相邻样本</h3>
+<p><a href="/harnesswiki-site/docs/research/upstream-repository-inventory/">上游仓库引入清单</a>记录 <strong>68 个</strong>已核验规范地址、当前 gitlink 和本地浅克隆路径。仓库被引入只表示当前提交可物化和核对，不保证画像的旧研究锚点仍在浅克隆中，也不会自动成为 Corpus Harness 或独立机制证据。20 个画像中有 19 个能映射到这些上游；MiniMax Code 是唯一尚未核验到官方核心 Git 仓库的画像，因此保留黑盒证据路径但不计入这 68 个 GitHub 上游。</p>
+<p>GenericAgent、OpenClaw、Hermes Agent 等跨域邻接样本继续用于检验长期记忆、能力学习、设备控制和 Trajectory 边界；AgentsMesh、Trellis、browser-harness 等控制层或工作流叠加层则用于研究互操作与调度，不重复计作 worker agent loop。开放状态只作为可检查性和许可证元数据记录，不决定是否值得研究。</p>
+<h3 id="113-后续验证样本">11.3 后续验证样本</h3>
+<p>Gemini CLI 与 Qwen Code 已经完成固定提交证据底稿并进入 Corpus；Kilo Code 与 Loopal 也已建立画像。本轮又完成 Mistral Vibe、Refact、Zed Agent、Stakpak Agent 与跨域 browser-use 的固定版本画像及 Primitive 双向索引。后续队列以<a href="/harnesswiki-site/docs/research/third-party-harness-landscape/">第三方 Harness 仓库全景</a>为准，优先级表示对机制研究的增量价值，不是产品排名：</p>
+<ul>
+<li><strong>已建画像，继续深挖</strong>：Mistral Vibe 的事件化 Session、Refact 的 daemon/worktree fleet、Zed Agent 的 IDE thread ownership、Stakpak Agent 的 secret/Warden 边界，以及 browser-use 的跨域浏览器状态与高风险 Action。</li>
+<li><strong>P0 尚未建立画像</strong>：Grok Build、Freebuff、SWE-agent、Pochi、DeepSeek-Reasonix、mi 与 Warp；AgentsMesh 只作为控制平面样本研究。</li>
+<li><strong>P1 代表性样本，仍未完成</strong>：Open SWE 用于异步入口、队列、云执行与交付；RA.Aid 用于历史阶段式工作流；AutoCodeRover 用于结构化检索与窄域修复；Prime Agent 用于 Pi Family 的长任务、daemon 与运行中改进；DeepCode 用于 CLI/Desktop 共核运行时；Void 用于已归档 IDE thread ownership。它们尚未建立 Corpus 画像，也不能用于宣称当前 Primitive 已完成额外独立验证。</li>
+</ul>
+<p>goose、Open Interpreter、Plandex、Crush、Kimi Code、Oh My Pi 和 Pydantic AI Harness 等保留为扩展候选；纳入时仍需固定版本、标注许可证与 Family，并说明它为哪个未决边界提供新证据。</p>
+<h3 id="114-phistory-发现池">11.4 Phistory 发现池</h3>
+<p>截至 2026-08-17，Phistory 提供 14 个版本化候选入口。按上游材料核验后：</p>
+<ul>
+<li><strong>核心开源候选</strong>：Codex CLI、DeepSeek Harness、Grok Build、Kimi Code、OpenCode、Pi、Oh My Pi。</li>
+<li><strong>闭源或黑盒 Harness</strong>：Claude Code、Antigravity CLI、MiniMax Code。</li>
+<li><strong>需附许可证限制的参考</strong>：MiMo Code。</li>
+<li><strong>通用 Agent 邻接样本</strong>：OpenClaw、Hermes Agent。</li>
+<li><strong>历史/迁移样本</strong>：Kimi CLI，其官方资料表明正由 Kimi Code 接替。</li>
+</ul>
+<p>Phistory 是发现与 Trace 来源，不是 Harness 本身。Pi/Oh My Pi、Kimi CLI/Kimi Code、SWE-agent/mini-SWE-agent 等谱系必须显式记录，继承而来的相同机制不能重复计入独立共识证据。</p>
+<h3 id="115-明确的邻接层">11.5 明确的邻接层</h3>
+<p>Agent framework、可嵌入 runtime、GUI 壳和多 Harness 会话/编排平台分别进入相关项目索引，不进入同一实现矩阵。判断关键不是产品有没有 UI，而是它是否拥有 Agent 循环、上下文、工具决策和工作区状态。例如 Cline 拥有完整 Agent Core，适合纳入；<a href="https://github.com/AgentsMesh/agentsmesh">AgentsMesh</a> 拥有 Runner fleet、worktree AgentPod、Autopilot 与协作拓扑，但把底层 Agent loop 作为外部负载，因此进入控制平面研究而不重复计作 Harness 实现。</p>
+<h2 id="12-信息架构">12. 信息架构</h2>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">/</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">├── README.md                       # Markdown 阅读入口</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">├── CONTEXT.md                      # 基本概念与领域术语</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">├── GOAL.md                         # 项目目标、范围和完成标准</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">├── docs/</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   ├── research-method.md          # 证据、比较与共识形成方法</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   ├── domain-model.md             # Harness 运行模型与 Wiki 研究模型</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   ├── module-map.md               # Theme 与 Primitive 总导航</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   ├── primitives/                 # Theme → Primitive 两层机制正文</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   │   ├── runtime-kernel/</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   │   ├── coding-workspace/</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   │   ├── control-continuity/</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   │   └── composition-interop/</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   ├── harnesses/                  # Harness 画像与 Primitive 反向索引</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   ├── comparisons/                # 围绕 Situation 的横向比较</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">│   └── research/                   # 调研底稿与证据索引</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">└── conformance/                    # 出现稳定 Interface 后再创建的验证资产</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="/├── README.md                       # Markdown 阅读入口├── CONTEXT.md                      # 基本概念与领域术语├── GOAL.md                         # 项目目标、范围和完成标准├── docs/│   ├── research-method.md          # 证据、比较与共识形成方法│   ├── domain-model.md             # Harness 运行模型与 Wiki 研究模型│   ├── module-map.md               # Theme 与 Primitive 总导航│   ├── primitives/                 # Theme → Primitive 两层机制正文│   │   ├── runtime-kernel/│   │   ├── coding-workspace/│   │   ├── control-continuity/│   │   └── composition-interop/│   ├── harnesses/                  # Harness 画像与 Primitive 反向索引│   ├── comparisons/                # 围绕 Situation 的横向比较│   └── research/                   # 调研底稿与证据索引└── conformance/                    # 出现稳定 Interface 后再创建的验证资产"><div></div></button></div></figure></div>
+<p>目录按需创建。尤其不提前创建空的 <code>conformance/</code> 或为每个候选项目生成占位页。</p>
+<p>导航遵循两条互相交叉的路径：</p>
+<ul>
+<li>从 <strong>Theme → Primitive → Situation → Implementation → Harness</strong> 理解机制差异。</li>
+<li>从 <strong>Harness → Implementation → Primitive → Situation</strong> 理解一个产品的整体取向。</li>
+</ul>
+<p>横向比较页只承载确实跨多个 Primitive 的端到端 Situation，例如“首次进入陌生仓库并完成一个修复”；单一机制的例子留在对应 Primitive 页。</p>
+<h2 id="13-研究工作流">13. 研究工作流</h2>
+<ol>
+<li><strong>发现</strong>：从官方生态、Phistory、论文引用和现有语料找到 Candidate Harness。</li>
+<li><strong>分诊</strong>：按纳入标准判断它是 Corpus Harness、相关项目还是证据源。</li>
+<li><strong>定版</strong>：选择明确的版本或提交，记录许可证和可检查材料。</li>
+<li><strong>画像</strong>：先写 Harness 页，只陈述该项目实际拥有的机制。</li>
+<li><strong>切片</strong>：把机制映射到现有 Primitive；无法解释的内容进入“待分类机制”。</li>
+<li><strong>对照</strong>：使用相同 Situation 检查其他 Harness 的实现、替代、缺席或未知。</li>
+<li><strong>抽象</strong>：达到证据阈值后提出 Proposed Abstraction，并主动纳入反例。</li>
+<li><strong>复核</strong>：升级版本时复查受影响的实现记录，不无差别重写历史结论。</li>
+</ol>
+<p>研究中的关键判断通过 Pull Request 或讨论记录保留理由。只有满足“难以逆转、未来读者难以自行理解、确实存在取舍”三项条件时，才建立 ADR。</p>
+<h2 id="14-分阶段交付">14. 分阶段交付</h2>
+<h3 id="phase-0研究地基">Phase 0：研究地基</h3>
+<ul>
+<li>完成本目标文档、领域术语表和生态调研底稿。</li>
+<li>确定 Corpus 分层、Theme 初版和证据规则。</li>
+</ul>
+<h3 id="phase-1锚点语料已达到可用规模持续扩展">Phase 1：锚点语料（已达到可用规模，持续扩展）</h3>
+<ul>
+<li>为首批不同形态的 Anchor Harness 建立版本化画像。</li>
+<li>每个画像至少识别三个有源码或官方文档支撑的关键机制。</li>
+<li>建立 Candidate Harness 分诊队列，不追求一次写完所有项目。</li>
+</ul>
+<h3 id="phase-2primitive-atlas当前结构里程碑已达成">Phase 2：Primitive Atlas（当前结构里程碑已达成）</h3>
+<ul>
+<li>当前形成 35 个正式 Primitive 和 4 个协调指南，覆盖理解、行动、验证、控制、持续运行与互操作。</li>
+<li>当前形成 20 个 Corpus 画像与 7 个 Situation，并建立 Harness ↔ Primitive 双向导航。</li>
+<li>页面数量只表示 Atlas 结构已形成，不表示每个抽象都已达到 <code>Accepted Primitive</code>，也不替代后续行为证据。</li>
+</ul>
+<h3 id="phase-3候选抽象">Phase 3：候选抽象</h3>
+<ul>
+<li>从重复出现的 Observed Pattern 提出 Proposed Abstraction。</li>
+<li>对每个抽象记录至少一个差异实现或反例。</li>
+<li>仅为真实存在的接缝描述 Interface，不追求全局统一协议。</li>
+</ul>
+<h3 id="phase-4可执行验证">Phase 4：可执行验证</h3>
+<ul>
+<li>为稳定且可观察的 Interface 建立最小一致性实验。</li>
+<li>保存输入、环境、事件序列和产物，使结果可复现。</li>
+<li>将行为变化关联到具体 Harness 版本，而不是覆盖旧结论。</li>
+</ul>
+<h2 id="15-当前达成状态与后续门槛">15. 当前达成状态与后续门槛</h2>
+<p>Phase 2 的结构性交付已经达到以下可核验快照：</p>
+<ul>
+<li><strong>Corpus</strong>：20 个画像，包含 19 个 Coding Harness 与 1 个跨域 browser-use，覆盖 CLI、Headless/可嵌入、IDE、远程、混合和浏览器任务形态；其中 17 个源码可读，3 个闭源/黑盒，19 个能映射到当前 gitlink，MiniMax Code 是唯一没有已核验官方核心 Git 仓库的画像。</li>
+<li><strong>机制地图</strong>：4 个 Theme 下有 35 个正式 Primitive，另有 4 个不参与计数的协调指南。正式页面按独立状态或契约拆分，不再用“权限与沙箱”“任务与多 Agent”“Trajectory 与回放”等宽泛页面代替原子机制。</li>
+<li><strong>横向比较</strong>：7 个 Situation 串联真实触发、状态变化和终态，包含替代机制、明确缺席与 <code>unknown</code> 的差异。</li>
+<li><strong>本地物化语料</strong>：68 个已核验 GitHub 上游以当前 gitlink 浅克隆到本地；它们支持当前版本检查，但漂移画像的旧研究 SHA 需要定向获取后才能离线复核。MiniMax Code 因没有核验到官方核心仓库而保留黑盒证据路径。</li>
+<li><strong>可追溯性</strong>：实现性结论绑定固定提交、版本或观察日期；Claim 研究锚点与当前 gitlink 分开记录，Harness 与 Primitive 使用双向索引，<code>absent</code> 与 <code>unknown</code> 分开记录。</li>
+</ul>
+<p>这份快照仍有明确未完成项，不能因页面数量或结构自检通过而宣称研究结束：</p>
+<ul>
+<li><strong>版本锚点迁移</strong>：10 组画像/仓库存在研究 SHA 与当前 gitlink 漂移。现有 Claim 继续绑定旧 permalink；后续需定向物化旧、新提交并逐 Claim 比较路径、schema、状态机和失败语义，不能批量替换 SHA。</li>
+<li><strong>运行期行为实验</strong>：Qwen 多客户端控制面和 Qwen/DeepSeek 恢复边界已有模块级 <code>observed</code> Claim，但尚未覆盖真实 transport、跨重启、多 writer 与更多 Harness。后续实验必须继续保存固定版本、输入、环境、命令、Trace 和产物；优先验证 replay window 截断后的 live handoff，以及 Goal 声明与外部验证证据不一致等边界。</li>
+<li><strong>P1 样本</strong>：Open SWE、RA.Aid、AutoCodeRover、Prime Agent、DeepCode 和 Void 仍在代表性样本队列。完成标准不是“建一张画像”，而是说明 Family/历史状态、固定研究锚点，并为至少一个现有 Primitive 或反例提供增量证据。</li>
+<li><strong>成熟度复核</strong>：<code>Observed Pattern</code> 和 <code>Proposed Abstraction</code> 只有在解释至少三个独立实现并经差异 Situation 与反例检验后，才能升级为 <code>Accepted Primitive</code>；共享谱系不得重复计票。</li>
+</ul>
+<p>项目长期成功不以页面数量衡量，而看三个指标：</p>
+<ul>
+<li><strong>解释力</strong>：同一 Primitive 能否准确解释不同实现，而不抹平关键差异。</li>
+<li><strong>可追溯性</strong>：读者能否从结论回到特定版本的一手证据。</li>
+<li><strong>可演进性</strong>：新 Harness 出现时，能够复用已有语言，也允许暴露分类缺陷。</li>
+</ul>
+<h2 id="16-主要风险">16. 主要风险</h2>
+<ul>
+<li><strong>最低公分母化</strong>：用最少共同功能定义 Primitive，得到没有解释力的薄抽象。</li>
+<li><strong>产品术语污染</strong>：直接采用某个厂商的命名，使其他实现被迫套入其模型。</li>
+<li><strong>CLI 偏见</strong>：只研究终端产品，忽略 IDE、远程和可嵌入运行时的不同接缝。</li>
+<li><strong>功能表化</strong>：页面逐渐变成勾选矩阵，丢失原理和 Situation。</li>
+<li><strong>时间漂移</strong>：不绑定版本，导致旧实现和新文档互相矛盾。</li>
+<li><strong>证据偏差</strong>：开源项目容易深入，闭源项目只能观察；两种证据强度必须显式标注。</li>
+<li><strong>分类冻结</strong>：把初版 Theme 当成最终架构，阻止新反例修正分类。</li>
+</ul>
+<h2 id="17-文档站点交付与持续研究">17. 文档站点交付与持续研究</h2>
+<p>2026-10-24 增加站点交付目标。保留当前 Markdown 作为内容源，参考现有 Astro 项目的静态构建方式，交付可搜索、可沿证据链接阅读、支持手机导航的文档站点。</p>
+<p>每个研究单元选择一个现有未决边界，给出固定版本的证据、能够复现的检查，以及尚未闭合的限制。正文面向本科水平读者，优先解释状态归属、失败位置和设计代价，再比较同一抽象下的不同实现。页面数量不作为完成判据。</p>
+<p>每次完成后运行文档与站点检查，发布 GitHub Pages，并在确认公开版本可访问后，用一段自包含的简短说明和地址通知。源码默认私有；公开发布仓库只保存生成的站点。</p>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"><a href="/harnesswiki-site/docs/research-method/" rel="prev" class="astro-5midzo3a"><svg aria-hidden="true" class="astro-5midzo3a astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-5midzo3a">上一页<br class="astro-5midzo3a"><span class="link-title astro-5midzo3a">研究方法</span></span></a><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" rel="next" class="astro-5midzo3a"><svg aria-hidden="true" class="astro-5midzo3a astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-5midzo3a">下一页<br class="astro-5midzo3a"><span class="link-title astro-5midzo3a">Primitive 重写规划</span></span></a></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

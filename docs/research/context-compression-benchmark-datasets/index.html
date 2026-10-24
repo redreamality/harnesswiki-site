@@ -1,0 +1,375 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>上下文压缩 Benchmark：按数据集核对任务、指标与证据边界 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/research/context-compression-benchmark-datasets/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="上下文压缩 Benchmark：按数据集核对任务、指标与证据边界"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/research/context-compression-benchmark-datasets/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究问题与结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究问题与结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#证据口径" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">证据口径</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#快速对照" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">快速对照</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#推理与生成保持" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">推理与生成保持</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gsm8k-与-bbhllmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">GSM8K 与 BBH（LLMLingua）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#sharegpt-与-arxiv-march23llmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">ShareGPT 与 Arxiv-March23（LLMLingua）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#长文档与多文档问答" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">长文档与多文档问答</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#naturalquestions-20-document-版本longllmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">NaturalQuestions 20-document 版本（LongLLMLingua）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#longbenchlongllmlingua-使用原版不是-longbench-v2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LongBench（LongLLMLingua 使用原版，不是 LongBench v2）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#zeroscrollsmusique-与-looglelongllmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">ZeroSCROLLS、MuSiQue 与 LooGLE（LongLLMLingua）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#可控长上下文诊断" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">可控长上下文诊断</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#ruler" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">RULER</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#longbench-v2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LongBench v2</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#长期会话记忆" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">长期会话记忆</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#longmemeval" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LongMemEval</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#locomo" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LoCoMo</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#agent-端到端执行" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Agent 端到端执行</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#appworldofficebench-与-8-objective-qaacon" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">AppWorld、OfficeBench 与 8-objective QA（ACON）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#memgym-五轨数据集族" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">MemGym 五轨数据集族</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gaiabrowsecompbrowsecomp-zh-与-sailorfog-qaresum" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">GAIA、BrowseComp、BrowseComp-zh 与 SailorFog-QA（ReSum）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#如何组合成上下文压缩-benchmark" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">如何组合成上下文压缩 Benchmark</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#论文自报与本文判断的边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">论文自报与本文判断的边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#一手来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">一手来源</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#仍需谨慎引用的缺口" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">仍需谨慎引用的缺口</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#研究问题与结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">研究问题与结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#证据口径" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">证据口径</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#快速对照" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">快速对照</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#推理与生成保持" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">推理与生成保持</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gsm8k-与-bbhllmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">GSM8K 与 BBH（LLMLingua）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#sharegpt-与-arxiv-march23llmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">ShareGPT 与 Arxiv-March23（LLMLingua）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#长文档与多文档问答" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">长文档与多文档问答</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#naturalquestions-20-document-版本longllmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">NaturalQuestions 20-document 版本（LongLLMLingua）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#longbenchlongllmlingua-使用原版不是-longbench-v2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LongBench（LongLLMLingua 使用原版，不是 LongBench v2）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#zeroscrollsmusique-与-looglelongllmlingua" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">ZeroSCROLLS、MuSiQue 与 LooGLE（LongLLMLingua）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#可控长上下文诊断" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">可控长上下文诊断</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#ruler" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">RULER</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#longbench-v2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LongBench v2</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#长期会话记忆" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">长期会话记忆</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#longmemeval" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LongMemEval</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#locomo" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">LoCoMo</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#agent-端到端执行" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Agent 端到端执行</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#appworldofficebench-与-8-objective-qaacon" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">AppWorld、OfficeBench 与 8-objective QA（ACON）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#memgym-五轨数据集族" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">MemGym 五轨数据集族</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gaiabrowsecompbrowsecomp-zh-与-sailorfog-qaresum" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">GAIA、BrowseComp、BrowseComp-zh 与 SailorFog-QA（ReSum）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#如何组合成上下文压缩-benchmark" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">如何组合成上下文压缩 Benchmark</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#论文自报与本文判断的边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">论文自报与本文判断的边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#一手来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">一手来源</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#仍需谨慎引用的缺口" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">仍需谨慎引用的缺口</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">上下文压缩 Benchmark：按数据集核对任务、指标与证据边界</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="上下文压缩-benchmark按数据集核对任务指标与证据边界"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/docs/research/">调研索引</a> · <a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/">上下文压缩</a><br>
+快照日期：2026-08-25<br>
+事实类型：论文和官方数据/代码中的自报设置为 <code>documented</code>；“科学性与局限”是本文评析，不代表论文作者结论</p>
+</blockquote>
+<h2 id="研究问题与结论">研究问题与结论</h2>
+<p>本文核对九项常被一并引用为“上下文压缩 benchmark”的工作：LLMLingua、LongLLMLingua、RULER、LongBench v2、LongMemEval、LoCoMo、ACON、MemGym 与 ReSum。结论是它们实际测量的是四个不同层次：</p>
+<ol>
+<li><strong>压缩后的答案或文本是否保持</strong>：GSM8K、BBH、ShareGPT、Arxiv-March23、NaturalQuestions、LongBench、ZeroSCROLLS、MuSiQue、LooGLE。</li>
+<li><strong>模型能否利用长输入</strong>：RULER、LongBench v2。它们没有压缩模块，适合作为压缩前后的能力探针，不是压缩系统的端到端 benchmark。</li>
+<li><strong>长期记忆的召回、更新与读取</strong>：LongMemEval、LoCoMo。它们更接近“压缩成记忆后还能否回答”，但通常不执行外部环境动作。</li>
+<li><strong>压缩后 Agent 是否仍能完成任务</strong>：AppWorld、OfficeBench、8-objective QA、SWE-Gym、tau2-bench、WebArena-Infinity、MemGym-DR、MemGym-CodeQA、GAIA、BrowseComp 与 BrowseComp-zh。</li>
+</ol>
+<p>因此，单独报告 ROUGE、压缩率或长上下文准确率，都不足以证明压缩策略适用于 Agent。较可信的结论至少需要同时报告：端到端任务成功、峰值与累计 token、压缩触发覆盖率、按同一 reasoner 配对的差值，以及多次压缩后的状态漂移。</p>
+<h2 id="证据口径">证据口径</h2>
+<ul>
+<li>数据集、切分、指标和 baseline 优先取论文正文、附录、官方仓库与官方数据文件；不采用二手榜单补全设置。</li>
+<li>“样例”分为两类：<code>官方实例</code> 是数据文件或论文展示的真实题目；<code>官方任务模板</code> 是论文明确给出的生成模板，不能冒充一条已发布实例。</li>
+<li>压缩率定义并不统一。LLMLingua 系列通常用 <code>原 prompt token / 压缩后 prompt token</code>；Agent 论文还会报告峰值 token、累计依赖或仅在触发压缩的 episode 上平均的比率。本文不把这些数值直接横比。</li>
+<li>同一 benchmark 内混合多个原始数据集时，本文以论文报告的顶层 benchmark 为分类单元，并列出其子任务和评分函数；不把每个子数据源误写成独立实验。</li>
+</ul>
+<h2 id="快速对照">快速对照</h2>
+<table>
+<thead>
+<tr>
+<th>数据集或数据集族</th>
+<th>被哪些论文实际使用</th>
+<th>主目标</th>
+<th>主指标</th>
+<th>能否直接证明 Agent 压缩有效</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GSM8K、BBH</td>
+<td>LLMLingua</td>
+<td>保留 CoT/ICL 推理</td>
+<td>Exact Match</td>
+<td>否，只测最终短答案</td>
+</tr>
+<tr>
+<td>ShareGPT、Arxiv-March23</td>
+<td>LLMLingua</td>
+<td>保留对话续写或摘要语义</td>
+<td>BLEU、ROUGE、BERTScore F1</td>
+<td>否，参考答案本身由 GPT-3.5 生成</td>
+</tr>
+<tr>
+<td>NaturalQuestions 20-doc、LongBench、ZeroSCROLLS、MuSiQue、LooGLE</td>
+<td>LongLLMLingua</td>
+<td>在长文档中保留问题相关证据</td>
+<td>各 benchmark 原指标、token、延迟</td>
+<td>部分，覆盖检索与长依赖，不覆盖工具状态</td>
+</tr>
+<tr>
+<td>RULER</td>
+<td>RULER</td>
+<td>可控长度下的检索、追踪、聚合、QA</td>
+<td>recall-based accuracy</td>
+<td>否，是能力诊断集</td>
+</tr>
+<tr>
+<td>LongBench v2</td>
+<td>LongBench v2</td>
+<td>真实长材料上的理解与推理</td>
+<td>四选一 accuracy</td>
+<td>否，但适合压缩前后 A/B</td>
+</tr>
+<tr>
+<td>LongMemEval</td>
+<td>LongMemEval；LongBench v2 取其历史再标注新题</td>
+<td>长期会话的抽取、跨 Session 推理、更新、时间、拒答</td>
+<td>GPT-4o judge accuracy；Recall@k、NDCG@k</td>
+<td>部分，能测记忆但不测环境动作</td>
+</tr>
+<tr>
+<td>LoCoMo</td>
+<td>LoCoMo；其他记忆论文常用</td>
+<td>长对话 QA、事件总结、多模态续聊</td>
+<td>token F1、Recall@k、FactScore/ROUGE、BLEU/MM-Relevance</td>
+<td>部分；MemGym 主实验没有使用它</td>
+</tr>
+<tr>
+<td>AppWorld、OfficeBench、8-objective QA</td>
+<td>ACON</td>
+<td>工具调用后任务是否完成，同时降低上下文成本</td>
+<td>环境 accuracy/EM/F1；Steps、Peak、Dependency</td>
+<td>是，但成功率仍混合规划与工具能力</td>
+</tr>
+<tr>
+<td>SWE-Gym、tau2-bench、WebArena-Infinity、MemGym-CodeQA、MemGym-DR</td>
+<td>MemGym</td>
+<td>固定 reasoner 下隔离记忆策略的增益</td>
+<td>配对成功率差、QA accuracy/judge score、压缩率；MemRM AUROC/ECE</td>
+<td>是，目前最接近 memory-isolated 设计</td>
+</tr>
+<tr>
+<td>GAIA、BrowseComp、BrowseComp-zh；SailorFog-QA 仅训练</td>
+<td>ReSum</td>
+<td>长程网页搜索能否靠周期摘要继续探索</td>
+<td>LLM judge Pass@1、Pass@3；成功轨迹 token/工具调用</td>
+<td>是，但 judge 和成本统计有明显边界</td>
+</tr>
+</tbody>
+</table>
+<h2 id="推理与生成保持">推理与生成保持</h2>
+<h3 id="gsm8k-与-bbhllmlingua">GSM8K 与 BBH（LLMLingua）</h3>
+<p><strong>论文实际设置。</strong> LLMLingua 在 GSM8K 使用 3-shot complex CoT prompt，在 BBH 的 23 个子任务上使用 3-shot CoT。GSM8K 测试集约 1,300 题；论文称 BBH 共约 6,500 题。目标模型主要是 <code>GPT-3.5-Turbo-0301</code>，temperature 为 0；压缩器为 Alpaca-7B 或 GPT2-Alpaca。比较项包括不压缩 full-shot、减少 demonstration 数量、随机选择、Selective Context 和由 GPT-4 按指令生成短 prompt。约束按 1-shot、half-shot、quarter-shot 表达，最终同时报告 EM、压缩后 token 与 <code>1/tau</code> 压缩倍数。Alpaca 数据只用于对齐压缩器，<strong>不是评测集</strong>。<a href="https://aclanthology.org/2023.emnlp-main.825/">LLMLingua 论文 §5 与附录 A</a>、<a href="https://github.com/microsoft/LLMLingua">官方代码</a>、<a href="https://github.com/openai/grade-school-math">GSM8K 官方仓库</a>、<a href="https://github.com/suzgunmirac/BIG-Bench-Hard">BBH 官方仓库</a></p>
+<p><strong>官方实例。</strong> 论文案例让模型根据“Sam 买了 12 盒、每盒 30 支荧光笔、分两种方式售卖”的多步计算过程回答总利润，目标短答案是 <code>115</code>；BBH 的 <code>web_of_lies</code> 案例给出 Raymond、Sal、Alexis、Helene、Elanor 依次评价前一人是否说谎，目标是判断 Elanor 是否说真话。输入中真正被压缩的是 demonstration 与题目文本，评测只核对最终答案。<a href="https://aclanthology.org/2023.emnlp-main.825/">LLMLingua Figure 4、Figure 8</a></p>
+<p><strong>指标是否科学。</strong> EM 对数学数值和封闭标签清楚、可复现，且对“删掉关键一步后答错”敏感；它适合做压缩回归的硬门槛。局限是只看最终答案：压缩后若靠模型先验、数据污染或偶然猜中，EM 不会暴露推理链已经失真；反之，格式变化也可能被判错。论文还从十套 GPT-4 压缩指令中报告最好结果，这使该 baseline 带有选择最优提示的优势，不能视为无调参比较。</p>
+<h3 id="sharegpt-与-arxiv-march23llmlingua">ShareGPT 与 Arxiv-March23（LLMLingua）</h3>
+<p><strong>论文实际设置。</strong> ShareGPT 使用 Selective Context 工作整理的 575 条样本：以最后一轮之前的全部对话作 prompt，让 GPT-3.5-Turbo 生成最后一轮回复作为 reference。Arxiv-March23 使用 500 篇 2023 年 3 月论文，取前五节且每节截到 10,000 字符，再由 GPT-3.5-Turbo 生成参考摘要。两者均报告 BLEU、ROUGE-1/2/L 和 BERTScore F1，并报告 token 与实际压缩倍数；ShareGPT 主要比较 2x、3x 约束，Arxiv-March23 比较 350 与 175 token 约束。<a href="https://aclanthology.org/2023.emnlp-main.825/">LLMLingua 附录 A.1 与 Table 1</a></p>
+<p><strong>官方实例。</strong> ShareGPT 案例要求把一张 Elekta LINAC 能谱表转换成 TOPAS 格式，目标输出必须保住每个能量值与权重；Arxiv-March23 案例要求概括一篇关于 N-body 模拟中 redshift drift 的论文，关键事实包括所用模拟、两项主导分量的抵消以及 optical drift 至多约占信号的 10%。<a href="https://aclanthology.org/2023.emnlp-main.825/">LLMLingua Figure 9、Figure 10</a></p>
+<p><strong>指标是否科学。</strong> BERTScore 比纯词面重合更能容忍改写，BLEU/ROUGE 能暴露表格数字或关键词丢失；三者并报优于只报一个指标。但这些指标都不直接验证代码/表格是否可执行、摘要事实是否正确。更关键的是 reference 由同一个目标模型生成，测到的是“压缩后输出与一次未压缩模型输出的相似度”，不是相对于人工真值的正确性；因此不能据此推断 Agent 状态被可靠保存。</p>
+<h2 id="长文档与多文档问答">长文档与多文档问答</h2>
+<h3 id="naturalquestions-20-document-版本longllmlingua">NaturalQuestions 20-document 版本（LongLLMLingua）</h3>
+<p><strong>论文实际设置。</strong> LongLLMLingua 采用 Lost in the Middle 构造：2,655 个 NQ-open 问题各包含 20 篇 Contriever 文档，把含答案文档放在第 1、5、10、15 或 20 位，并另报按相关性重排。原 prompt 平均约 2,946 token；比较 2x 与 4x 约束。baseline 包括 BM25、Gzip、SentenceBERT、OpenAI Embedding、仅用 LongLLMLingua 的粗排分数、Selective Context、LLMLingua、原文和 zero-shot。答案按 <code>best_subspan_em</code> 评分：取回复第一行、规范化后，只要任一 gold answer 是预测的子串即得分；表格另报 token、压缩倍数、延迟和 speedup。<a href="https://aclanthology.org/2024.acl-long.91/">LongLLMLingua §5、Table 1</a>、<a href="https://github.com/nelson-liu/lost-in-the-middle">Lost in the Middle 官方仓库</a></p>
+<p><strong>官方实例。</strong> 论文展示的问题是“谁获得了首届诺贝尔物理学奖”，20 篇检索结果中只有相关文档给出 Wilhelm Conrad Rontgen；高压缩下，subsequence recovery 用于把残缺姓名恢复为完整答案。<a href="https://aclanthology.org/2024.acl-long.91/">LongLLMLingua Figure 6</a></p>
+<p><strong>指标是否科学。</strong> 控制 gold document 位置能直接测 lost-in-the-middle，也能区分“重排带来的收益”和“token 级压缩带来的收益”，设计较科学。局限是 substring EM 不惩罚同一行附带冲突答案；且只有一篇 gold 文档、答案较短，和需要保留多轮副作用、失败尝试与未完成事项的 Agent 状态差异很大。压缩后超过原文的准确率也可能来自去噪或位置变化，不能解释为无损压缩。</p>
+<h3 id="longbenchlongllmlingua-使用原版不是-longbench-v2">LongBench（LongLLMLingua 使用原版，不是 LongBench v2）</h3>
+<p><strong>论文实际设置。</strong> LongLLMLingua 在原版 LongBench 上聚合六类任务：SingleDoc QA、MultiDoc QA、Summarization、Few-shot Learning、Synthetic、Code。官方 LongBench 的评分函数按子数据集变化：QA 多用 token F1，摘要用 ROUGE-L，分类/合成检索用 accuracy 或专用 count/retrieval score，代码补全用 code similarity；LongLLMLingua 把各类得分再平均，同时报告 3,000/2,000-token 约束、实际 token、压缩倍数、延迟和 speedup。原 prompt 平均约 10,295 token。<a href="https://aclanthology.org/2024.acl-long.91/">LongLLMLingua Table 2</a>、<a href="https://github.com/THUDM/LongBench/blob/main/pred.py">LongBench 官方评测代码</a></p>
+<p><strong>官方任务模板。</strong> LongBench 的 MultiDoc QA 输入多篇材料后要求综合回答一个短问题；Synthetic 的 passage retrieval 要从大量带编号段落中返回命中段落编号；Code 类给出长代码前缀并预测后续代码。目标分别是短答案、精确编号和参考代码延续。<a href="https://github.com/THUDM/LongBench">LongBench 论文与仓库</a></p>
+<p><strong>指标是否科学。</strong> 子任务使用领域适配指标是合理的，但把 F1、ROUGE、accuracy 与 code similarity 直接平均，只适合做同一 benchmark 内的粗排名，不能解释成统一的“信息保留百分比”。此外，LongLLMLingua 的主要表格按六类聚合，读者无法从总平均判断压缩究竟保护了检索、摘要还是代码结构。</p>
+<h3 id="zeroscrollsmusique-与-looglelongllmlingua">ZeroSCROLLS、MuSiQue 与 LooGLE（LongLLMLingua）</h3>
+<p><strong>论文实际设置。</strong> ZeroSCROLLS 完整 benchmark 有 4,378 题、10 个任务；LongLLMLingua 实际取官方 validation set 与脚本，官方设置约为每任务 20 题，因此实验规模约 200，而非 4,378。它覆盖四个摘要任务、四个长上下文 QA 和两个排序任务，平均 prompt 约 9,788 token。MuSiQue 使用官方 validation set，论文给出的 train/validation/test 数量为 39,876/4,834/4,918，平均 prompt 约 2,477 token，只报 answer F1、不报 supporting-fact F1。LooGLE 只用 1,101 条 long-dependency QA 子集，含 information retrieval、timeline reordering、computation、comprehension，平均 prompt 约 24,005 token；沿用 LooGLE 的 GPT-4 evaluator accuracy，而不是确定性的事件排序指标。三者比较与 NaturalQuestions 相同的检索和压缩 baseline。<a href="https://aclanthology.org/2024.acl-long.91/">LongLLMLingua 附录 B.1、C.4-C.6</a>、<a href="https://github.com/tau-nlp/zero_scrolls">ZeroSCROLLS 官方仓库</a>、<a href="https://github.com/StonyBrookNLP/musique">MuSiQue 官方仓库</a>、<a href="https://github.com/bigai-nlco/LooGLE">LooGLE 官方仓库</a></p>
+<p><strong>官方任务模板与实例。</strong> ZeroSCROLLS 的 BookSumSort 要把被打乱的书中事件恢复为时间顺序；MuSiQue 要从多篇材料串联多个桥接事实得到短答案；LooGLE 的 timeline reordering 要跨长文档恢复事件先后，computation 则要求汇总分散数字。LongLLMLingua 还展示了 ZeroSCROLLS/NarrativeQA 类问题“电视节目 Dancing on Ice 何时播出”，目标从长材料中返回具体播出时间。<a href="https://aclanthology.org/2024.acl-long.91/">LongLLMLingua 附录 C</a></p>
+<p><strong>指标是否科学。</strong> 这组数据比单 gold-document QA 更能测试跨段依赖，尤其 MuSiQue 和 LooGLE 对丢失桥接事实敏感；按官方脚本复用也利于复现。局限是 ZeroSCROLLS validation 每任务约 20 题，且把随机基线不同的摘要、QA、比例估计和排序分数直接平均；MuSiQue answer F1 不验证 bridge evidence；LooGLE 又引入未在主表重述版本与 prompt 的 GPT-4 judge。F1/ROUGE 仍可能奖励词面重合而漏掉因果、顺序和数字错误。</p>
+<h2 id="可控长上下文诊断">可控长上下文诊断</h2>
+<h3 id="ruler">RULER</h3>
+<p><strong>数据与切分。</strong> RULER 不是自然收集的固定测试集，而是按长度和复杂度自动生成实例。主实验选 13 个配置，覆盖四类能力：</p>
+<ul>
+<li>Retrieval：3 个 Single NIAH、3 个 Multi-key NIAH、1 个 Multi-value NIAH、1 个 Multi-query NIAH。</li>
+<li>Multi-hop tracing：1 个 Variable Tracking，固定 1 条链、4 次绑定跳转，需返回 5 个变量名。</li>
+<li>Aggregation：Common Words Extraction 与 Frequent Words Extraction 各 1 个。</li>
+<li>QA：把 SQuAD 单跳或 HotpotQA 多跳的 gold paragraph 混入同源 distractor paragraphs，各 1 个任务。</li>
+</ul>
+<p>每个任务在 4K、8K、16K、32K、64K、128K 每个长度生成 500 条，模型 greedy decoding。论文在 query 后附 answer prefix，并以目标字符串是否出现在输出中的 <strong>recall-based accuracy</strong> 评分；13 项均值用于总体曲线，另以 Llama-2-7B 在 4K 的分数作阈值，报告“effective context length”。RULER 没有压缩策略或压缩 baseline；它比较 17 个长上下文模型，因此用于压缩研究时应自行做 <code>完整输入 vs 压缩输入</code> 配对。<a href="https://arxiv.org/abs/2404.06654">RULER 论文 §3-4、附录 B</a>、<a href="https://github.com/NVIDIA/RULER">官方生成与评分代码</a></p>
+<p><strong>官方实例。</strong> Single NIAH 在长篇 essay 中插入“long-context 的特殊数字是 12345”，末尾询问该数字，目标输出 <code>12345</code>；Multi-value NIAH 对同一 key 插入 <code>12345</code> 与 <code>54321</code>，要求两者全部返回；Variable Tracking 给出 <code>X1=12345, X2=X1, X3=X2</code> 等离散绑定，要求返回所有指向 <code>12345</code> 的变量；CWE 给出大量随机词，要求返回 10 个出现 30 次、而普通词只出现 3 次的 common words。<a href="https://arxiv.org/abs/2404.06654">RULER Table 2</a></p>
+<p><strong>指标是否科学。</strong> 优点是长度、信噪比、目标数量和跳数可控，能定位压缩策略在“单事实、完整多值召回、跨距追踪、全局聚合”哪一类先崩溃。缺点有三项：第一，substring recall 允许包含额外错误答案，精度不足；第二，answer prefix 降低了拒答和格式噪声，却与真实 Agent 输出不同；第三，大部分任务是合成词/数字，可能高估结构化摘要对真实语义和工具状态的保持能力。13 项平均还会掩盖“单 needle 很强但多值召回很差”。</p>
+<h3 id="longbench-v2">LongBench v2</h3>
+<p><strong>数据与切分。</strong> LongBench v2 是 503 道英语四选一题，材料从 8K 到 2M words，分六类、20 个子任务：Single-Doc QA 175、Multi-Doc QA 125、Long ICL 81、Long-dialogue History 39、Code Repository 50、Long Structured Data 33。每题包含长材料、问题、四个选项、答案与证据；97 名标注者构题，24 名专家复核。hard 子集的纳入条件是最多 1/3 个自动审查模型答对，且人工 reviewer 用时超过 10 分钟。论文没有 train split，也没有压缩设置。<a href="https://arxiv.org/abs/2412.15204">LongBench v2 §3 与 Table 1</a>、<a href="https://github.com/THUDM/LongBench">官方仓库</a>、<a href="https://huggingface.co/datasets/THUDM/LongBench-v2">官方数据集</a></p>
+<p><strong>baseline 与指标。</strong> 主指标是四选一 accuracy，随机基线 25%；分别报告 Overall、Easy/Hard、<code>&lt;32K</code>、<code>32K-128K</code>、<code>&gt;128K</code> 和六大类。这里的 K 是<strong>词数</strong>而非模型 token；数据中位数约 54K words、平均约 104K words。主实验含 zero-shot 与 zero-shot+CoT；另做无 context baseline 检查记忆污染。RAG baseline 把 context 按 GLM-4-9B tokenizer 切成 512-token chunks，用问题加选项作 query，测试 top 4/8/16/32/64/128/256 chunks。模型名义窗口统一按 128K，超限材料保留首尾、截掉中间。无有效选项的回复在主表判错，附录另给“按 25% 概率补偿”的结果。</p>
+<p><strong>官方实例。</strong> New-language translation 给模型一部长篇 Kalamang 词典/语料，再要求把一句未见 Kalamang 句子翻译成英语；Code Repo QA 的例题询问 Megatron-LM 中启用 Context Parallel 且使用 THD 数据格式时应如何修改 rotary position embedding 实验；Long-dialogue History 的例题询问用户已在新宿当前公寓住了多久。<a href="https://arxiv.org/abs/2412.15204">LongBench v2 Appendix B</a></p>
+<p><strong>指标是否科学。</strong> 四选一 accuracy 比 ROUGE 清楚，人工证据与无 context 对照也能抑制“靠训练记忆作答”。它适合测“压缩前后是否仍能做深层理解”，尤其 code、table、dialogue 子类比 NIAH 更接近 Agent。局限是选项会提供额外线索，chance floor 高；503 题按 20 个子任务分开后样本很少。论文明确警告各长度区间的任务组成不同，因此不能用短/中/长分数直接推导长度退化。它只量最终选择，不量压缩成本、状态可恢复性或工具执行。</p>
+<h2 id="长期会话记忆">长期会话记忆</h2>
+<h3 id="longmemeval">LongMemEval</h3>
+<p><strong>数据与切分。</strong> LongMemEval 共 500 题，问题实例是 <code>(带时间戳的 Session 序列, 问题, 提问时间, 答案或 rubric)</code>。能力分为 Information Extraction、Multi-Session Reasoning、Knowledge Updates、Temporal Reasoning、Abstention；发布数据再细分为 <code>single-session-user</code> 70、<code>single-session-assistant</code> 56、<code>single-session-preference</code> 30、<code>multi-session</code> 133、<code>knowledge-update</code> 78、<code>temporal-reasoning</code> 133。论文另从已有题型改造 30 个 false-premise abstention 问题。标准历史有 <code>LongMemEval_S</code>，每题约 115K token，以及 <code>LongMemEval_M</code>，每题 500 个 Session、约 1.5M token；另有仅提供证据 Session 的 Oracle 条件。<a href="https://arxiv.org/abs/2410.10813">LongMemEval 论文 §3</a>、<a href="https://github.com/xiaowu0162/longmemeval">官方仓库</a>、<a href="https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned">官方 cleaned 数据</a></p>
+<p><strong>baseline 与指标。</strong> 最终 QA 由 <code>gpt-4o-2024-08-06</code> judge 判 <code>yes/no</code>，报告 accuracy。检索器若暴露结果，则按人工标注的 evidence location 计算 Recall@5/10 与 NDCG@5/10。论文比较直接 long-context reading、Oracle、商业 memory system，以及 RAG 设计：Session vs Round 粒度，原文 vs summary/keyphrase/user facts，单 key vs <code>原文+fact</code> 多 key，时间感知 query expansion；默认 Stella V5 dense retriever、Llama 3.1 8B 做抽取，召回项按时间排序，reader 比较 GPT-4o、Llama 3.1 70B/8B 等。</p>
+<p><strong>官方实例。</strong> cleaned 数据中的 knowledge-update 题询问用户 charity 5K 的最新个人最好成绩，目标是 <code>25:50</code>；multi-session 题要求汇总要去门店取回或退回的衣物数量，目标是 <code>3</code>；论文流程图还展示“平时每周工作 40 小时，旺季增加 10 小时”，目标回答 <code>50</code>。<a href="https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned">LongMemEval 官方数据文件</a>、<a href="https://arxiv.org/abs/2410.10813">论文 Figure 2</a></p>
+<p><strong>指标是否科学。</strong> 这是少数同时有 answer location、时间戳、更新事实和拒答的 benchmark，Recall/NDCG 能把“没召回”与“召回后没读懂”拆开，明显优于只看最终回答。LLM judge 对同义改写更合理，论文按每题型 30 题、两种 answer model 做人工 meta-evaluation，平均一致率 97%-98%。局限是样本仍由 ontology、LLM self-chat 和人工编辑构造；每题型 30 条的 judge 校验规模小。judge 对 temporal 答案允许天数 off-by-one，对 knowledge-update 允许同时带上旧信息，只要含更新答案即算对，可能高估严格状态覆盖和删除旧事实的正确性。</p>
+<h3 id="locomo">LoCoMo</h3>
+<p><strong>数据与切分。</strong> 原论文构造 <strong>50 段</strong>长对话，平均 19.3 个 Session、每 Session 15.8 turns、每段约 9,209 token，并带 persona、时间事件图与图片。QA 共 7,512 题：single-hop 2,705、multi-hop 1,104、temporal 1,547、open-domain knowledge 285、adversarial 1,871。另有事件总结和多模态对话生成任务。官方仓库当前常见的 <code>locomo10.json</code> 是 10 段对话、1,986 个 QA 的较小 release，不能倒推原论文只评了 10 段。<a href="https://arxiv.org/abs/2402.17753">LoCoMo 论文 Table 5</a>、<a href="https://github.com/snap-research/locomo">官方仓库与 locomo10 数据</a></p>
+<p><strong>baseline 与指标。</strong> QA 对规范化 prediction 与 ground truth 计算 token-level partial-match F1；RAG 另报正确证据 turn 的 Recall@k。事件总结把时间图中的事件拆成 atomic facts，用改造后的 FactScore 计算 precision、recall、F1，同时报告 ROUGE。多模态续聊报告 BLEU-1/2、ROUGE-L、BERTScore 与 MM-Relevance。baseline 包括因窗口限制丢弃早期对话的 Base、尽量放入全部历史的 long-context LLM、对 raw dialogue/observation/session summary 检索的 RAG，以及跨 Session incremental summarization。</p>
+<p><strong>官方实例。</strong> 论文示例中 Joanna 告诉 Nate 她完成了第一部 screenplay，后续 Session 又提到提交电影节、宠物和过敏；QA 可询问该事件的时间或需跨 Session 汇总其计划，事件总结则要从对话恢复这些有因果和时间关系的 life events。<a href="https://arxiv.org/abs/2402.17753">LoCoMo Figure 8</a></p>
+<p><strong>指标是否科学。</strong> 五类 QA 把单跳、跨 Session、时间、外部常识和应拒答分开，证据 turn Recall@k 也有诊断价值。token F1 对短抽取答案可复现，却会惩罚正确改写，也可能奖励含有正确词但语义错误的回答；FactScore 比 ROUGE 更关注事实，但其 atomic-fact 分解和匹配仍依赖模型。对话主要由 LLM 生成后人工修订，论文只做单次 inference run；外部效度和方差有限。还需特别纠正：MemGym 只在 related work 和 LightMem 的 LoCoMo 专用 prompt 讨论 LoCoMo，<strong>主结果的五个 track 不包含 LoCoMo</strong>。</p>
+<h2 id="agent-端到端执行">Agent 端到端执行</h2>
+<h3 id="appworldofficebench-与-8-objective-qaacon">AppWorld、OfficeBench 与 8-objective QA（ACON）</h3>
+<p><strong>数据与切分。</strong> ACON 主实验使用三套数据：</p>
+<ul>
+<li><strong>AppWorld</strong>：9 个模拟 app、457 个 API、约 100 个可操作用户；官方任务平均 42.5 次 API 调用。按官方 split 取 90 train 做 guideline optimization/distillation，168 个 <code>test-normal</code> 评测，并按 easy/medium/hard 分解。</li>
+<li><strong>OfficeBench</strong>：Word、Excel、PDF、Calendar、Email、Shell、Calculator 等办公 app；ACON 排除 OCR 任务，因无官方 split 而随机分成 92 train、95 test，并额外去掉歧义任务、避免 synthetic testbed 跨 split。</li>
+<li><strong>8-objective QA</strong>：从 NaturalQuestions train/test 各组合 100 个任务；每个任务同时给 8 个互不相同的问题，Agent 用 BM25 搜索 2018 Wikipedia，最后一次性提交 8 个答案。</li>
+</ul>
+<p>附录另在 WebVoyager 用 50 train、70 held-out test 验证外推，但不属于三张主表的核心结论。<a href="https://arxiv.org/abs/2510.00615">ACON 论文 §4、附录 B</a>、<a href="https://github.com/microsoft/acon">官方代码</a>、<a href="https://github.com/StonyBrookNLP/appworld">AppWorld 官方仓库</a>、<a href="https://github.com/zjunlp/OfficeBench">OfficeBench 官方仓库</a></p>
+<p><strong>压缩设置与 baseline。</strong> Agent 统一为 ReAct。History compression 在 AppWorld/OfficeBench 超过 4,096 token、8-objective QA 超过 2,048 token 时触发，并保留最近一个 action-observation pair；Observation compression 阈值分别为 1,024、512、400 token。baseline 是 No Compression、FIFO recent interactions、embedding Retrieval、LLMLingua extractive compression、通用 Prompting summary。ACON 报 <code>UT</code>（先最大化任务 utility）和 <code>UTCO</code>（再最大化压缩）两个 guideline 版本；用 o3 分析/更新 prompt，每轮采样 5 个候选在 train 子集选优，另把 GPT-4.1 compressor 蒸馏到小模型。</p>
+<p><strong>指标。</strong> AppWorld 使用 benchmark task-completion score；OfficeBench 用 benchmark-defined final-state accuracy；8-objective QA 同时报 8 个答案上的 EM 与 token F1。效率报告 Steps、Peak Tokens 和 Dependency。Peak 是轨迹任一步的最大输入 token，不含 system prompt。论文把 Dependency 定义为各步 <code>(n_input + 2*n_output) * n_output / 2</code> 的总和，用作 action generation 对既有上下文依赖量的近似；它是 token 几何代理，不是实测 FLOPs 或延迟。论文固定 <code>gpt-4.1-2025-04-14</code> 等 API snapshot、temperature 0、seed 42，同时承认 API 仍非确定。</p>
+<p><strong>官方实例。</strong> AppWorld hard 示例要求读取 Simple Note 中当天 workout plan，再在 Spotify 播放一张时长足够、无需中途更换的 playlist；OfficeBench 3-app 示例要求读取公司 revenue、给 Bob 发邮件并生成 <code>revenue.docx</code>；8-objective QA 示例把“某首歌作者、某电影演员、英格兰上次进入世界杯决赛时间”等 8 个问题放在同一任务中统一提交。<a href="https://arxiv.org/abs/2510.00615">ACON Table 5</a></p>
+<p><strong>指标是否科学。</strong> 环境 final-state 检查比语言相似度更可信：只要压缩丢了 access token、文件路径、已写入行或跨 app 依赖，任务就会失败。Peak 与 Dependency 分别覆盖瞬时内存和跨步累计计算，优于只报最终 prompt 长度。局限是最终成功仍混合 reasoner、规划、API 使用与压缩影响；ACON 没有像 MemGym 那样对每个压缩事件做 counterfactual replay。OfficeBench split 由作者随机新建且又人工过滤，跨论文比较必须使用同一清单。只报告平均值而没有充分置信区间/多 seed 时，小样本百分点差异不稳定。</p>
+<h3 id="memgym-五轨数据集族">MemGym 五轨数据集族</h3>
+<p><strong>实际纳入的五个 track。</strong> MemGym 把同一 memory manager 接口接到三套既有 gym 和两套自建数据：</p>
+<table>
+<thead>
+<tr>
+<th>Track</th>
+<th>论文实际样本与任务</th>
+<th>最终指标</th>
+<th>官方实例或任务模板</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SWE-Gym</td>
+<td>11 个 Python repo；不同 reasoner 的 paired/fork-batch 样本为 1,003-1,041 条</td>
+<td>harness-verified resolved rate；配对 <code>+memory - baseline</code></td>
+<td>给定真实 issue 与 repo，Agent 修改代码，最终由容器内测试验证补丁；历史可重读 repo，因此记忆未必是瓶颈。</td>
+</tr>
+<tr>
+<td>tau2-bench</td>
+<td>base split 全部 288 题，覆盖 mock、telecom、airline、retail</td>
+<td>任务 success rate 与配对差值</td>
+<td><code>官方实例</code>：用户 Emma Kim 要取消 <code>EHGLP3</code>，但若不能退款就不取消；即使用户声称先前被告知无需保险，Agent 也应按政策拒绝不可退款的取消。<a href="https://github.com/sierra-research/tau2-bench/blob/main/data/tau2/domains/airline/tasks.json">airline task 0</a></td>
+</tr>
+<tr>
+<td>WebArena-Infinity</td>
+<td>gmail、paypal、gitlab 的 140 个 hard tasks，最多 50 steps</td>
+<td>success rate 与配对差值</td>
+<td><code>官方实例</code>：Gmail task 要把 Sarah Chen 的 Q1 product roadmap 邮件加星；MemGym 的 hard slice 把这类网页动作扩展成长批量操作，需跨页面记住已处理项。<a href="https://github.com/web-arena-x/webarena-infinity/blob/main/apps/gmail/real-tasks.json">Gmail real tasks</a></td>
+</tr>
+<tr>
+<td>MemGym-CodeQA</td>
+<td>从 SWE-smith 构造，production run 4,289 verified instances；token pressure 为 10K/50K/100K/500K</td>
+<td>QA accuracy</td>
+<td><code>官方任务模板</code>：逐出含 gold debugging facts 的 raw prefix 后询问行为事实；发布 prompt 示例包括“<code>scope_to_list</code> 收到单元素字符串时应返回什么”。</td>
+</tr>
+<tr>
+<td>MemGym-DR</td>
+<td>100K-token synthetic deep-research；3-hop、4-hop、5/6-hop</td>
+<td>Sonnet 4.5 judge score</td>
+<td><code>官方任务模板</code>：从多篇学术材料形成 dependent bridge-fact chain，加入 natural、near-miss、contradictory 与 bulk distractors，并 fictionalize 实体后作答。</td>
+</tr>
+</tbody>
+</table>
+<p>论文 v1 正文没有清楚解释两组 MemGym-CodeQA 规模：§4.1 的 4,289-instance verified set，以及 §3.4/Appendix D 的 670 verified instances、2,131 deduplicated QA pairs。官方仓库的数据说明将后者标为 1,000-candidate <strong>pilot</strong> 的产物，将 4,289 标为独立 <strong>production run</strong>；截至本快照，production CodeQA 数据仍 pending release。因此论文结果可按 4,289 理解，但外部尚不能只靠公开数据完整复现。<a href="https://arxiv.org/abs/2605.20833">MemGym 论文 §3-4、Appendix D</a>、<a href="https://github.com/WujiangXu/MemGym/blob/main/docs/data.md">官方数据说明</a>、<a href="https://github.com/SWE-Gym/SWE-Gym">SWE-Gym 官方仓库</a>、<a href="https://github.com/sierra-research/tau2-bench">tau2-bench 官方仓库</a>、<a href="https://github.com/web-arena-x/webarena-infinity">WebArena-Infinity 官方仓库</a></p>
+<p><strong>压缩/记忆 baseline 与设置。</strong> 三个 wrapped gym 在 100 messages 或 32K context token 先达到者触发压缩，reasoner 在 baseline 与 memory 侧固定。比较 None/passthrough、rolling Summary、Structured Summary、A-Mem、MemoryBank、LightMem、SimpleMem，以及只用于 MemGym-DR 的 BM25/Naive RAG。Structured Summary 有 17 个字段，包括 objective、files inspected/modified、test results、errors、hypotheses、environment state、commands、remaining steps、blockers、key decisions。论文报告每个 track 的成功率或 QA 分数及配对 memory gain，也报告压缩率；但不同 wrapper 的压缩率 estimator 不同，例如 SWE-Gym 平均每次压缩比，tau2-bench 只取最后一次事件，不能直接横比。</p>
+<p><strong>MemRM 指标。</strong> MemRM 把 <code>(压缩前 context, 压缩后 context, candidate action)</code> 分类为 SAFE/HARMFUL。训练数据来自 SWE-Gym 18,637/18,642 左右的 compression events，按 repository 分成 15,630 train、3,007 eval，类别约 87.8% HARMFUL。主指标是 AUROC、Expected Calibration Error 与 OOD Coverage；阈值还受 <code>HARMFUL-F1 &gt;= 0.90</code>、<code>SAFE precision &gt;= 0.80</code> 约束。IID 自报 AUROC 0.985、ECE 0.009；Strategy-OOD 和 Scenario-OOD 只在筛选后的 26.5% 与 20.4% coverage 上报 AUROC。<a href="https://arxiv.org/abs/2605.20833">MemGym §3.3、§4.4、Appendix H</a></p>
+<p><strong>指标是否科学。</strong> 固定 reasoner 的 paired baseline-vs-memory、从同一轨迹 replay/fork、记录每个 condensation event，是当前几项工作中最接近“隔离记忆效应”的设计。自建两轨还用 no-memory、long-context、distractor/leakage verifier 阻断捷径。论文也准确限定：memory 改变后续 action distribution，因此 memory gain 仍不是把记忆当完全独立能力的因果消融。其他局限包括：只有触发压缩的 episode 才产生非平凡配对，存在选择条件；tau2 两个 baseline row 来自独立采样 rollout；MemRM 的 IID AUROC 在严重类别不平衡下不能替代 SAFE-F1 与部署 coverage，而 OOD coverage 仅约两成，不能外推为通用压缩评分器。</p>
+<h3 id="gaiabrowsecompbrowsecomp-zh-与-sailorfog-qaresum">GAIA、BrowseComp、BrowseComp-zh 与 SailorFog-QA（ReSum）</h3>
+<p><strong>测试数据。</strong> ReSum 在三套长程 web-search benchmark 上评测：GAIA 使用 103 条 text-only validation subset；BrowseComp 全集 1,266 题；BrowseComp-zh 全集 289 题。三者都要求通过 search/visit 工具做多步探索，但任务难度不同：GAIA 答案通常是短字符串/数值且官方有严格评分；BrowseComp 题目刻意做到难以直接搜索命中；BrowseComp-zh 是中文对应集。SailorFog-QA <strong>只用于训练</strong>：ReSum-GRPO 随机取 1,000 条训练 4 epochs；ReSumTool-30B 则用合成的 9,000 余个 conversation-summary pairs，不应把训练集结果写进测试成绩。<a href="https://arxiv.org/abs/2509.13313">ReSum §4.1、§4.3、Appendix E</a>、<a href="https://huggingface.co/datasets/gaia-benchmark/GAIA">GAIA 官方数据</a>、<a href="https://arxiv.org/abs/2504.12516">BrowseComp 论文</a>、<a href="https://arxiv.org/abs/2504.19314">BrowseComp-zh 论文</a></p>
+<p><strong>压缩设置与 baseline。</strong> WebSailor-3B/7B/30B 都限制 32K context。training-free 比较 ReAct append-all、Recent History（到上限时仅保留最近 22K token）、MEM1 与 ReSum；ReSum 接近 context 上限时调用 ReSumTool-30B 生成 summary，然后以 summary 作为新轨迹起点。统一 inference 上限为 60 tool calls，temperature 0.6、top-p 0.95。RL 比较 GRPO、MEM1-GRPO、ReSum-GRPO；但标准 GRPO 最多 40 次 tool call，而 ReSum-GRPO 允许 60 次，因此 RL 表中的收益并非纯压缩变量。</p>
+<p><strong>指标。</strong> <code>Qwen2.5-72B-Instruct</code> judge 判断预测与 ground truth 是否语义一致，报告全测试集平均 Pass@1，以及每题三次 rollout 的 Pass@3。论文用 GPT-4o-mini、Qwen3-235B、Gemini-2.5-Flash 在 BrowseComp-zh 上交叉核对 judge，自报四者得分方差小于 0.3 个百分点。资源分析报告成功轨迹的平均 total tokens 与 tool calls；注意论文明确只统计 <strong>成功轨迹</strong>，这不是全任务平均成本。</p>
+<p><strong>官方实例。</strong> GAIA 的 text-only Level 1 题询问 Kuznetzov 描述的越南标本最终存放在哪座城市，目标短答案为 <code>Saint Petersburg</code>；BrowseComp 案例给出多条线索：一种濒危食虫植物、在该国是其属唯一代表、主要地区 2011 年人口密度为 132/km²、当地名意为“魔鬼或幽灵的篮子”，目标是科学名；BrowseComp-zh 案例要求从“片名与含数字的文学剧本名不同、60 多年后修复重映、导演曾在西南与一位四字姓名女演员共事”等链条追到该演员出生地；SailorFog-QA 展示题询问 2025 年哪个 CS 会议与 IJCAI 有完全相同的 full-paper deadline 和 CCF rank。<a href="https://arxiv.org/abs/2311.12983">GAIA 论文 Appendix C</a>、<a href="https://arxiv.org/abs/2509.13313">ReSum Appendix F、E</a></p>
+<p><strong>指标是否科学。</strong> Pass@1 直接对应一次 Agent 是否答对，Pass@3 能反映探索方差；语义 judge 比 GAIA 的严格字符串规则更能容忍解释性输出。局限是 judge 的四模型一致性只比较 BrowseComp-zh 的聚合得分，不是逐样本人工一致性验证，不能证明所有语言、题型都无偏。Pass@3 天然受采样预算影响。只对成功轨迹平均 token 会产生 survivorship bias：失败且耗尽 context 的昂贵轨迹被排除；论文也没有证明 ReSum 降低累计 token，成功轨迹资源通常反而约为 ReAct 的两倍。更公平的报告应同时给全体 query 的累计 token、失败成本、每个 solved task 的成本和固定工具预算下的成功率。</p>
+<h2 id="如何组合成上下文压缩-benchmark">如何组合成上下文压缩 Benchmark</h2>
+<p>单一数据集不足以支撑“压缩科学有效”。建议按下列最小套件配对运行完整上下文、最近窗口、待测压缩、压缩加按需召回四组：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>推荐数据</th>
+<th>必报指标</th>
+<th>主要失败模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>可控单元测试</td>
+<td>RULER 的 MV/MQ-NIAH、VT、CWE/FWE</td>
+<td>exact-set precision/recall/F1，不只 substring recall；按长度曲线</td>
+<td>漏项、添项、跨距绑定断裂、聚合错误</td>
+</tr>
+<tr>
+<td>长材料理解</td>
+<td>LongBench v2 六类；LongBench/MuSiQue/LooGLE 作兼容对照</td>
+<td>accuracy/F1 与类别置信区间；压缩前后 paired delta</td>
+<td>选项线索、长度与任务类型混杂、异质指标平均</td>
+</tr>
+<tr>
+<td>时间与更新</td>
+<td>LongMemEval；LoCoMo QA</td>
+<td>judge accuracy、Recall/NDCG、过期事实率、拒答 precision/recall</td>
+<td>旧事实未删除、时间换算错、只召回部分证据</td>
+</tr>
+<tr>
+<td>Agent 工具状态</td>
+<td>AppWorld、OfficeBench、tau2-bench、WebArena-Infinity</td>
+<td>harness success、paired memory gain、失败类型</td>
+<td>丢 token/ID、重复副作用、忘记已处理项、工具对断裂</td>
+</tr>
+<tr>
+<td>代码与搜索长轨迹</td>
+<td>SWE-Gym、MemGym-CodeQA/DR、BrowseComp</td>
+<td>tests/judge、峰值与累计 token、压缩触发覆盖率、全体任务成本</td>
+<td>文件系统可重读造成伪记忆收益；成功轨迹成本偏差</td>
+</tr>
+</tbody>
+</table>
+<p>至少还应增加三项现有论文普遍不足的指标：</p>
+<ol>
+<li><strong>Repeated-compaction drift</strong>：同一轨迹连续压缩 1、2、4、8 次，分别核对约束、未完成事项、环境状态和最终任务成功率。</li>
+<li><strong>Transactional correctness</strong>：在 tool call/result 边界、用户插入新消息、摘要生成失败时触发压缩，检查是否留下孤儿 tool result、丢失新消息或提交过期摘要。</li>
+<li><strong>Recovery overhead</strong>：统计压缩导致的额外文件读取、搜索、重复 API 调用、rollback 与 wall-clock；只看 peak token 会把“删掉后重新找回来”的成本隐藏掉。</li>
+</ol>
+<h2 id="论文自报与本文判断的边界">论文自报与本文判断的边界</h2>
+<ul>
+<li>LLMLingua 自报最高约 20x 压缩仍保持 GSM8K EM；这支持“特定 few-shot CoT prompt 可高度冗余”，不支持“Agent transcript 可 20x 无损压缩”。</li>
+<li>LongLLMLingua 自报在部分 QA 上压缩后优于原文；更稳妥解释是问题感知去噪和重排缓解 lost-in-the-middle，而不是压缩创造了新信息。</li>
+<li>RULER 与 LongBench v2 测模型能力，不含 compressor；把它们用于压缩必须有同模型、同解码、同题的 paired full-context control。</li>
+<li>LongMemEval 与 LoCoMo 能测记忆内容，但不包含文件、进程、工具调用配对和不可重复副作用。</li>
+<li>ACON 的环境成功率证据强于文本相似度，但训练过的 guideline 与同分布 benchmark 可能共同适配。</li>
+<li>MemGym 的配对设计最接近 memory-isolated evaluation，但论文自己承认 memory 会改变后续策略；MemRM 也只在有限 OOD coverage 内有证据。</li>
+<li>ReSum 证明“摘要可让受 32K 限制的搜索 Agent 继续探索”，但其 Pass@3、LLM judge、不同 RL tool budget 和成功轨迹成本口径都需要单列，不能浓缩成一个平均提升值。</li>
+</ul>
+<h2 id="一手来源">一手来源</h2>
+<ul>
+<li><a href="https://aclanthology.org/2023.emnlp-main.825/">LLMLingua（EMNLP 2023）</a> · <a href="https://github.com/microsoft/LLMLingua">官方代码</a></li>
+<li><a href="https://aclanthology.org/2024.acl-long.91/">LongLLMLingua（ACL 2024）</a></li>
+<li><a href="https://arxiv.org/abs/2404.06654">RULER 论文</a> · <a href="https://github.com/NVIDIA/RULER">官方代码</a></li>
+<li><a href="https://arxiv.org/abs/2412.15204">LongBench v2 论文</a> · <a href="https://github.com/THUDM/LongBench">官方仓库</a> · <a href="https://huggingface.co/datasets/THUDM/LongBench-v2">官方数据</a></li>
+<li><a href="https://arxiv.org/abs/2410.10813">LongMemEval 论文</a> · <a href="https://github.com/xiaowu0162/longmemeval">官方仓库</a> · <a href="https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned">官方数据</a></li>
+<li><a href="https://arxiv.org/abs/2402.17753">LoCoMo 论文</a> · <a href="https://github.com/snap-research/locomo">官方仓库</a></li>
+<li><a href="https://arxiv.org/abs/2510.00615">ACON 论文</a> · <a href="https://github.com/microsoft/acon">官方代码</a></li>
+<li><a href="https://arxiv.org/abs/2605.20833">MemGym 论文</a> · <a href="https://github.com/WujiangXu/MemGym">官方仓库</a> · <a href="https://github.com/WujiangXu/MemGym/blob/main/docs/data.md">数据发布状态</a></li>
+<li><a href="https://arxiv.org/abs/2509.13313">ReSum 论文</a></li>
+</ul>
+<h2 id="仍需谨慎引用的缺口">仍需谨慎引用的缺口</h2>
+<ul>
+<li>MemGym v1 正文未说明 670-pilot 与 4,289-production 的关系；官方仓库补充了该映射，但 production CodeQA 数据截至快照仍未公开，复现性结论应保留这一限制。</li>
+<li>LoCoMo 原论文统计为 50 段对话，而后续工作常用官方 <code>locomo10.json</code>。报告结果必须写明使用哪一版，不应只写“LoCoMo”。</li>
+<li>ZeroSCROLLS、LongBench 原版等复合 benchmark 的总体均值混合不同评分函数；做压缩论文横比时应保留逐子任务结果，不能只摘平均分。</li>
+<li>GAIA 官方 scorer 与 ReSum 的 Qwen judge 不是同一口径；和官方 leaderboard 横比前必须重跑同一 scorer。</li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

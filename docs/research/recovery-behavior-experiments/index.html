@@ -1,0 +1,542 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>恢复边界行为实测：丢失 Worktree、压缩投影与未知工具终态 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/research/recovery-behavior-experiments/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="恢复边界行为实测：丢失 Worktree、压缩投影与未知工具终态"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/research/recovery-behavior-experiments/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#结论摘要" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">结论摘要</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#术语与判定边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">术语与判定边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#固定研究锚点" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">固定研究锚点</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验环境与隔离" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验环境与隔离</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验一qwen-丢失-worktree-与压缩后恢复投影" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验一：Qwen 丢失 Worktree 与压缩后恢复投影</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实验类型与被测边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实验类型与被测边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#安装编译与启动命令" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">安装、编译与启动命令</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#输入与事件序列" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">输入与事件序列</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实际输出" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实际输出</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#与官方契约交叉核验" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">与官方契约交叉核验</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#本实验能证明与不能证明的内容" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">本实验能证明与不能证明的内容</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验二deepseek-未知工具终态与不兼容日志拒绝" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验二：DeepSeek 未知工具终态与不兼容日志拒绝</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实验类型与执行命令" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实验类型与执行命令</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#输入一有调用无结果的中断-session" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">输入一：有调用、无结果的中断 Session</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实际事件序列与终态" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实际事件序列与终态</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#输入二当前-harness-无法解释的日志" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">输入二：当前 Harness 无法解释的日志</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#横向恢复覆盖" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">横向恢复覆盖</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#未纳入正向结论的运行" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">未纳入正向结论的运行</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#局限与后续实验" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">局限与后续实验</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#一手来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">一手来源</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#结论摘要" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">结论摘要</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#术语与判定边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">术语与判定边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#固定研究锚点" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">固定研究锚点</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验环境与隔离" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验环境与隔离</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验一qwen-丢失-worktree-与压缩后恢复投影" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验一：Qwen 丢失 Worktree 与压缩后恢复投影</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实验类型与被测边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实验类型与被测边界</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#安装编译与启动命令" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">安装、编译与启动命令</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#输入与事件序列" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">输入与事件序列</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实际输出" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实际输出</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#与官方契约交叉核验" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">与官方契约交叉核验</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#本实验能证明与不能证明的内容" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">本实验能证明与不能证明的内容</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#实验二deepseek-未知工具终态与不兼容日志拒绝" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">实验二：DeepSeek 未知工具终态与不兼容日志拒绝</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实验类型与执行命令" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实验类型与执行命令</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#输入一有调用无结果的中断-session" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">输入一：有调用、无结果的中断 Session</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实际事件序列与终态" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实际事件序列与终态</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#输入二当前-harness-无法解释的日志" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">输入二：当前 Harness 无法解释的日志</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#横向恢复覆盖" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">横向恢复覆盖</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#未纳入正向结论的运行" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">未纳入正向结论的运行</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#局限与后续实验" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">局限与后续实验</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#一手来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">一手来源</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">恢复边界行为实测：丢失 Worktree、压缩投影与未知工具终态</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="恢复边界行为实测丢失-worktree压缩投影与未知工具终态"></span></p>
+<blockquote>
+<p>导航：<a href="/harnesswiki-site/">首页</a> · <a href="/harnesswiki-site/docs/research/">调研索引</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态持久化与恢复</a> · <a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/">上下文压缩</a><br>
+实验日期：2026-08-19<br>
+事实类型：命令运行结果为 <code>observed</code>；固定源码契约为 <code>implemented</code>；官方用户说明为 <code>documented</code></p>
+</blockquote>
+<p>本文记录第一批恢复边界行为实验，限定回答三个问题：Session 绑定的 worktree 在两次运行之间消失后，恢复是成功、降级还是失败；持久记录中出现 compaction checkpoint 后，下一次模型请求能恢复哪些内容；进程中断在有副作用的工具调用已经持久化、结果尚未持久化之间时，Harness 怎样给出可继续的唯一终态。</p>
+<p>本页区分两类执行证据：</p>
+<ul>
+<li><strong>直接实现探针</strong>：导入固定提交中的真实模块，以临时文件和真实函数调用驱动边界。它是 <code>observed</code>，但不是完整 CLI 黑盒。</li>
+<li><strong>项目自有 assembled-app snapshot test</strong>：执行上游提交的测试、真实 Loader 组合、子进程和 JSONL persistence，并用录制的模型响应代替付费 API。它是 <code>observed</code>，但不是使用真实模型账号的产品黑盒。</li>
+</ul>
+<h2 id="结论摘要">结论摘要</h2>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>实际结果</th>
+<th>事实类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen Session 的 worktree 目录已经被删除，恢复会不会失败？</td>
+<td>不会。恢复返回 <code>session=null</code>、<code>contextMessage=null</code>，删除 stale sidecar，Session 可继续但不再带 worktree context。这是部分恢复，不是 worktree 重建。</td>
+<td><code>observed</code> 直接实现探针；完整 CLI 继续语义另有 <code>documented</code> 佐证</td>
+</tr>
+<tr>
+<td>Qwen 在 compaction record 后怎样重建模型历史？</td>
+<td>四条 durable records 被投影成三条 API history：<code>state_snapshot</code>、ack、压缩后 tail。压缩前原始 user/model 文本仍在 durable input 中，但不再暴露给模型。</td>
+<td><code>observed</code> 直接实现探针</td>
+</tr>
+<tr>
+<td>DeepSeek 恢复一个已记录 <code>tool/call</code>、缺少 <code>tool/result</code> 的 Session 会不会重放工具？</td>
+<td>不会盲目重放。恢复追加 <code>TOOL_OUTCOME_UNKNOWN</code> 合成结果，闭合旧 Turn；新 Turn 的最终回答要求先验证外部状态。</td>
+<td><code>observed</code> assembled-app snapshot test</td>
+</tr>
+<tr>
+<td>DeepSeek 遇到更高日志版本或未知 required event 会怎样？</td>
+<td>两种输入都拒绝恢复并以进程退出码 1 终结；错误分别给出升级方向或未知 event 的 seq，并指出 raw log。</td>
+<td><code>observed</code> assembled-app snapshot test</td>
+</tr>
+</tbody>
+</table>
+<p>共同边界是：<strong>恢复投影不等于恢复 Execution World</strong>。Qwen 可以保留 Session transcript 却失去 worktree identity；压缩后的模型只看到派生快照与 tail；DeepSeek 可以把未决 Action 标成 unknown，却不能从日志判断远端副作用是否真的完成。</p>
+<h2 id="术语与判定边界">术语与判定边界</h2>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>本页定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Durable record</td>
+<td>进程退出后仍可读取的 transcript/event。它是恢复输入，不保证全部进入下一次模型请求。</td>
+</tr>
+<tr>
+<td>Worktree binding</td>
+<td>Session id 到 worktree 路径、分支和原仓库的 sidecar 关联。目录本身和 sidecar 是两个独立事实。</td>
+</tr>
+<tr>
+<td>Recovery projection</td>
+<td>Harness 从 durable records 构造的当前模型历史或 UI context。它可以有损，不等于原始事件流。</td>
+</tr>
+<tr>
+<td>Semantic snapshot</td>
+<td>压缩历史后供后续模型继续的派生摘要。本实验不把摘要文本当作外部事实源。</td>
+</tr>
+<tr>
+<td>Unknown tool outcome</td>
+<td>已有 durable <code>tool/call</code>，但没有 durable result；外部效果可能成功、失败或部分完成，Harness 无法仅凭日志判定。</td>
+</tr>
+<tr>
+<td>Terminal outcome</td>
+<td>本次恢复尝试不再变化的结果：正常、部分恢复、拒绝，或恢复后新 Turn 的完成状态。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="固定研究锚点">固定研究锚点</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>gitlink 与子仓库 HEAD</th>
+<th>本轮执行面</th>
+<th>凭据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen Code</td>
+<td><a href="https://github.com/QwenLM/qwen-code/commit/b4f5079dc0cc89ce1448785898ab72b358399c95"><code>b4f5079dc0cc89ce1448785898ab72b358399c95</code></a></td>
+<td><code>worktreeSessionService.ts</code>、<code>session-api-history.ts</code> 的直接实现探针</td>
+<td>无 API key、无模型调用</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><a href="https://github.com/deepseek-ai/DeepSeek-Harness/commit/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca"><code>99f6f02fecdb7dff40c3fbc9470f5907c29f74ca</code></a></td>
+<td>两个官方 keyless snapshot 文件、真实 Loader 子进程与 JSONL persistence</td>
+<td>无 API key；使用仓库内录制响应</td>
+</tr>
+</tbody>
+</table>
+<p>两个本地子仓库都是 shallow repository，顶层 gitlink 与各自 <code>HEAD</code> 相同。Qwen 根包版本为 <code>0.21.11</code>，要求 Node <code>&gt;=22</code>；DeepSeek 根包版本为 <code>0.1.0-rc.7</code>，固定 <code>pnpm@11.7.0</code>，支持 Node <code>^22.19.0 || &gt;=24.0.0</code>。</p>
+<p>锚点在实验后按下列命令再次核对：</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">git ls</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">files </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">stage </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/QwenLM/qwen-code</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/deepseek-ai/DeepSeek-Harness</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">git </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">C </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/QwenLM/qwen-code</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> rev</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">parse HEAD</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">git </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">C </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/QwenLM/qwen-code</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> rev</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">parse </span><span style="--0:#C792EA;--1:#8844AE">--is-</span><span style="--0:#D6DEEB;--1:#403F53">shallow</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">repository</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">git </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">C </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/deepseek-ai/DeepSeek-Harness</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> rev</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">parse HEAD</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">git </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">C </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/deepseek-ai/DeepSeek-Harness</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> rev</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">parse </span><span style="--0:#C792EA;--1:#8844AE">--is-</span><span style="--0:#D6DEEB;--1:#403F53">shallow</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">repository</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="git ls-files --stage -- &#x60;  &#x27;upstreams/QwenLM/qwen-code&#x27; &#x60;  &#x27;upstreams/deepseek-ai/DeepSeek-Harness&#x27;git -C &#x27;upstreams/QwenLM/qwen-code&#x27; rev-parse HEADgit -C &#x27;upstreams/QwenLM/qwen-code&#x27; rev-parse --is-shallow-repositorygit -C &#x27;upstreams/deepseek-ai/DeepSeek-Harness&#x27; rev-parse HEADgit -C &#x27;upstreams/deepseek-ai/DeepSeek-Harness&#x27; rev-parse --is-shallow-repository"><div></div></button></div></figure></div>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">160000 b4f5079dc0cc89ce1448785898ab72b358399c95 0 upstreams/QwenLM/qwen-code</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">160000 99f6f02fecdb7dff40c3fbc9470f5907c29f74ca 0 upstreams/deepseek-ai/DeepSeek-Harness</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">b4f5079dc0cc89ce1448785898ab72b358399c95</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">true</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">99f6f02fecdb7dff40c3fbc9470f5907c29f74ca</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">true</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="160000 b4f5079dc0cc89ce1448785898ab72b358399c95 0 upstreams/QwenLM/qwen-code160000 99f6f02fecdb7dff40c3fbc9470f5907c29f74ca 0 upstreams/deepseek-ai/DeepSeek-Harnessb4f5079dc0cc89ce1448785898ab72b358399c95true99f6f02fecdb7dff40c3fbc9470f5907c29f74catrue"><div></div></button></div></figure></div>
+<h2 id="实验环境与隔离">实验环境与隔离</h2>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>实际值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS</td>
+<td>Microsoft Windows 11 专业版，10.0.26200，64 位</td>
+</tr>
+<tr>
+<td>PowerShell</td>
+<td>7.6.4</td>
+</tr>
+<tr>
+<td>Git</td>
+<td>2.55.0.windows.3</td>
+</tr>
+<tr>
+<td>Node.js</td>
+<td>v26.7.0，<code>win32 x64</code></td>
+</tr>
+<tr>
+<td>Qwen 临时包管理器</td>
+<td>pnpm 10.28.2</td>
+</tr>
+<tr>
+<td>DeepSeek workspace 包管理器</td>
+<td>packageManager 自动选择 pnpm 11.7.0</td>
+</tr>
+<tr>
+<td>临时根目录</td>
+<td><code>%TEMP%\harnesswiki-recovery-exp-1787077649</code></td>
+</tr>
+</tbody>
+</table>
+<p>所有安装、编译产物、sidecar 和测试运行目录都在上述临时根目录。上游浅克隆未安装依赖、未写测试缓存；实验不修改 Session 之外的远端系统，也不使用真实付费凭据。</p>
+<p>Qwen 的单 package 临时副本无法直接沿用 monorepo Vitest 配置，因此本轮以 <code>tsc --noCheck</code> 做机械转换，再由 Node 执行真实上游模块。<code>--noCheck</code> 只跳过静态类型检查，不替换运行实现。DeepSeek 则完整复制固定工作树，在临时目录按 lockfile 安装后直接运行上游 snapshot tests。</p>
+<p>完整实验输入不是只保存在本文代码块中。Qwen probe 固化为 <a href="/harnesswiki-site/_sources/scripts/recovery/qwen-recovery-probe.ts"><code>scripts/recovery/qwen-recovery-probe.ts</code></a>，包含输入构造、真实模块调用、逐项断言和 JSON observation。DeepSeek 使用固定子仓库内的 <code>examples/headless-agent/tests/semantic-checkpoint.snapshot.ts</code>、<code>session-format-guard.snapshot.ts</code>，以及相邻的 <code>semantic-checkpoint-snapshots/tool-outcome-unknown/</code>、<code>workspace-context-resume-snapshots/offline-edit/</code> replay 与 golden；这些资产都由上表 gitlink 锚定。临时目录只承载依赖和生成物，可以从这些仓库内文件重建。</p>
+<h2 id="实验一qwen-丢失-worktree-与压缩后恢复投影">实验一：Qwen 丢失 Worktree 与压缩后恢复投影</h2>
+<h3 id="实验类型与被测边界">实验类型与被测边界</h3>
+<p>这是 <code>observed</code> <strong>直接实现探针</strong>，不是 <code>qwen --resume</code> 原生 CLI 黑盒。探针调用两个固定源码入口：</p>
+<ul>
+<li><a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/worktreeSessionService.ts#L391-L474"><code>restoreWorktreeContext</code></a>读取真实 JSON sidecar、对真实路径执行 <code>fs.stat</code>，并在目录不存在时清理 sidecar。</li>
+<li><a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/session-api-history.ts#L73-L131"><code>buildApiHistoryFromConversation</code></a>顺序读取恢复记录，遇到 <code>chat_compression</code> 时用 <code>compressedHistory</code> 替换当前模型投影，再追加后续 message。</li>
+</ul>
+<p>它直接观察 worktree binding 与 model-visible projection，不启动 TUI/headless adapter，不验证 session picker、stderr 文案、旧 shell 进程或 Git worktree metadata。</p>
+<h3 id="安装编译与启动命令">安装、编译与启动命令</h3>
+<p>临时副本只包含固定 Qwen 提交的 <code>packages/core</code>。以下命令从仓库内 probe 构造全新可运行副本；<code>tsc</code> 显式接收输入文件和编译选项，不依赖 monorepo 的 Vitest 配置：</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$repositoryRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Resolve-Path</span><span style="--0:#D6DEEB;--1:#403F53"> .</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$experimentRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$env:TEMP</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">harnesswiki-recovery-exp-replay</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$qwenSource</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$repositoryRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/QwenLM/qwen-code/packages/core</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$experimentRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">qwen-core</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">if</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#7FDBCA;--1:#096E72">Test-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">LiteralPath </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span><span style="--0:#D6DEEB;--1:#403F53">) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">throw</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">Replay target already exists: </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">New-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">ItemType Directory </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Path </span><span style="--0:#82AAFF;--1:#3B61B0">$experimentRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Force </span><span style="--0:#7FDBCA;--1:#096E72">|</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Out-Null</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">New-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">ItemType Directory </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Path </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">|</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Out-Null</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Get-ChildItem</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">LiteralPath </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenSource</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Force </span><span style="--0:#7FDBCA;--1:#096E72">|</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">Where-Object</span><span style="--0:#D6DEEB;--1:#403F53"> { $_</span><span style="--0:#C5E478;--1:#3B61B0">.Name</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-notin</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">@</span><span style="--0:#D6DEEB;--1:#403F53">(</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">node_modules</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#7FDBCA;--1:#096E72">,</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">dist</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53">) } </span><span style="--0:#7FDBCA;--1:#096E72">|</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">ForEach-Object</span><span style="--0:#D6DEEB;--1:#403F53"> {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">Copy-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">LiteralPath $_</span><span style="--0:#C5E478;--1:#3B61B0">.FullName</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Destination </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Recurse </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Force</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Copy-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">LiteralPath (</span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$repositoryRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">scripts/recovery/qwen-recovery-probe.ts</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53">) </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Destination (</span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">recovery-probe.ts</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53">)</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Set-Location</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$qwenTarget</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm install </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">ignore</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">scripts </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">no</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">frozen</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">lockfile</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm add </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#7FDBCA;--1:#096E72">save-dev</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">@types</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">node</span><span style="--0:#82AAFF;--1:#3B61B0">@22</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">ignore</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">scripts</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm exec tsc recovery</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.ts </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">outDir probe</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">dist</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">persisted </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">rootDir </span><span style="--0:#7FDBCA;--1:#096E72">.</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">module NodeNext </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">moduleResolution NodeNext </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">target ES2022 </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">lib ES2023 </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">types node </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">skipLibCheck </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">esModuleInterop </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">resolveJsonModule </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">declaration false </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">sourceMap false </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">composite false </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">incremental false </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">noCheck</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">node probe</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">dist</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">persisted</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">recovery</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">probe.js</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="$repositoryRoot = Resolve-Path .$experimentRoot = Join-Path $env:TEMP &#x27;harnesswiki-recovery-exp-replay&#x27;$qwenSource = Join-Path $repositoryRoot &#x27;upstreams/QwenLM/qwen-code/packages/core&#x27;$qwenTarget = Join-Path $experimentRoot &#x27;qwen-core&#x27;if (Test-Path -LiteralPath $qwenTarget) {  throw &quot;Replay target already exists: $qwenTarget&quot;}New-Item -ItemType Directory -Path $experimentRoot -Force | Out-NullNew-Item -ItemType Directory -Path $qwenTarget | Out-NullGet-ChildItem -LiteralPath $qwenSource -Force |  Where-Object { $_.Name -notin @(&#x27;node_modules&#x27;, &#x27;dist&#x27;) } |  ForEach-Object {    Copy-Item -LiteralPath $_.FullName -Destination $qwenTarget -Recurse -Force  }Copy-Item -LiteralPath (Join-Path $repositoryRoot &#x27;scripts/recovery/qwen-recovery-probe.ts&#x27;) &#x60;  -Destination (Join-Path $qwenTarget &#x27;recovery-probe.ts&#x27;)Set-Location $qwenTargetpnpm install --ignore-scripts --no-frozen-lockfilepnpm add --save-dev @types/node@22 --ignore-scriptspnpm exec tsc recovery-probe.ts &#x60;  --outDir probe-dist-persisted --rootDir . &#x60;  --module NodeNext --moduleResolution NodeNext --target ES2022 &#x60;  --lib ES2023 --types node --skipLibCheck --esModuleInterop &#x60;  --resolveJsonModule --declaration false --sourceMap false &#x60;  --composite false --incremental false --noChecknode probe-dist-persisted/recovery-probe.js"><div></div></button></div></figure></div>
+<p>首次实验与从固化 probe 重跑时，最后两条命令退出码均为 0。首次编译耗时 9.55 秒、运行耗时 0.60 秒；固化文件重跑编译耗时 9.94 秒、运行耗时 0.11 秒。probe 内的断言覆盖 sidecar 清理、两个 <code>null</code> 恢复值、三条模型历史及压缩前原文不可见，任一结果漂移都会让 Node 非零退出。</p>
+<h3 id="输入与事件序列">输入与事件序列</h3>
+<p>Worktree 输入使用一个结构完整的 sidecar，<code>worktreePath</code> 位于允许的 <code>&lt;originalCwd&gt;/.qwen/worktrees/</code> 子树，但目标目录从未创建：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"slug"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">lost-worktree</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"worktreePath"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">&lt;tmp&gt;/repo/.qwen/worktrees/lost-worktree</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"worktreeBranch"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">worktree-lost-worktree</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"originalCwd"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">&lt;tmp&gt;/repo</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"originalBranch"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">main</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"originalHeadCommit"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="{  &quot;slug&quot;: &quot;lost-worktree&quot;,  &quot;worktreePath&quot;: &quot;<tmp>/repo/.qwen/worktrees/lost-worktree&quot;,  &quot;worktreeBranch&quot;: &quot;worktree-lost-worktree&quot;,  &quot;originalCwd&quot;: &quot;<tmp>/repo&quot;,  &quot;originalBranch&quot;: &quot;main&quot;,  &quot;originalHeadCommit&quot;: &quot;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&quot;}"><div></div></button></div></figure></div>
+<p>压缩恢复输入模拟 Session transcript 的 active chain，保留压缩前 records、一个 compression checkpoint 和其后的新消息：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right">顺序</th>
+<th>record</th>
+<th>模型内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right">1</td>
+<td><code>user u1</code></td>
+<td><code>ORIGINAL_DETAIL</code></td>
+</tr>
+<tr>
+<td style="text-align: right">2</td>
+<td><code>assistant a1</code></td>
+<td><code>ORIGINAL_REPLY</code></td>
+</tr>
+<tr>
+<td style="text-align: right">3</td>
+<td><code>system c1 / chat_compression</code></td>
+<td><code>compressedHistory = [&lt;state_snapshot&gt;SUMMARY_ONLY&lt;/state_snapshot&gt;, Summary acknowledged.]</code></td>
+</tr>
+<tr>
+<td style="text-align: right">4</td>
+<td><code>user u2</code></td>
+<td><code>POST_COMPACTION_TAIL</code></td>
+</tr>
+</tbody>
+</table>
+<p>探针按以下顺序执行：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">write valid sidecar</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; read sidecar before restore</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; restoreWorktreeContext(sidecar)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; read sidecar after restore</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; buildApiHistoryFromConversation(four records)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; print JSON observation</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="write valid sidecar  -> read sidecar before restore  -> restoreWorktreeContext(sidecar)  -> read sidecar after restore  -> buildApiHistoryFromConversation(four records)  -> print JSON observation"><div></div></button></div></figure></div>
+<p>预期分为两个独立判定：目录不存在时 sidecar 应被清理且不得把旧路径注入 context；compression checkpoint 应成为模型投影的新起点，但 checkpoint 之后的 tail 仍应追加。</p>
+<h3 id="实际输出">实际输出</h3>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"runtime"</span><span style="--0:#D6DEEB;--1:#403F53">: {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"node"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">v26.7.0</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"platform"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">win32</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"arch"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">x64</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">},</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"lostWorktree"</span><span style="--0:#D6DEEB;--1:#403F53">: {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"worktreeExists"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">false</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"sidecarExistedBefore"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"restoreSession"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">null</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"restoreContextMessage"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">null</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"sidecarExistsAfter"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">false</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">},</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">"compressedResumeProjection"</span><span style="--0:#D6DEEB;--1:#403F53">: {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"durableRecordCount"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">4</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"apiHistoryCount"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">3</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"preservesSummary"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"preservesPostCompressionTail"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"exposesOriginalDetailToModel"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">false</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"exposesOriginalReplyToModel"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">false</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="{  &quot;runtime&quot;: {    &quot;node&quot;: &quot;v26.7.0&quot;,    &quot;platform&quot;: &quot;win32&quot;,    &quot;arch&quot;: &quot;x64&quot;  },  &quot;lostWorktree&quot;: {    &quot;worktreeExists&quot;: false,    &quot;sidecarExistedBefore&quot;: true,    &quot;restoreSession&quot;: null,    &quot;restoreContextMessage&quot;: null,    &quot;sidecarExistsAfter&quot;: false  },  &quot;compressedResumeProjection&quot;: {    &quot;durableRecordCount&quot;: 4,    &quot;apiHistoryCount&quot;: 3,    &quot;preservesSummary&quot;: true,    &quot;preservesPostCompressionTail&quot;: true,    &quot;exposesOriginalDetailToModel&quot;: false,    &quot;exposesOriginalReplyToModel&quot;: false  }}"><div></div></button></div></figure></div>
+<p>生成的三条 API history 依次为：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="json"><code><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">[</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"role"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">user</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"parts"</span><span style="--0:#D6DEEB;--1:#403F53">: [{ </span><span style="--0:#7FDBCA;--1:#096E72">"text"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">&lt;state_snapshot&gt;SUMMARY_ONLY&lt;/state_snapshot&gt;</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53"> }]</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">},</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"role"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">model</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"parts"</span><span style="--0:#D6DEEB;--1:#403F53">: [{ </span><span style="--0:#7FDBCA;--1:#096E72">"text"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">Summary acknowledged.</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53"> }]</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">},</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">{</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"role"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">user</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">,</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">"parts"</span><span style="--0:#D6DEEB;--1:#403F53">: [{ </span><span style="--0:#7FDBCA;--1:#096E72">"text"</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#C789D6;--1:#7C5686">POST_COMPACTION_TAIL</span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53"> }]</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">]</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="[  {    &quot;role&quot;: &quot;user&quot;,    &quot;parts&quot;: [{ &quot;text&quot;: &quot;<state_snapshot>SUMMARY_ONLY</state_snapshot>&quot; }]  },  {    &quot;role&quot;: &quot;model&quot;,    &quot;parts&quot;: [{ &quot;text&quot;: &quot;Summary acknowledged.&quot; }]  },  {    &quot;role&quot;: &quot;user&quot;,    &quot;parts&quot;: [{ &quot;text&quot;: &quot;POST_COMPACTION_TAIL&quot; }]  }]"><div></div></button></div></figure></div>
+<table>
+<thead>
+<tr>
+<th>判定</th>
+<th>预期</th>
+<th>实际</th>
+<th>终态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>丢失 worktree</td>
+<td>清理 stale binding，不恢复旧路径</td>
+<td>sidecar 从存在变为不存在；返回两个 <code>null</code>；函数正常完成</td>
+<td>worktree 域 <code>partial/degraded</code>，非异常终态</td>
+</tr>
+<tr>
+<td>压缩快照</td>
+<td>summary 成为模型历史起点</td>
+<td><code>SUMMARY_ONLY</code> 与 ack 保留</td>
+<td>恢复成功，但只恢复派生语义投影</td>
+</tr>
+<tr>
+<td>压缩后 tail</td>
+<td>checkpoint 后的新消息继续可见</td>
+<td><code>POST_COMPACTION_TAIL</code> 保留</td>
+<td>恢复成功</td>
+</tr>
+<tr>
+<td>压缩前原文</td>
+<td>不应绕过 checkpoint 重新注入模型</td>
+<td><code>ORIGINAL_DETAIL</code>、<code>ORIGINAL_REPLY</code> 均不在 API history</td>
+<td>durable input 仍有 4 records，模型投影不可见原文</td>
+</tr>
+</tbody>
+</table>
+<h3 id="与官方契约交叉核验">与官方契约交叉核验</h3>
+<p><code>implemented</code>：恢复函数先约束 sidecar 路径必须位于 Qwen 管理的 worktree 子树，再对目录执行 <code>stat</code>；目录不是存活 directory 时调用 clear 并返回空 context。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/worktreeSessionService.ts#L425-L474">路径校验与 stale cleanup</a> 上游自有测试也使用临时文件系统固定了同一结果。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/worktreeSessionService.test.ts#L211-L322">stale sidecar test</a></p>
+<p><code>documented</code>：用户文档明确说，两次 Session 之间 worktree 目录被删除时自动清理 stale sidecar，resume “continues without worktree context”，不会报错。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/docs/users/features/worktree.md#L145-L165">恢复步骤与删除边界</a> 本探针观察了 core 返回与清理，没有把文档声明的完整 CLI continuation 升级成原生黑盒 <code>observed</code>。</p>
+<p><code>implemented</code>：<code>SessionApiHistoryAccumulator</code> 遇到有效 <code>chat_compression</code> record 时把活动 history 替换成 <code>compressedHistory</code> 的拷贝；后续普通 record 再 append。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/session-api-history.ts#L73-L105">投影实现</a> 上游测试以同样的 “compressed snapshot + post-compression record” 固定预期。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/sessionService.test.ts#L3094-L3159">恢复投影测试</a></p>
+<h3 id="本实验能证明与不能证明的内容">本实验能证明与不能证明的内容</h3>
+<p>本实验能证明：丢失 worktree 不会让 core restore helper 抛出失败；旧 binding 会被删除；compression record 之后的模型投影不会重新混入 checkpoint 之前的原文。</p>
+<p>本实验不能证明：</p>
+<ul>
+<li><code>qwen --resume</code> 的完整 TUI/headless 进程在所有配置下都成功，因为没有启动 CLI adapter。</li>
+<li>被删除 worktree 中的未提交文件、分支、shell cwd 或后台进程可以恢复；本轮实际结果恰好没有返回这些状态。</li>
+<li><code>SUMMARY_ONLY</code> 是否忠实覆盖原历史；探针从已存在 checkpoint 开始，没有调用模型生成 summary。</li>
+<li>原始 transcript 是否经过磁盘 schema 迁移；四条 records 是直接传入真实投影函数的 durable-shaped input。</li>
+<li>Qwen 会自动重建同名 worktree。实际观察是清理 binding 并降级，不是 recreate。</li>
+</ul>
+<h2 id="实验二deepseek-未知工具终态与不兼容日志拒绝">实验二：DeepSeek 未知工具终态与不兼容日志拒绝</h2>
+<h3 id="实验类型与执行命令">实验类型与执行命令</h3>
+<p>这是 <code>observed</code> <strong>项目自有 assembled-app snapshot test</strong>。测试在临时目录启动真实 Loader driver、JSONL persistence 和 headless stream-json adapter；模型响应来自固定 replay fixture，因此不消耗 API key，也不把录制响应冒充实时模型行为。</p>
+<p>以下测试文件、driver、replay 输入和 golden 都直接来自固定 DeepSeek gitlink；复制工作树不会生成或改写 fixture。默认 <code>DSH_SNAPSHOT=replay</code>，命令没有设置 <code>record</code> 或 <code>refresh</code>。</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$repositoryRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Resolve-Path</span><span style="--0:#D6DEEB;--1:#403F53"> .</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$experimentRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$env:TEMP</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">harnesswiki-recovery-exp-replay</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$source</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Resolve-Path</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$repositoryRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">upstreams/deepseek-ai/DeepSeek-Harness</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53">)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$target</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Join-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$experimentRoot</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">deepseek-copy</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">if</span><span style="--0:#D6DEEB;--1:#403F53"> (</span><span style="--0:#7FDBCA;--1:#096E72">Test-Path</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">LiteralPath </span><span style="--0:#82AAFF;--1:#3B61B0">$target</span><span style="--0:#D6DEEB;--1:#403F53">) {</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">throw</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">Replay target already exists: </span><span style="--0:#82AAFF;--1:#3B61B0">$target</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">New-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">ItemType Directory </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Path </span><span style="--0:#82AAFF;--1:#3B61B0">$target</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">|</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">Out-Null</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Get-ChildItem</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Force </span><span style="--0:#82AAFF;--1:#3B61B0">$source</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">|</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">Where-Object</span><span style="--0:#D6DEEB;--1:#403F53"> { $_</span><span style="--0:#C5E478;--1:#3B61B0">.Name</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-ne</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">.git</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> } </span><span style="--0:#7FDBCA;--1:#096E72">|</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#096E72">ForEach-Object</span><span style="--0:#D6DEEB;--1:#403F53"> {</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#096E72">Copy-Item</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">LiteralPath $_</span><span style="--0:#C5E478;--1:#3B61B0">.FullName</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Destination </span><span style="--0:#82AAFF;--1:#3B61B0">$target</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Recurse </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">Force</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">}</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#096E72">Set-Location</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#82AAFF;--1:#3B61B0">$target</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm install </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">frozen</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">lockfile </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">ignore</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">scripts</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$env:DSH_SNAPSHOT_MAX_CONCURRENCY</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">1</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm exec vitest run </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">config vitest.snapshot.config.ts </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">examples</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">headless</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">agent</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">tests</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">semantic</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">checkpoint.snapshot.ts </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">examples</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">headless</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">agent</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">tests</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">session</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#7FDBCA;--1:#096E72">format-guard</span><span style="--0:#D6DEEB;--1:#403F53">.snapshot.ts </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">reporter</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53">verbose </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">pool</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53">forks </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">maxWorkers</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">no</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">file</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">parallelism</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="$repositoryRoot = Resolve-Path .$experimentRoot = Join-Path $env:TEMP &#x27;harnesswiki-recovery-exp-replay&#x27;$source = Resolve-Path (Join-Path $repositoryRoot &#x27;upstreams/deepseek-ai/DeepSeek-Harness&#x27;)$target = Join-Path $experimentRoot &#x27;deepseek-copy&#x27;if (Test-Path -LiteralPath $target) {  throw &quot;Replay target already exists: $target&quot;}New-Item -ItemType Directory -Path $target | Out-NullGet-ChildItem -Force $source |  Where-Object { $_.Name -ne &#x27;.git&#x27; } |  ForEach-Object {    Copy-Item -LiteralPath $_.FullName -Destination $target -Recurse -Force  }Set-Location $targetpnpm install --frozen-lockfile --ignore-scripts$env:DSH_SNAPSHOT_MAX_CONCURRENCY = &#x27;1&#x27;pnpm exec vitest run &#x60;  --config vitest.snapshot.config.ts &#x60;  examples/headless-agent/tests/semantic-checkpoint.snapshot.ts &#x60;  examples/headless-agent/tests/session-format-guard.snapshot.ts &#x60;  --reporter=verbose --pool=forks --maxWorkers=1 --no-file-parallelism"><div></div></button></div></figure></div>
+<p>安装按固定 lockfile解析 238 个 workspace project、923 个 package，并通过仓库自带的 1203-entry supply-chain policy 校验。Windows 上两个 Linux-only 原生包被报告为 unsupported platform；<code>--ignore-scripts</code> 还让两个尚未 build 的 demo bin 无法生成 shim，但目标 snapshot tests 不依赖它们，安装退出码为 0。</p>
+<p>测试命令的实际摘要如下：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">PASS session-format-guard: newer-format refusal              9661 ms</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">PASS session-format-guard: unknown required event refusal    4366 ms</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">PASS semantic-checkpoint: unknown tool outcome resume        5072 ms</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Test Files  2 passed (2)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Tests       3 passed (3)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Duration    25.12 s</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Exit code   0</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="PASS session-format-guard: newer-format refusal              9661 msPASS session-format-guard: unknown required event refusal    4366 msPASS semantic-checkpoint: unknown tool outcome resume        5072 msTest Files  2 passed (2)Tests       3 passed (3)Duration    25.12 sExit code   0"><div></div></button></div></figure></div>
+<p>固化资产完成后再次执行同一命令，三个场景分别耗时 4488、4481、4909 ms；Vitest 报告 <code>2 passed (2)</code>、<code>3 passed (3)</code>、总时长 15.28 秒，退出码仍为 0。两次运行的 wall-clock 差异不改变 golden 与终态断言。</p>
+<h3 id="输入一有调用无结果的中断-session">输入一：有调用、无结果的中断 Session</h3>
+<p>上游测试先用真实 JSONL backend 建立 Session <code>semantic-checkpoint-unknown-outcome</code>，只写入以下事件：<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/examples/headless-agent/tests/semantic-checkpoint.snapshot.ts#L25-L78">seed 实现</a></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right">seq</th>
+<th>event</th>
+<th>关键内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right">0</td>
+<td><code>turn/start</code></td>
+<td>Turn 1</td>
+</tr>
+<tr>
+<td style="text-align: right">1</td>
+<td><code>user/message</code></td>
+<td><code>Perform one side-effecting remote mutation.</code></td>
+</tr>
+<tr>
+<td style="text-align: right">2</td>
+<td><code>step/start</code></td>
+<td>Step 1</td>
+</tr>
+<tr>
+<td style="text-align: right">3</td>
+<td><code>assistant/message</code></td>
+<td>请求 <code>write_remote({value:1})</code></td>
+</tr>
+<tr>
+<td style="text-align: right">4</td>
+<td><code>tool/call</code></td>
+<td>调用已被持久记录，但没有 <code>tool/result</code></td>
+</tr>
+</tbody>
+</table>
+<p>随后销毁 seed context，以同一 persistence root 经 <code>ctx.agents.resume</code> 恢复，并把 <code>Continue safely from the interrupted operation.</code> 作为新输入交给 headless app。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/examples/headless-agent/tests/semantic-checkpoint.snapshot.ts#L82-L119">恢复与断言</a></p>
+<p>预期不是假定工具失败，也不是自动重放。恢复协调器应把 durable call 变成明确的 unknown outcome，闭合旧 Step/Turn，再允许新 Turn 处理这个不确定事实。</p>
+<h3 id="实际事件序列与终态">实际事件序列与终态</h3>
+<p>测试对重新持久化的完整规范化 JSONL 做逐字节 golden 比较，并额外断言包含 <code>TOOL_OUTCOME_UNKNOWN</code> 与 <code>Do not retry blindly.</code>。三个断言均通过。恢复插入的关键序列是：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right">seq</th>
+<th>event</th>
+<th>观测到的恢复语义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right">5</td>
+<td>synthetic <code>tool/result</code></td>
+<td><code>isError=true</code>；<code>ToolOutcomeUnknownError</code>；引用原 <code>tool/call</code> seq 4</td>
+</tr>
+<tr>
+<td style="text-align: right">6</td>
+<td>synthetic <code>step/end</code></td>
+<td>闭合原 Step 1</td>
+</tr>
+<tr>
+<td style="text-align: right">7</td>
+<td>synthetic <code>turn/end</code></td>
+<td>原 Turn 1 以 <code>reason.kind=interrupted</code> 闭合</td>
+</tr>
+<tr>
+<td style="text-align: right">8</td>
+<td><code>session/end-seed</code></td>
+<td>耐久 seed 与新运行边界分开</td>
+</tr>
+<tr>
+<td style="text-align: right">9–13</td>
+<td>inbox + Turn 2 start</td>
+<td>新用户输入进入下一 Turn</td>
+</tr>
+<tr>
+<td style="text-align: right">21–23</td>
+<td>assistant + Step/Turn end</td>
+<td>新 Turn 正常 <code>completed</code></td>
+</tr>
+</tbody>
+</table>
+<p>合成 result 的核心文本是：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">The tool call was interrupted after it was recorded, but no result was</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">durably recorded. Its outcome is unknown. Decide whether to retry from the</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">tool semantics: retry only if the operation is read-only or idempotent; if it</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">may have side effects, first verify external state or ask the user. Do not</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">retry blindly.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="The tool call was interrupted after it was recorded, but no result wasdurably recorded. Its outcome is unknown. Decide whether to retry from thetool semantics: retry only if the operation is read-only or idempotent; if itmay have side effects, first verify external state or ask the user. Do notretry blindly."><div></div></button></div></figure></div>
+<p>headless stream 的最后一条 result 保留同一个 <code>sessionId</code>，最终输出精确为：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">I will verify the external state before deciding whether to retry the side-effecting operation.</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="I will verify the external state before deciding whether to retry the side-effecting operation."><div></div></button></div></figure></div>
+<p>因此本场景的终态是：原 Turn 被修复为 <code>interrupted</code>，未决工具调用被修复为 <code>unknown</code>，恢复进程本身成功，新 Turn 为 <code>completed</code>。没有工具自动重放，也没有声称远端 mutation 已成功或失败。</p>
+<p><code>implemented</code>：<code>interruptedTurnClosers</code> 追踪 pending calls；存在 durable <code>tool/call</code> 时生成 <code>TOOL_OUTCOME_UNKNOWN</code> result，然后按顺序追加 <code>step/end</code> 与 interrupted <code>turn/end</code>。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/core/session/src/repair.ts#L79-L132">修复实现</a> <code>documented</code>：JSONL persistence 明确说恢复 stored surface history，未匹配的 durable call 要求验证副作用或询问用户。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/session/session-persistence-jsonl/README.md#L54-L64">持久化恢复契约</a></p>
+<h3 id="输入二当前-harness-无法解释的日志">输入二：当前 Harness 无法解释的日志</h3>
+<p>同一命令还执行两个 fail-closed 场景：<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/examples/headless-agent/tests/session-format-guard.snapshot.ts#L55-L108">官方测试</a></p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>Seed 输入</th>
+<th>预期</th>
+<th>实际终态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>newer format</td>
+<td>header version = <code>SESSION_FORMAT_VERSION + 99</code>，Turn 已闭合</td>
+<td>stderr 指出日志来自 newer Harness、需要 upgrade，并包含 raw log 路径</td>
+<td>断言通过；进程退出码 1</td>
+</tr>
+<tr>
+<td>unknown required event</td>
+<td>当前 version；追加 <code>{type:'future/event', seq:2}</code>，未标 <code>ignorable</code></td>
+<td>stderr 指出 event type、seq、不可忽略和可能来自 newer Harness，并包含 raw log 路径</td>
+<td>断言通过；进程退出码 1</td>
+</tr>
+</tbody>
+</table>
+<p>两个场景都没有进入模型 replay，也没有把不可解释记录静默裁掉。<code>implemented</code>：coordinator 对 version 做方向感知拒绝；对未知 event 只允许显式 <code>ignorable=true</code>，否则抛 <code>SessionFormatUnsupportedError</code> 并在可用时附 raw artifact 路径。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/session/session-persistence/src/coordinator.ts#L66-L82">版本拒绝</a> · <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/session/session-persistence/src/coordinator.ts#L1048-L1072">event 支持性检查</a></p>
+<h2 id="横向恢复覆盖">横向恢复覆盖</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>Session identity/history</th>
+<th>模型可见投影</th>
+<th>Worktree/files</th>
+<th>Action outcome</th>
+<th>旧进程</th>
+<th>恢复结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen：worktree 目录丢失</td>
+<td>本探针未加载完整 transcript；官方契约允许 Session 继续</td>
+<td>不注入旧 worktree context</td>
+<td>不重建；stale sidecar 被删除</td>
+<td>不涉及</td>
+<td>不恢复</td>
+<td><code>partial/degraded</code>，core helper 正常返回</td>
+</tr>
+<tr>
+<td>Qwen：存在 compression record</td>
+<td>输入仍有 4 records</td>
+<td>summary + ack + checkpoint 后 tail；压缩前原文不可见</td>
+<td>不涉及</td>
+<td>不涉及</td>
+<td>不恢复</td>
+<td>模型投影恢复成功，但有损</td>
+</tr>
+<tr>
+<td>DeepSeek：durable call 无 result</td>
+<td>同一 Session id；旧事件与合成 closers 均入 JSONL</td>
+<td>包含 unknown-outcome Observation；新 Turn 可继续</td>
+<td>未观测</td>
+<td><code>unknown</code>，不改写为 success/failure，不自动重放</td>
+<td>不恢复</td>
+<td>原 Turn <code>interrupted</code>；新 Turn <code>completed</code></td>
+</tr>
+<tr>
+<td>DeepSeek：新格式或未知 required event</td>
+<td>identity 可读，但内容拒绝解释</td>
+<td>不构建</td>
+<td>不涉及</td>
+<td>不涉及</td>
+<td>不恢复</td>
+<td><code>refused</code>，进程退出码 1</td>
+</tr>
+</tbody>
+</table>
+<p>这四个结果说明恢复不能建模成单个 <code>resumed: boolean</code>。至少需要分别记录 recovery identity、durable history、当前 projection、workspace binding、未决 Action 终态和 compatibility verdict。某个域成功不应掩盖另一个域已经丢失或未知。</p>
+<p>对 semantic snapshot 的边界也应明确：</p>
+<ul>
+<li><strong>能恢复</strong>：被 checkpoint 明确保留的任务摘要、ack，以及 checkpoint 后追加的 tail。</li>
+<li><strong>不能从当前模型投影恢复</strong>：被摘要覆盖的逐字原文和未被摘要表达的细节；即使底层 transcript 仍保留这些 records，模型也不会自动看到它们。</li>
+<li><strong>不能替代重新观察</strong>：当前 worktree、远端资源、后台进程和有副作用工具的真实终态。</li>
+<li><strong>不兼容时不能猜测</strong>：当前版本无法解释 required event 时，DeepSeek 的实测终态是拒绝，不是用相似字段勉强继续。</li>
+</ul>
+<h2 id="未纳入正向结论的运行">未纳入正向结论的运行</h2>
+<p>本轮还尝试执行 DeepSeek 的 keyless assembled compaction snapshot：</p>
+<div class="expressive-code"><figure class="frame is-terminal not-content"><figcaption class="header"><span class="title"></span><span class="sr-only">终端窗口</span></figcaption><pre data-language="powershell"><code><div class="ec-line"><div class="code"><span style="--0:#82AAFF;--1:#3B61B0">$env:DSH_SNAPSHOT_MAX_CONCURRENCY</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">1</span><span style="--0:#D9F5DD;--1:#111111">'</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">pnpm exec vitest run </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">config vitest.snapshot.config.ts </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">examples</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">headless</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">agent</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">tests</span><span style="--0:#C792EA;--1:#8844AE">/</span><span style="--0:#D6DEEB;--1:#403F53">headless.snapshot.ts </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">t </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">recovers from context overflow through an assembled compaction</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#7FDBCA;--1:#096E72">`</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">reporter</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53">verbose </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">pool</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53">forks </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">maxWorkers</span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#F78C6C;--1:#AA0982">1</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">--</span><span style="--0:#D6DEEB;--1:#403F53">no</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">file</span><span style="--0:#C792EA;--1:#8844AE">-</span><span style="--0:#D6DEEB;--1:#403F53">parallelism</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="$env:DSH_SNAPSHOT_MAX_CONCURRENCY = &#x27;1&#x27;pnpm exec vitest run &#x60;  --config vitest.snapshot.config.ts &#x60;  examples/headless-agent/tests/headless.snapshot.ts &#x60;  -t &#x27;recovers from context overflow through an assembled compaction&#x27; &#x60;  --reporter=verbose --pool=forks --maxWorkers=1 --no-file-parallelism"><div></div></button></div></figure></div>
+<p>该命令整体退出码为 1，因此不作为通过证据。失败发生在 Windows shell fixture：预期 Bash 命令 <code>printf 'alpha\n'</code> 返回 <code>alpha\n</code>，实际 <code>wsl.exe</code> 报告本机 WSL 不可用，golden JSONL 在 <code>tool/result</code> 处不一致。diff 中后续已经出现 <code>compaction/start</code>、<code>compaction/summary</code> 和恢复继续事件，但由于测试整体未绿，本页不据此声称 compaction assembled snapshot 已在本机通过。这个失败只说明该 Bash fixture 需要可用的 POSIX/WSL 环境，不证明 compaction 机制失败。</p>
+<h2 id="局限与后续实验">局限与后续实验</h2>
+<ul>
+<li>Qwen 直接探针不是原生 CLI 黑盒。后续应在可启动官方 runner 的环境中实际执行 <code>qwen --resume &lt;id&gt;</code>，同时捕获退出码、stderr、首个 prompt 和 <code>worktree_restored</code> 事件。</li>
+<li>本轮没有删除一个包含未提交修改的真实 Git worktree，因此不能观察 orphan branch、untracked file 或 <code>git worktree prune</code> 后的诊断。</li>
+<li>Qwen 的 compression record 是构造输入；本轮验证恢复投影，不验证模型生成摘要的完整性、token gate、失败熔断或多次压缩信息损失。</li>
+<li>DeepSeek replay fixture没有真实执行 <code>write_remote</code>。它精确验证 Harness 对“无法知道外部效果”的处理，但不能告诉我们远端 mutation 实际成功还是失败。</li>
+<li>DeepSeek 使用录制模型响应，证明的是 assembled recovery path 与最终协议输出，不是实时模型在未知终态提示下总会作出相同自然语言判断。</li>
+<li>两个 Harness 都没有恢复旧 OS 进程、环境变量、terminal buffer、pending approval 或后台 job；这些域需要独立故障注入。</li>
+<li>只在 Windows 11 与单一固定提交运行。跨版本 schema migration、Linux/macOS worktree inode/permission 差异和多客户端并发恢复仍未观测。</li>
+</ul>
+<h2 id="一手来源">一手来源</h2>
+<ul>
+<li>Qwen Code：仓库内 <a href="/harnesswiki-site/_sources/scripts/recovery/qwen-recovery-probe.ts"><code>qwen-recovery-probe.ts</code></a>，以及固定提交中的 <a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/worktreeSessionService.ts"><code>worktreeSessionService.ts</code></a>、<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/session-api-history.ts"><code>session-api-history.ts</code></a>、<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/docs/users/features/worktree.md">worktree 官方文档</a>与上游测试。</li>
+<li>DeepSeek Harness：固定提交中的 <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/core/session/src/repair.ts"><code>repair.ts</code></a>、<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/packages/session/session-persistence/src/coordinator.ts"><code>coordinator.ts</code></a>、JSONL persistence README、两个 snapshot test 文件及其相邻 replay/golden 目录。</li>
+</ul>
+<p>本页只把命令实际覆盖到的行为标成 <code>observed</code>。测试名、注释或文档中出现但未执行的用户表面保持 <code>implemented</code>/<code>documented</code>，不向外推成端到端事实。</p>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

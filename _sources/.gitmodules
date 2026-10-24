@@ -1,0 +1,272 @@
+[submodule "upstreams/openai/codex"]
+	path = upstreams/openai/codex
+	url = https://github.com/openai/codex
+	shallow = true
+[submodule "upstreams/anomalyco/opencode"]
+	path = upstreams/anomalyco/opencode
+	url = https://github.com/anomalyco/opencode
+	shallow = true
+[submodule "upstreams/Aider-AI/aider"]
+	path = upstreams/Aider-AI/aider
+	url = https://github.com/Aider-AI/aider
+	shallow = true
+[submodule "upstreams/deepseek-ai/DeepSeek-Harness"]
+	path = upstreams/deepseek-ai/DeepSeek-Harness
+	url = https://github.com/deepseek-ai/DeepSeek-Harness
+	shallow = true
+[submodule "upstreams/earendil-works/pi"]
+	path = upstreams/earendil-works/pi
+	url = https://github.com/earendil-works/pi
+	shallow = true
+[submodule "upstreams/cline/cline"]
+	path = upstreams/cline/cline
+	url = https://github.com/cline/cline
+	shallow = true
+[submodule "upstreams/OpenHands/OpenHands"]
+	path = upstreams/OpenHands/OpenHands
+	url = https://github.com/OpenHands/OpenHands
+	shallow = true
+[submodule "upstreams/SWE-agent/mini-swe-agent"]
+	path = upstreams/SWE-agent/mini-swe-agent
+	url = https://github.com/SWE-agent/mini-swe-agent
+	shallow = true
+[submodule "upstreams/google-gemini/gemini-cli"]
+	path = upstreams/google-gemini/gemini-cli
+	url = https://github.com/google-gemini/gemini-cli
+	shallow = true
+[submodule "upstreams/QwenLM/qwen-code"]
+	path = upstreams/QwenLM/qwen-code
+	url = https://github.com/QwenLM/qwen-code
+	shallow = true
+[submodule "upstreams/mistralai/mistral-vibe"]
+	path = upstreams/mistralai/mistral-vibe
+	url = https://github.com/mistralai/mistral-vibe
+	shallow = true
+[submodule "upstreams/CodebuffAI/freebuff"]
+	path = upstreams/CodebuffAI/freebuff
+	url = https://github.com/CodebuffAI/freebuff
+	shallow = true
+[submodule "upstreams/SWE-agent/SWE-agent"]
+	path = upstreams/SWE-agent/SWE-agent
+	url = https://github.com/SWE-agent/SWE-agent
+	shallow = true
+[submodule "upstreams/langchain-ai/open-swe"]
+	path = upstreams/langchain-ai/open-swe
+	url = https://github.com/langchain-ai/open-swe
+	shallow = true
+[submodule "upstreams/JegernOUTT/refact"]
+	path = upstreams/JegernOUTT/refact
+	url = https://github.com/JegernOUTT/refact
+	shallow = true
+[submodule "upstreams/TabbyML/pochi"]
+	path = upstreams/TabbyML/pochi
+	url = https://github.com/TabbyML/pochi
+	shallow = true
+[submodule "upstreams/ai-christianson/RA.Aid"]
+	path = upstreams/ai-christianson/RA.Aid
+	url = https://github.com/ai-christianson/RA.Aid
+	shallow = true
+[submodule "upstreams/AutoCodeRoverSG/auto-code-rover"]
+	path = upstreams/AutoCodeRoverSG/auto-code-rover
+	url = https://github.com/AutoCodeRoverSG/auto-code-rover
+	shallow = true
+[submodule "upstreams/PrimeIntellect-ai/prime-agent"]
+	path = upstreams/PrimeIntellect-ai/prime-agent
+	url = https://github.com/PrimeIntellect-ai/prime-agent
+	shallow = true
+[submodule "upstreams/esengine/DeepSeek-Reasonix"]
+	path = upstreams/esengine/DeepSeek-Reasonix
+	url = https://github.com/esengine/DeepSeek-Reasonix
+	shallow = true
+[submodule "upstreams/HKUDS/DeepCode"]
+	path = upstreams/HKUDS/DeepCode
+	url = https://github.com/HKUDS/DeepCode
+	shallow = true
+[submodule "upstreams/stakpak/agent"]
+	path = upstreams/stakpak/agent
+	url = https://github.com/stakpak/agent
+	shallow = true
+[submodule "upstreams/av/mi"]
+	path = upstreams/av/mi
+	url = https://github.com/av/mi
+	shallow = true
+[submodule "upstreams/Kilo-Org/kilocode"]
+	path = upstreams/Kilo-Org/kilocode
+	url = https://github.com/Kilo-Org/kilocode
+	shallow = true
+[submodule "upstreams/zed-industries/zed"]
+	path = upstreams/zed-industries/zed
+	url = https://github.com/zed-industries/zed
+	shallow = true
+[submodule "upstreams/voideditor/void"]
+	path = upstreams/voideditor/void
+	url = https://github.com/voideditor/void
+	shallow = true
+[submodule "upstreams/warpdotdev/warp"]
+	path = upstreams/warpdotdev/warp
+	url = https://github.com/warpdotdev/warp
+	shallow = true
+[submodule "upstreams/FoundationAgents/OpenManus"]
+	path = upstreams/FoundationAgents/OpenManus
+	url = https://github.com/FoundationAgents/OpenManus
+	shallow = true
+[submodule "upstreams/OpenHands/software-agent-sdk"]
+	path = upstreams/OpenHands/software-agent-sdk
+	url = https://github.com/OpenHands/software-agent-sdk
+	shallow = true
+[submodule "upstreams/pydantic/pydantic-ai"]
+	path = upstreams/pydantic/pydantic-ai
+	url = https://github.com/pydantic/pydantic-ai
+	shallow = true
+[submodule "upstreams/langchain-ai/langgraph"]
+	path = upstreams/langchain-ai/langgraph
+	url = https://github.com/langchain-ai/langgraph
+	shallow = true
+[submodule "upstreams/openai/openai-agents-python"]
+	path = upstreams/openai/openai-agents-python
+	url = https://github.com/openai/openai-agents-python
+	shallow = true
+[submodule "upstreams/microsoft/agent-framework"]
+	path = upstreams/microsoft/agent-framework
+	url = https://github.com/microsoft/agent-framework
+	shallow = true
+[submodule "upstreams/mastra-ai/mastra"]
+	path = upstreams/mastra-ai/mastra
+	url = https://github.com/mastra-ai/mastra
+	shallow = true
+[submodule "upstreams/FoundationAgents/MetaGPT"]
+	path = upstreams/FoundationAgents/MetaGPT
+	url = https://github.com/FoundationAgents/MetaGPT
+	shallow = true
+[submodule "upstreams/winfunc/opcode"]
+	path = upstreams/winfunc/opcode
+	url = https://github.com/winfunc/opcode
+	shallow = true
+[submodule "upstreams/asheshgoplani/agent-deck"]
+	path = upstreams/asheshgoplani/agent-deck
+	url = https://github.com/asheshgoplani/agent-deck
+	shallow = true
+[submodule "upstreams/AgentsMesh/agentsmesh"]
+	path = upstreams/AgentsMesh/agentsmesh
+	url = https://github.com/AgentsMesh/agentsmesh
+	shallow = true
+[submodule "upstreams/mindfold-ai/Trellis"]
+	path = upstreams/mindfold-ai/Trellis
+	url = https://github.com/mindfold-ai/Trellis
+	shallow = true
+[submodule "upstreams/browser-use/browser-harness"]
+	path = upstreams/browser-use/browser-harness
+	url = https://github.com/browser-use/browser-harness
+	shallow = true
+[submodule "upstreams/BloopAI/vibe-kanban"]
+	path = upstreams/BloopAI/vibe-kanban
+	url = https://github.com/BloopAI/vibe-kanban
+	shallow = true
+[submodule "upstreams/stackblitz-labs/bolt.diy"]
+	path = upstreams/stackblitz-labs/bolt.diy
+	url = https://github.com/stackblitz-labs/bolt.diy
+	shallow = true
+[submodule "upstreams/dyad-sh/dyad"]
+	path = upstreams/dyad-sh/dyad
+	url = https://github.com/dyad-sh/dyad
+	shallow = true
+[submodule "upstreams/TabbyML/tabby"]
+	path = upstreams/TabbyML/tabby
+	url = https://github.com/TabbyML/tabby
+	shallow = true
+[submodule "upstreams/The-PR-Agent/pr-agent"]
+	path = upstreams/The-PR-Agent/pr-agent
+	url = https://github.com/The-PR-Agent/pr-agent
+	shallow = true
+[submodule "upstreams/Pythagora-io/gpt-pilot"]
+	path = upstreams/Pythagora-io/gpt-pilot
+	url = https://github.com/Pythagora-io/gpt-pilot
+	shallow = true
+[submodule "upstreams/AntonOsika/gpt-engineer"]
+	path = upstreams/AntonOsika/gpt-engineer
+	url = https://github.com/AntonOsika/gpt-engineer
+	shallow = true
+[submodule "upstreams/smallcloudai/refact"]
+	path = upstreams/smallcloudai/refact
+	url = https://github.com/smallcloudai/refact
+	shallow = true
+[submodule "upstreams/WEIFENG2333/phistory"]
+	path = upstreams/WEIFENG2333/phistory
+	url = https://github.com/WEIFENG2333/phistory
+	shallow = true
+[submodule "upstreams/xai-org/grok-build"]
+	path = upstreams/xai-org/grok-build
+	url = https://github.com/xai-org/grok-build
+	shallow = true
+[submodule "upstreams/MoonshotAI/kimi-code"]
+	path = upstreams/MoonshotAI/kimi-code
+	url = https://github.com/MoonshotAI/kimi-code
+	shallow = true
+[submodule "upstreams/can1357/oh-my-pi"]
+	path = upstreams/can1357/oh-my-pi
+	url = https://github.com/can1357/oh-my-pi
+	shallow = true
+[submodule "upstreams/pydantic/pydantic-ai-harness"]
+	path = upstreams/pydantic/pydantic-ai-harness
+	url = https://github.com/pydantic/pydantic-ai-harness
+	shallow = true
+[submodule "upstreams/aaif-goose/goose"]
+	path = upstreams/aaif-goose/goose
+	url = https://github.com/aaif-goose/goose
+	shallow = true
+[submodule "upstreams/openinterpreter/openinterpreter"]
+	path = upstreams/openinterpreter/openinterpreter
+	url = https://github.com/openinterpreter/openinterpreter
+	shallow = true
+[submodule "upstreams/plandex-ai/plandex"]
+	path = upstreams/plandex-ai/plandex
+	url = https://github.com/plandex-ai/plandex
+	shallow = true
+[submodule "upstreams/charmbracelet/crush"]
+	path = upstreams/charmbracelet/crush
+	url = https://github.com/charmbracelet/crush
+	shallow = true
+[submodule "upstreams/XiaomiMiMo/MiMo-Code"]
+	path = upstreams/XiaomiMiMo/MiMo-Code
+	url = https://github.com/XiaomiMiMo/MiMo-Code
+	shallow = true
+[submodule "upstreams/MoonshotAI/kimi-cli"]
+	path = upstreams/MoonshotAI/kimi-cli
+	url = https://github.com/MoonshotAI/kimi-cli
+	shallow = true
+[submodule "upstreams/RooCodeInc/Roo-Code"]
+	path = upstreams/RooCodeInc/Roo-Code
+	url = https://github.com/RooCodeInc/Roo-Code
+	shallow = true
+[submodule "upstreams/continuedev/continue"]
+	path = upstreams/continuedev/continue
+	url = https://github.com/continuedev/continue
+	shallow = true
+[submodule "upstreams/anthropics/claude-code"]
+	path = upstreams/anthropics/claude-code
+	url = https://github.com/anthropics/claude-code
+	shallow = true
+[submodule "upstreams/AgentsMesh/Loopal"]
+	path = upstreams/AgentsMesh/Loopal
+	url = https://github.com/AgentsMesh/Loopal
+	shallow = true
+[submodule "upstreams/google-antigravity/antigravity-cli"]
+	path = upstreams/google-antigravity/antigravity-cli
+	url = https://github.com/google-antigravity/antigravity-cli
+	shallow = true
+[submodule "upstreams/lsdefine/GenericAgent"]
+	path = upstreams/lsdefine/GenericAgent
+	url = https://github.com/lsdefine/GenericAgent
+	shallow = true
+[submodule "upstreams/openclaw/openclaw"]
+	path = upstreams/openclaw/openclaw
+	url = https://github.com/openclaw/openclaw
+	shallow = true
+[submodule "upstreams/NousResearch/hermes-agent"]
+	path = upstreams/NousResearch/hermes-agent
+	url = https://github.com/NousResearch/hermes-agent
+	shallow = true
+[submodule "upstreams/browser-use/browser-use"]
+	path = upstreams/browser-use/browser-use
+	url = https://github.com/browser-use/browser-use
+	shallow = true

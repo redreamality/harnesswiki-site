@@ -1,0 +1,986 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>运行内核、连续性与组合机制证据底稿 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/research/runtime-primitives-evidence/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="运行内核、连续性与组合机制证据底稿"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/research/runtime-primitives-evidence/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#快照与检查范围" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">快照与检查范围</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#先理解四套领域模型" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">先理解四套领域模型</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-clithread-是控制面聚合turn-是一次用户推进" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI：Thread 是控制面聚合，Turn 是一次用户推进</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#opencodesession-是聚合messagepart-承载运行事实" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">OpenCode：Session 是聚合，Message/Part 承载运行事实</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#deepseek-harnesssessionevent-是事实agent-是活体" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">DeepSeek Harness：SessionEvent 是事实，Agent 是活体</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi一个-jsonl-文件内保存会话树agentsession-是运行投影" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi：一个 JSONL 文件内保存会话树，AgentSession 是运行投影</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#横向规范化不抹平差异" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">横向规范化，不抹平差异</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#规范化运行时序" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">规范化运行时序</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#压缩时序与状态边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">压缩时序与状态边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive会话与运行拓扑" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：会话与运行拓扑</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#能显露差异的-situation" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">能显露差异的 Situation</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitiveagent-循环与工作模式" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：Agent 循环与工作模式</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-1" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-1" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#模式的正交维度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">模式的正交维度</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive上下文压缩" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：上下文压缩</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#不能被有无压缩掩盖的差异" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">不能被“有无压缩”掩盖的差异</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive项目指令发现与组装" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：项目指令发现与组装</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-3" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-3" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域结论" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域结论</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive工具与能力运行时" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：工具与能力运行时</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-4" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-4" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#一个关键反例可见性不等于权限" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">一个关键反例：可见性不等于权限</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive任务goal-与后台-job" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：任务、Goal 与后台 Job</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#job-领域模型" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Job 领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-5" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#goal-不是-job" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Goal 不是 Job</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive多-agent-与委派拓扑" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：多 Agent 与委派拓扑</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-5" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-6" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#关键结论" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">关键结论</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive配置资源发现与项目信任" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：配置、资源发现与项目信任</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-6" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-7" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#三层安全语义" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">三层安全语义</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive扩展与生命周期" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：扩展与生命周期</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-7" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-8" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive控制平面与互操作协议" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：控制平面与互操作协议</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-8" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-9" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#控制协议需要显式区分的失败" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">控制协议需要显式区分的失败</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitivetrajectory回放与评测适配" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：Trajectory、回放与评测适配</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#回放层级" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">回放层级</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-10" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#为什么必须拆开" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">为什么必须拆开</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#跨-primitive-结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">跨 Primitive 结论</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可以接受为稳定-primitive-的部分" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可以接受为稳定 Primitive 的部分</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#仍应保持-proposed-abstraction-的部分" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">仍应保持 Proposed Abstraction 的部分</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型带来的目录建议" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型带来的目录建议</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#明确保留的-unknown" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">明确保留的 unknown</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#证据限制与复核入口" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">证据限制与复核入口</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#快照与检查范围" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">快照与检查范围</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#先理解四套领域模型" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">先理解四套领域模型</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-clithread-是控制面聚合turn-是一次用户推进" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI：Thread 是控制面聚合，Turn 是一次用户推进</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#opencodesession-是聚合messagepart-承载运行事实" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">OpenCode：Session 是聚合，Message/Part 承载运行事实</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#deepseek-harnesssessionevent-是事实agent-是活体" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">DeepSeek Harness：SessionEvent 是事实，Agent 是活体</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi一个-jsonl-文件内保存会话树agentsession-是运行投影" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi：一个 JSONL 文件内保存会话树，AgentSession 是运行投影</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#横向规范化不抹平差异" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">横向规范化，不抹平差异</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#规范化运行时序" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">规范化运行时序</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#压缩时序与状态边界" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">压缩时序与状态边界</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive会话与运行拓扑" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：会话与运行拓扑</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#能显露差异的-situation" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">能显露差异的 Situation</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitiveagent-循环与工作模式" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：Agent 循环与工作模式</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-1" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-1" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#模式的正交维度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">模式的正交维度</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive上下文压缩" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：上下文压缩</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#不能被有无压缩掩盖的差异" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">不能被“有无压缩”掩盖的差异</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive项目指令发现与组装" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：项目指令发现与组装</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-3" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-3" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域结论" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域结论</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive工具与能力运行时" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：工具与能力运行时</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-4" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-4" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#一个关键反例可见性不等于权限" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">一个关键反例：可见性不等于权限</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive任务goal-与后台-job" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：任务、Goal 与后台 Job</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#job-领域模型" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Job 领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-5" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#goal-不是-job" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Goal 不是 Job</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive多-agent-与委派拓扑" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：多 Agent 与委派拓扑</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-5" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-6" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#关键结论" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">关键结论</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive配置资源发现与项目信任" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：配置、资源发现与项目信任</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-6" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-7" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#三层安全语义" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">三层安全语义</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive扩展与生命周期" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：扩展与生命周期</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-7" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-8" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitive控制平面与互操作协议" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：控制平面与互操作协议</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型-8" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-9" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#控制协议需要显式区分的失败" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">控制协议需要显式区分的失败</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#primitivetrajectory回放与评测适配" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">Primitive：Trajectory、回放与评测适配</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#回放层级" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">回放层级</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#implementation-对照-10" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Implementation 对照</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#为什么必须拆开" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">为什么必须拆开</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#跨-primitive-结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">跨 Primitive 结论</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可以接受为稳定-primitive-的部分" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可以接受为稳定 Primitive 的部分</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#仍应保持-proposed-abstraction-的部分" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">仍应保持 Proposed Abstraction 的部分</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域模型带来的目录建议" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域模型带来的目录建议</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#明确保留的-unknown" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">明确保留的 unknown</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#证据限制与复核入口" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">证据限制与复核入口</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">运行内核、连续性与组合机制证据底稿</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="运行内核连续性与组合机制证据底稿"></span></p>
+<blockquote>
+<p>快照日期：2026-08-17。导航：<a href="/harnesswiki-site/docs/research/">调研底稿</a> · <a href="/harnesswiki-site/docs/research-method/">研究方法</a> · <a href="/harnesswiki-site/docs/domain-model/">领域模型</a> · <a href="/harnesswiki-site/docs/module-map/">机制地图</a> · <a href="/harnesswiki-site/docs/harnesses/">Harness 索引</a></p>
+</blockquote>
+<p>本文对 OpenAI Codex CLI、OpenCode、DeepSeek Harness 与 Pi 的运行时机制做固定版本核验。目标不是比较功能数量，而是从四套不同领域模型中辨认可独立讨论的 Primitive，并记录它们在什么情境下显露差异。</p>
+<h2 id="快照与检查范围">快照与检查范围</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>默认分支与研究锚点</th>
+<th>本轮检查范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAI Codex CLI</td>
+<td><code>main@9ded177ce7c1c0bd2047f902936c177612ab3434</code></td>
+<td><code>codex-rs/core</code>、<code>config</code>、<code>app-server</code>、<code>rollout-trace</code> 与同仓文档</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>dev@a0f8dccbfe139ffc7137d1eaf6fee6e4195af599</code></td>
+<td><code>packages/opencode</code> 运行时、Web 文档、server/sync 说明</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>master@47f943859bef60e4160492346772ded9b24f765a</code></td>
+<td>架构、subsystem 文档及 instruction 实现</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>main@d3ab2af969d64997338253c9151190aa1bc33580</code></td>
+<td><code>packages/agent</code>、<code>packages/coding-agent</code> 源码与文档</td>
+</tr>
+</tbody>
+</table>
+<p>所有外链都固定到上表 commit。Implementation 状态与 Fact type 分开记录，例如 <code>implemented / documented</code> 表示机制已经被官方版本化文档明确描述，<code>implemented / implemented</code> 表示固定源码直接展示实现。<code>unknown</code> 只表示本轮证据不足，不等价于缺席；只有官方材料明确界定缺席时才写 <code>absent</code>。</p>
+<h2 id="先理解四套领域模型">先理解四套领域模型</h2>
+<p>四个 Harness 都有“会话”和“循环”，但对象边界并不相同。若先画一套理想化类图再套产品，很容易把内部 Step、用户 Turn、后台 Job 和子 Agent 都叫成“任务”。本节先保留各项目自己的词，再给出横向映射。</p>
+<h3 id="codex-clithread-是控制面聚合turn-是一次用户推进">Codex CLI：Thread 是控制面聚合，Turn 是一次用户推进</h3>
+<p>Codex app-server 把 <strong>Thread → Turn → Item</strong> 作为三个顶层协议对象：Thread 是持续对话；Turn 通常始于用户消息并止于 agent 消息；Item 是用户消息、推理、命令、文件编辑等持久化输入输出。Thread 可以 start、resume 或 fork，Turn 可以 start、steer 或 interrupt，说明“对话身份”“一次推进”和“流式产物”是三个状态边界。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L66-L83"><code>implemented / documented</code>，Codex，固定锚点</a></p>
+<p>内部 <code>RegularTask</code> 可在同一外部 Turn 中反复调用 <code>run_turn()</code>；<code>run_turn()</code> 又在模型请求、工具结果和 steer 输入之间循环。因此 Codex 的内部模型请求步不能直接等同于 app-server Turn，<code>SessionTask</code> 也不能直接等同于用户工作项。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/tasks/regular.rs#L74-L90"><code>implemented / implemented</code>，Codex，固定锚点</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/session/turn.rs#L273-L335"><code>run_turn</code> 主循环</a></p>
+<h3 id="opencodesession-是聚合messagepart-承载运行事实">OpenCode：Session 是聚合，Message/Part 承载运行事实</h3>
+<p>OpenCode 的主循环按 Session 取出消息流，以局部 <code>step</code> 计数反复解析 subtask、compaction 或普通模型请求；完成条件来自最后 assistant message 的 finish、tool call 与 parent 关系。这个 <code>step</code> 是驱动器循环计数，不是文档化的持久顶层实体。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/prompt.ts#L1081-L1168"><code>implemented / implemented</code>，OpenCode，固定锚点</a></p>
+<p>Agent 是附着在消息和请求上的运行模式。Primary agent 处理主会话，subagent 建立带 <code>parentID</code> 的 child session；隐藏的 compaction、title、summary agent 也是 agent 配置，而不是新的 Session 类型。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/agents.mdx#L16-L39"><code>implemented / documented</code>，OpenCode，固定锚点</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/agents.mdx#L45-L115">内置 agent</a></p>
+<h3 id="deepseek-harnesssessionevent-是事实agent-是活体">DeepSeek Harness：SessionEvent 是事实，Agent 是活体</h3>
+<p>DeepSeek Harness 对边界的定义最显式：一个 <strong>Step</strong> 是一次模型请求及其工具调用；一个 <strong>Turn</strong> 包含零个或多个 Step，从输入被 claim 前开始，到没有待偿工作时结束。<code>turn/*</code>、<code>step/*</code>、message 与 tool 事件进入持久 Session log，<code>agent/*</code> 则携带 live Agent，只描述运行中的拦截点。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L53-L96"><code>implemented / documented</code>，DeepSeek Harness，固定锚点</a></p>
+<p>这里的 Session 不是可变消息数组，而是 append-only <code>SessionEvent</code> 流；模型可见历史由事件投影，任何模型可见输入都必须能从日志重建。因而 durable Session、live Agent 和 Context Snapshot 是三个对象，不能互换。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L92-L102"><code>implemented / documented</code>，DeepSeek Harness，固定锚点</a></p>
+<h3 id="pi一个-jsonl-文件内保存会话树agentsession-是运行投影">Pi：一个 JSONL 文件内保存会话树，AgentSession 是运行投影</h3>
+<p>Pi 的 Session 文件是 JSONL；entry 通过 <code>id/parentId</code> 在同一文件内组成树，active leaf 决定当前分支。上下文构建从 leaf 回溯到 root，再根据 compaction checkpoint、branch summary 和消息类型投影模型输入。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/session-format.md#L1-L27"><code>implemented / documented</code>，Pi，固定锚点</a> · <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/session-format.md#L306-L342">树与上下文投影</a></p>
+<p><code>AgentSession</code> 管理运行时生命周期、消息、模型、压缩和事件；新建、恢复、fork 或 import 会替换 active <code>AgentSession</code>，由更外层 <code>AgentSessionRuntime</code> 负责重建 cwd-bound 资源。因此“同一文件内换 leaf”和“换成另一个 Session”是两类操作。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/sdk.md#L66-L114"><code>implemented / documented</code>，Pi，固定锚点</a> · <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/sdk.md#L116-L167">runtime 替换语义</a></p>
+<h3 id="横向规范化不抹平差异">横向规范化，不抹平差异</h3>
+<table>
+<thead>
+<tr>
+<th>Wiki 术语</th>
+<th>最小定义</th>
+<th>Codex CLI</th>
+<th>OpenCode</th>
+<th>DeepSeek Harness</th>
+<th>Pi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Session identity</td>
+<td>可被恢复或寻址的一次持续交互身份</td>
+<td>Thread</td>
+<td>Session</td>
+<td>Session/event log</td>
+<td>Session JSONL 文件；active leaf 另记</td>
+</tr>
+<tr>
+<td>Turn</td>
+<td>外部输入推动到暂时稳定点</td>
+<td>app-server Turn</td>
+<td>消息驱动的一次 session run；无同名持久顶层对象证据</td>
+<td>明确定义的零或多个 Step</td>
+<td>agent core 中一次 assistant 响应及工具批；coding-agent 文档也以 user message 划任务 turn</td>
+</tr>
+<tr>
+<td>Step</td>
+<td>一次模型请求及随附行动边界</td>
+<td>内部 request/step context</td>
+<td>主循环局部计数</td>
+<td>明确持久边界</td>
+<td>agent loop 的一次内层迭代，未建独立持久实体</td>
+</tr>
+<tr>
+<td>Item / Event</td>
+<td>可持久或流式观察的细粒度事实</td>
+<td>Item</td>
+<td>Message + Part + bus event</td>
+<td>SessionEvent</td>
+<td>Session entry + AgentEvent</td>
+</tr>
+<tr>
+<td>Branch / Fork</td>
+<td>从历史边界继续而不覆盖原路径</td>
+<td>fork 新 Thread</td>
+<td>fork 新 Session</td>
+<td>fork Session</td>
+<td>同文件 branch；fork 则换 Session</td>
+</tr>
+<tr>
+<td>Live actor</td>
+<td>当前能继续执行与接收取消的运行对象</td>
+<td>loaded Thread/Session task</td>
+<td>session runner</td>
+<td>Agent / AgentHandle</td>
+<td>AgentSession / Agent</td>
+</tr>
+</tbody>
+</table>
+<p>这张表只用于翻译。正式 Primitive 仍应保留项目原词，并说明映射损失。特别是：<strong>Turn 不保证等于一次模型调用，Branch 不保证创建新 Session，Task 不保证是持久工作项。</strong></p>
+<h2 id="规范化运行时序">规范化运行时序</h2>
+<p>下面的时序图是 Wiki 的 Proposed Abstraction，不是声称四个仓库实现相同接口。虚线参与者表示部分 Harness 可能把它并入驱动器或交给外部系统。</p>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant C as "Client / User"
+    participant S as "Session aggregate"
+    participant D as "Turn driver"
+    participant X as "Context builder"
+    participant M as "Model"
+    participant P as "Policy / hook"
+    participant T as "Tool runtime"
+    participant E as "Durable events"
+
+    C->>S: submit input
+    S->>D: admit or queue input
+    loop zero or more Steps
+        D->>X: project history + instructions + tools
+        opt context pressure
+            X->>S: compact / replace visible history
+        end
+        X->>M: Context Snapshot
+        M-->>D: assistant blocks and/or tool calls
+        D->>E: record model-visible output
+        loop each tool call or parallel batch
+            D->>P: authorize / intercept
+            P->>T: dispatch accepted call
+            T-->>E: normalized result
+            E-->>D: observation for next request
+        end
+    end
+    D-->>S: completed, interrupted, or waiting
+    S-->>C: final state + streamed events</pre>
+<p>从四个实现可以提炼三条不变量：Context Snapshot 是某次模型调用的实际投影，不是 Session 全历史；工具结果只有进入下一次模型可见投影后才成为 observation；取消既可能终止当前模型/工具工作，也可能只取消等待者，必须逐个 Primitive 说明传播范围。</p>
+<h2 id="压缩时序与状态边界">压缩时序与状态边界</h2>
+<p>压缩不是“删除旧聊天”这一个动作。它至少包含触发、选择被替代范围、生成摘要、持久化 checkpoint/replace、重建 Context，以及溢出后的继续或原请求重放。</p>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant D as "Turn driver"
+    participant B as "Budget policy"
+    participant K as "Compactor"
+    participant M as "Summary model"
+    participant S as "Durable Session"
+    participant X as "Context builder"
+
+    D->>B: measure projected request
+    alt threshold, model downshift, manual request, or provider overflow
+        B->>K: compact(trigger, current history)
+        K->>K: choose retained tail and balanced boundaries
+        K->>M: summarize selected prefix / region
+        M-->>K: continuation summary
+        K->>S: append checkpoint or surface replacement
+        S->>X: project summary + retained tail
+        alt overflow recovery
+            X-->>D: replay original request or synthetic continue
+        else pre-turn/manual compaction
+            X-->>D: accept next input on rebuilt context
+        end
+    else below pressure
+        B-->>D: continue unchanged
+    end</pre>
+<p>Codex 的 pre-turn 与 mid-turn 会采用不同的初始上下文注入位置；OpenCode 能在 provider overflow 后重建原用户消息；DeepSeek 将 compaction 设计成可选 capability seam，并以 log-only bracket 加一条 surface replace 事件提交；Pi 则把 <code>CompactionEntry</code> 当成能独立重建上下文的 checkpoint。后文分别给出证据。</p>
+<h2 id="primitive会话与运行拓扑">Primitive：会话与运行拓扑</h2>
+<p><strong>问题。</strong> 怎样表示一次持续交互的身份、内部边界、分支关系、live 状态与终态？成熟度暂记为 <strong>Accepted Primitive</strong>：四个独立实现都暴露可恢复聚合，Branch/Fork 和 Turn/Step 的实质差异能够由同一组身份、边界与终态变量解释，且“恢复会话不等于恢复工作区”的反例边界保持稳定。</p>
+<h3 id="领域模型">领域模型</h3>
+<ul>
+<li><strong>输入</strong>：start、resume、fork/branch、追加输入、steer、interrupt/abort。</li>
+<li><strong>持久状态</strong>：Session identity、历史序列或树、parent/child 边、当前 leaf 或 fork boundary。</li>
+<li><strong>运行状态</strong>：loaded/idle/busy、active turn、待处理输入、取消 token。</li>
+<li><strong>输出</strong>：可投影的 Context、流式事件、完成/中断状态、新的 Session identity。</li>
+<li><strong>不变量</strong>：恢复会话不等于恢复工作区；分支必须保留来源边界；未完成 Turn 的 fork 语义必须显式定义，不能默默继承半条历史。</li>
+</ul>
+<h3 id="implementation-对照">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / documented</code></td>
+<td>Thread 可 start、resume、fork；fork 可按 <code>lastTurnId</code> 或 <code>beforeTurnId</code> 截取，源 Thread 正在运行时会记录 interruption marker；Thread 暴露 loaded/status、Turn/Item 分页和 parent/ancestor 查询。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L164-L176">固定锚点</a></td>
+<td><code>thread/revert</code> 明确不回退本地文件，因此只证明会话历史边界，不证明工作区 checkpoint。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L197-L212">边界</a></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / documented</code></td>
+<td>Server 可创建带 <code>parentID</code> 的 Session、列 children、按 message fork、abort 运行；消息可同步等待或异步接受。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/server.mdx#L146-L180">固定锚点</a></td>
+<td>本轮没有找到与 Codex/DeepSeek 同构的持久 Turn/Step 顶层对象；保持 <code>unknown</code>，不从局部变量名推断。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>Step、Turn、持久 SessionEvent 与 live Agent 分层；fork、resume、transcript、telemetry 和 persistence 都从同一事件流派生。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L63-L96">固定锚点</a></td>
+<td>事件日志能重建模型输入，不自动代表外部进程或文件系统状态可重建。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / documented</code></td>
+<td>JSONL entry 通过 <code>id/parentId</code> 在单文件内形成树；leaf 是当前位置，<code>buildContextEntries()</code> 按当前路径和压缩 checkpoint 构建上下文。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/session-format.md#L306-L342">固定锚点</a></td>
+<td>branch 可不创建新 Session；只有 runtime <code>fork()</code> 才替换 active AgentSession。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="能显露差异的-situation">能显露差异的 Situation</h3>
+<ol>
+<li><strong>从进行中的历史边界分叉。</strong> Codex 明确处理中断标记和 in-progress boundary；OpenCode 的公开 server 契约按 message fork；Pi 在同一树换 leaf；DeepSeek 从事件流边界 fork。统一 API 若只有 <code>fork(sessionId)</code> 会丢失关键语义。</li>
+<li><strong>进程退出后恢复。</strong> 四者都能恢复一部分对话状态，但本节证据不覆盖未提交文件、子进程、终端或远端 sandbox。那些状态属于<a href="/harnesswiki-site/docs/module-map/#%E6%8E%A7%E5%88%B6%E4%B8%8E%E8%BF%9E%E7%BB%AD%E6%80%A7">状态持久化与恢复</a>，不能由“支持 resume”代替。</li>
+</ol>
+<h2 id="primitiveagent-循环与工作模式">Primitive：Agent 循环与工作模式</h2>
+<p><strong>问题。</strong> 输入怎样经过上下文构建、模型请求、工具执行和完成判定反复推进；所谓 Plan/Build/Agent mode 改变的是角色、工具、策略还是拓扑？成熟度暂记为 <strong>Accepted Primitive</strong>：四个独立实现均有直接循环证据，Pi 的显式缺席又约束了“模式”不能成为循环的必填组件。</p>
+<h3 id="领域模型-1">领域模型</h3>
+<p>最小状态机为 <code>idle → admitted → requesting → executing-tools → requesting | settling → idle</code>。Steer 可在工具批之后进入下一次请求，follow-up 则只在本轮本应停止后重新进入 admitted。工作模式是作用于 system prompt、model、tool exposure、permission 或 stop policy 的配置投影，不应自动创建另一种 Session。</p>
+<h3 id="implementation-对照-1">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>代表性差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / implemented</code></td>
+<td><code>run_turn()</code> 在 pending input、sampling、tool result 与完成条件间循环；外层 <code>RegularTask</code> 在 input queue 仍有输入时再次运行，取消 token 向子循环传播。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/session/turn.rs#L145-L180">模型/工具完成约定</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/session/turn.rs#L273-L335">pending input 循环</a></td>
+<td>app-server Turn 可被 steer 而不新建 Turn；内部请求数不是协议 Turn 数。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L209-L212">固定锚点</a></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / implemented</code></td>
+<td>主循环先处理 subtask/compaction，再解析 agent、tools、instructions 与模型请求；finish、tool call、max steps、structured output 或 processor stop 共同决定结束。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/prompt.ts#L1081-L1180">固定锚点一</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/prompt.ts#L1221-L1338">固定锚点二</a></td>
+<td>Build/Plan 是 primary agent；General/Explore/Scout 是 subagent。Plan 主要由权限限制写入和 Bash，不是另一套 loop。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/agents.mdx#L45-L91">模式证据</a></td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>inbox claim、pre-step、prompt/tool schema assembly、LLM stream、工具管线和 stopping 形成显式 Turn flow；第一个 claim 被拒绝仍写一个零 Step Turn。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L63-L90">固定锚点</a></td>
+<td>live waterfall event 可改写或拒绝输入，但持久边界仍由 Session events 记录。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / implemented</code></td>
+<td>内层循环在 assistant response 与工具批之间继续；steering message 在下一响应前注入；外层循环只在本应停止后取 follow-up；stop hook 可提前终止。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/agent/src/agent-loop.ts#L155-L275">固定锚点</a></td>
+<td><code>absent / documented</code>：core 明确不内置 plan mode；可由 extension/package 实现。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/usage.md#L300-L304">固定锚点</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="模式的正交维度">模式的正交维度</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>例子</th>
+<th>不应混成什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>角色提示</td>
+<td>Plan、Explore、persona</td>
+<td>新的 loop 实现</td>
+</tr>
+<tr>
+<td>工具可见性</td>
+<td>read-only、deny edit</td>
+<td>OS sandbox</td>
+</tr>
+<tr>
+<td>权限策略</td>
+<td>allow/ask/deny</td>
+<td>工具注册</td>
+</tr>
+<tr>
+<td>Actor 拓扑</td>
+<td>primary → subagent</td>
+<td>同 Session 内换 mode</td>
+</tr>
+<tr>
+<td>完成策略</td>
+<td>max steps、goal continuation</td>
+<td>模型 stop reason 本身</td>
+</tr>
+</tbody>
+</table>
+<h2 id="primitive上下文压缩">Primitive：上下文压缩</h2>
+<p><strong>问题。</strong> 模型输入逼近预算或 provider 拒绝请求时，谁触发压缩，选择哪段历史，产生什么持久记录，怎样恢复未完成工作？成熟度暂记为 <strong>Accepted Primitive</strong>：四个实现都暴露独立状态与失败模式，且 DeepSeek 的可选 seam 证明压缩不是 agent loop 的必然组成。</p>
+<h3 id="领域模型-2">领域模型</h3>
+<ul>
+<li><strong>Trigger</strong>：manual、pressure threshold、confirmed overflow、model downshift 或 compatibility change。</li>
+<li><strong>Selection</strong>：被总结的 prefix/region、retained tail、工具 call/result 配对约束、媒体和超大 tool result 处理。</li>
+<li><strong>Artifact</strong>：summary、被 shadow 的范围、token/usage、来源请求、checkpoint identity。</li>
+<li><strong>Commit</strong>：替换模型可见投影，但通常保留原始持久证据用于 UI、诊断或分支。</li>
+<li><strong>Continuation</strong>：等待下一输入、注入 synthetic continue，或重放被 overflow 打断的原用户请求。</li>
+<li><strong>不变量</strong>：提交后 Context 能独立重建；不能留下孤立 tool result；失败或取消不能伪装成已完成 checkpoint。</li>
+</ul>
+<h3 id="implementation-对照-2">Implementation 对照</h3>
+<h4 id="codex-cli">Codex CLI</h4>
+<ul>
+<li><code>implemented / implemented</code>：pre-sampling 会在 token limit 到达时压缩；换到更小 context window 或 compaction compatibility 改变也可在 Turn 前触发。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/session/turn.rs#L994-L1150">触发与 compatibility 检查</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/session/turn.rs#L1140-L1205">model downshift 与 backend 路由</a></li>
+<li><code>implemented / implemented</code>：pre-turn/manual compaction 清空 reference context，下一普通 Turn 全量重注；mid-turn 则把初始上下文插在最后真实用户消息之前，保证 summary 位于历史末尾。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/compact.rs#L59-L79">固定锚点</a></li>
+<li><code>implemented / implemented</code>：压缩请求以完整历史生成 summary，遇自身 context overflow 会从最旧项开始裁剪；成功后用初始上下文、保留的用户消息与 summary 构造 replacement history，并持久化 compaction metadata/checkpoint。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/compact.rs#L240-L345">生成与失败</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/compact.rs#L347-L393">提交替换</a></li>
+<li><code>implemented / implemented</code>：replacement history 还会在固定 token 上限内从新到旧保留真实用户消息，必要时截断最老的入选消息。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/compact.rs#L639-L700">固定锚点</a></li>
+</ul>
+<h4 id="opencode">OpenCode</h4>
+<ul>
+<li><code>implemented / implemented</code>：隐藏 <code>compaction</code> agent 可单独选择模型；实现选择 head/tail、带入 previous summary，并允许插件注入 context 或替换 prompt。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/compaction.ts#L319-L445">固定锚点</a></li>
+<li><code>implemented / implemented</code>：普通 overflow 后可复制原 user message 与 parts 形成 replay；若无需 replay，则默认注入 synthetic continue。媒体 part 会降级成文字占位，auto-continue 还可被插件关闭。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/compaction.ts#L461-L550">固定锚点</a></li>
+<li><code>implemented / implemented</code>：压缩请求本身以 user message 下的 <code>compaction</code> part 持久化，记录 <code>auto</code> 与 <code>overflow</code>；主循环检测 token overflow 或 processor <code>compact</code> 结果后创建它。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/compaction.ts#L559-L582">持久化</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/prompt.ts#L1144-L1168">循环接入</a></li>
+</ul>
+<h4 id="deepseek-harness">DeepSeek Harness</h4>
+<ul>
+<li><code>implemented / documented</code>：压缩是可选 Service Definition / Provider / Consumer seam，不属于 agent-loop spine；后端可替换为 tokenizer 或 template 实现。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/compaction.md#L1-L7">固定锚点</a></li>
+<li><code>implemented / documented</code>：<code>compaction/start|summary|end</code> 都是 log-only；真正改变模型 surface 的是另一条 <code>user/message</code>，携带 <code>surfaceOp: replace</code>。start/end 形成提交 bracket，崩溃中断会留下可检测的 orphaned lock。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/compaction.md#L9-L23">固定锚点</a></li>
+<li><code>implemented / documented</code>：自动触发区分 <code>pressure</code> 与 <code>context-overflow</code>；pre-step 可先做 tool-result pruning，再重新计量；range selection 保持 call/result pairing 但不强求整 Turn，失败恢复只在 surface generation 前进后请求 retry。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/compaction.md#L60-L88">固定锚点</a></li>
+</ul>
+<h4 id="pi">Pi</h4>
+<ul>
+<li><code>implemented / documented</code>：阈值为 <code>contextTokens &gt; contextWindow - reserveTokens</code>，也可 <code>/compact</code> 手动触发；从末尾累积到 <code>keepRecentTokens</code> 选择保留尾部，summary 会带上 previous summary 迭代生成。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/compaction.md#L27-L45">固定锚点</a></li>
+<li><code>implemented / documented</code>：重复压缩从上次 kept boundary 开始重新总结；cut point 不落在 tool result，超大单 Turn 可拆成 history summary 与 turn-prefix summary。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/compaction.md#L79-L117">固定锚点</a></li>
+<li><code>implemented / documented</code>：离开树分支时另有 branch summarization，把旧分支从共同祖先到旧 leaf 的信息注入目标分支；它与预算压缩共享结构化摘要格式，但触发与拓扑目的不同。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/compaction.md#L148-L185">固定锚点</a></li>
+<li><code>implemented / documented</code>：extension 可在 <code>session_before_compact</code> 取消或提供自定义 summary/checkpoint 数据；tool result 在摘要序列化阶段限制长度。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/compaction.md#L260-L309">固定锚点</a></li>
+</ul>
+<h3 id="不能被有无压缩掩盖的差异">不能被“有无压缩”掩盖的差异</h3>
+<table>
+<thead>
+<tr>
+<th>差异轴</th>
+<th>Codex CLI</th>
+<th>OpenCode</th>
+<th>DeepSeek Harness</th>
+<th>Pi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发类型</td>
+<td>budget、model downshift、manual/mid-turn</td>
+<td>budget、processor overflow、manual</td>
+<td>pressure、confirmed overflow、manual region</td>
+<td>threshold、overflow、manual、branch navigation</td>
+</tr>
+<tr>
+<td>持久表示</td>
+<td>compacted replacement + checkpoint metadata</td>
+<td>compaction message/part + summary message</td>
+<td>log-only bracket + surface replace</td>
+<td>append-only CompactionEntry / BranchSummaryEntry</td>
+</tr>
+<tr>
+<td>保留策略</td>
+<td>summary + 有界用户消息 + 初始上下文</td>
+<td>selected head + tail</td>
+<td>provider-owned region/tail，可先 prune</td>
+<td>keepRecentTokens + balanced cut point</td>
+</tr>
+<tr>
+<td>继续语义</td>
+<td>pre-turn 重注或 mid-turn 继续</td>
+<td>replay 原请求或 synthetic continue</td>
+<td>retry action 取决于 surface generation</td>
+<td>rebuilt context；overflow 可 retry</td>
+</tr>
+<tr>
+<td>可扩展点</td>
+<td>本轮确认本地/远端 backend 选择</td>
+<td>compaction prompt/context hook</td>
+<td>整个 capability seam 可替换</td>
+<td>before-compact hook 可取消/替代</td>
+</tr>
+</tbody>
+</table>
+<p>结论是：<code>ContextCompaction</code> 至少应拆出 <strong>Trigger Policy、Selection/Retention、Summary Producer、Checkpoint Commit、Continuation Recovery</strong> 五个子概念。不同项目可以把它们包装在一个服务里，但 Wiki 不应只留一个布尔字段。</p>
+<h2 id="primitive项目指令发现与组装">Primitive：项目指令发现与组装</h2>
+<p><strong>问题。</strong> 项目级和用户级指令从哪里发现，目录作用域、候选优先级、预算、动态子目录与项目信任怎样影响最终 system context？成熟度暂记为 <strong>Accepted Primitive</strong>：四者都有独立发现机制，且信任与指令加载并非同一维度。</p>
+<h3 id="领域模型-3">领域模型</h3>
+<p><code>InstructionSource</code> 至少包含 <code>{path, scope directory, source kind, precedence, bytes, provenance}</code>。发现器先确定 root-to-cwd 目录链，再按同目录候选规则选择文件，最后按全局预算渲染为 Context section。动态 touched-path 指令属于后续 reconciliation，不应与启动 baseline 混为一谈。</p>
+<h3 id="implementation-对照-3">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>发现、顺序与预算</th>
+<th>信任边界 / 限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / implemented</code></td>
+<td>从配置根标记找到 project root，按 root→cwd 遍历；每目录依次选择 <code>AGENTS.override.md</code>、<code>AGENTS.md</code>、fallback，第一个文件胜出；读取受总字节预算约束，末项可截断。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/agents_md.rs#L104-L160">预算</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/agents_md.rs#L162-L253">发现与候选</a></td>
+<td>project config 的 trust 证据不能直接外推到 AGENTS 加载；本轮保持指令信任关系 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / documented</code></td>
+<td>当前目录向上找 local <code>AGENTS.md</code>/<code>CLAUDE.md</code>，再取 global AGENTS 与 Claude fallback；每一类 first match wins。配置中的本地 glob 或 remote URL instructions 会与 AGENTS 合并。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/rules.mdx#L63-L131">固定锚点</a></td>
+<td>remote instruction 有 5 秒 timeout；本轮未定位总字节预算和 project-trust gate，均为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / implemented</code></td>
+<td>默认候选为 <code>AGENTS.md</code>、<code>CLAUDE.md</code>，同目录 local overlay 为 <code>AGENTS.local.md</code>、<code>CLAUDE.local.md</code>；配置有单文件和渲染总 UTF-8 上限。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/context/agent-instructions/src/config.ts#L11-L46">候选与预算</a> root→cwd 会装入所有已存在候选并去重，touched path 还能导出 cwd 以下的 descendant scope。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/context/agent-instructions/src/files.ts#L168-L226">目录链</a> · <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/packages/context/agent-instructions/src/files.ts#L267-L319">baseline 顺序</a></td>
+<td>本轮未找到 project-trust prompt 或等价 gate，记为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / implemented</code></td>
+<td>同目录候选顺序为 <code>AGENTS.override.md</code> → <code>AGENTS.md</code> → 大小写兼容 → <code>CLAUDE.md</code>；先加载 global，再将所有 ancestor 文件按 root→cwd 顺序加入。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/src/core/resource-loader.ts#L70-L155">固定锚点</a></td>
+<td><code>implemented / documented</code>：这些 context files 即使项目未获信任也会加载；trust 只阻止 settings、extensions、skills 等受保护资源。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/security.md#L20-L29">固定锚点</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="领域结论">领域结论</h3>
+<p>Project trust 保护的是“仓库能否在模型请求前改变 Harness 行为或执行代码”，而 instruction discovery 决定“哪些仓库文本进入模型上下文”。Pi 明确将两者分开；其他实现不能因为有 trust 配置就被推断为自动隔离 prompt injection。指令页面应与<a href="/harnesswiki-site/docs/module-map/#%E6%8E%A7%E5%88%B6%E4%B8%8E%E8%BF%9E%E7%BB%AD%E6%80%A7">配置、资源发现与项目信任</a>双向链接，但不能合并成一个开关。</p>
+<h2 id="primitive工具与能力运行时">Primitive：工具与能力运行时</h2>
+<p><strong>问题。</strong> 模型可见工具如何被定义、注册、筛选、授权、执行、取消并把结果规范化回模型？成熟度暂记为 <strong>Accepted Primitive</strong>。DeepSeek 的 capability seam 和 Pi 的最小 core 共同表明：工具注册表、策略引擎、执行环境与扩展 hook 是相邻但不同的边界。</p>
+<h3 id="领域模型-4">领域模型</h3>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Tool Definition (name + schema + exposure)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; request-scoped Tool Set</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; Tool Call (call id + typed arguments)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; policy / hook preflight</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; execution gate and runtime</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; normalized Tool Result</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; durable/model-visible observation</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="Tool Definition (name + schema + exposure)  -> request-scoped Tool Set  -> Tool Call (call id + typed arguments)  -> policy / hook preflight  -> execution gate and runtime  -> normalized Tool Result  -> durable/model-visible observation"><div></div></button></div></figure></div>
+<p>一个完整工具运行时至少要回答：schema 由谁拥有；同名注册如何解析；工具是否对本次模型请求可见；call 是否被 allow/ask/deny；并行批怎样排序；取消是否等待资源清理；result 是否可被 hook 改写。OS sandbox 是 runtime 下面的 enforcement，不是上述任一问题的别名。</p>
+<h3 id="implementation-对照-4">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / implemented</code></td>
+<td><code>CoreToolRuntime</code> 把 ToolSpec/Executor 与 readiness、MCP ownership、payload kind、取消等待、telemetry、pre/post hook payload 组合；结果统一转为 Responses input item。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/tools/registry.rs#L49-L170">固定锚点</a> Router 判定工具是否支持并行，并用读/写 execution gate 串并行 dispatch，取消路径可选择等待 runtime teardown。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/tools/parallel.rs#L91-L207">并行与取消</a></td>
+<td>app-server 的 permission/sandbox 是 request 配置；Tool Registry 本身不等于 enforcement。</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / implemented</code></td>
+<td>每个模型请求通过 <code>SessionTools.resolve()</code> 合并 agent、session、registry、MCP、permission 与 truncation 生成 request-scoped tools。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/prompt.ts#L1221-L1241">固定锚点</a> Permission 按 tool 输入 pattern 解析 allow/ask/deny，last match wins，并对 external directory、doom loop 等 guard 单独建项。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/permissions.mdx#L12-L18">固定锚点</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/permissions.mdx#L68-L164">细粒度规则</a></td>
+<td><code>always</code> 只在当前 OpenCode session 内记住匹配 pattern，不是持久组织策略。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/permissions.mdx#L191-L199">固定锚点</a></td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td><code>ctx.tools</code> 是 scoped registry + guarded execution pipeline；每个 Step 重新组装 prompt section 与 tool schema，call 依次通过 <code>tools/pre-execute → execute → post-execute</code>。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L43-L59">固定锚点</a> · <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L63-L90">Turn flow</a> Capability seam 强制区分 Service Definition、Provider 与 Consumer；filesystem/subprocess 共享 execution world，替换 provider 会同时迁移 Bash、PTY 和 LSP。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L98-L102">固定锚点</a></td>
+<td>“一个 model-facing tool”不是完整 seam；provider swap 的一致 execution world 是额外不变量。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / implemented</code></td>
+<td>agent loop 在调用模型前把 <code>systemPrompt + messages + tools</code> 组成 Context；收到 tool calls 后执行并把 results 追加到下一轮上下文。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/agent/src/agent-loop.ts#L192-L224">固定锚点</a> · <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/agent/src/agent-loop.ts#L277-L312">请求投影</a> 默认工具仅 read/write/edit/bash，更多能力来自 extension/package。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/README.md#L80-L95">固定锚点</a></td>
+<td><code>absent / documented</code>：无内置 permission popup 或 sandbox；extension 的 <code>tool_call</code> 可阻断/改参，仍不构成 OS 隔离。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/usage.md#L300-L304">缺席证据</a> · <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/extensions.md#L749-L847">hook 语义</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="一个关键反例可见性不等于权限">一个关键反例：可见性不等于权限</h3>
+<p>从模型 prompt 移除工具只能降低可调用性；真正的 authority 还取决于 dispatch 是否拒绝未知/禁用工具、policy 是否授权、provider 在哪个 execution world 执行，以及 OS 边界允许什么。DeepSeek 明确让 tool restriction 同时影响 prompt 与 execution；Pi 则明确 extension 与 built-in tool 继承启动用户权限。Wiki 的工具页必须回链<a href="/harnesswiki-site/docs/module-map/#%E6%8E%A7%E5%88%B6%E4%B8%8E%E8%BF%9E%E7%BB%AD%E6%80%A7">权限、审批与沙箱</a>，但两页分别建模。</p>
+<h2 id="primitive任务goal-与后台-job">Primitive：任务、Goal 与后台 Job</h2>
+<p><strong>问题。</strong> 长时工作怎样取得身份、所有者、状态、输出游标、取消和完成通知？持久目标怎样跨多个 Turn 继续？成熟度暂记为 <strong>Proposed Abstraction</strong>，因为四者对 <code>task</code> 的含义差别过大；本轮证据反而支持把 <strong>Queued Turn、Goal、Background Job、Child Agent</strong> 分成四种对象。</p>
+<h3 id="job-领域模型">Job 领域模型</h3>
+<p><code>Job = {id, kind, owner, status, started work, cancel, done, output}</code>。核心不变量是：身份与执行资源的所有权分离；取消请求不等于进程已退出；等待超时只结束等待者，不应自动 kill；终态 first-wins；结果通知和结果消费需要防止重复或丢失。</p>
+<h3 id="implementation-对照-5">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / documented</code></td>
+<td>app-server 提供持久 FIFO queued turns 的 add/list/update/delete/reorder/start；另有 thread-scoped background terminal 的 list/terminate/clean。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L183-L196">队列</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L202-L206">后台终端</a></td>
+<td>这两组 API 不是同一个通用 Job 抽象；本轮对“任意 producer 可注册的通用后台 Job”保持 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / implemented</code></td>
+<td><code>BackgroundJob</code> 暴露 list/get/start/extend/wait/promote/cancel；session cancel 会沿 job metadata 的 session/parentSession 关系传播。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/background/job.ts#L1-L37">registry facade</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/session/run-state.ts#L71-L143">取消传播</a> Task tool 用 child session id 作为 job id，完成后向 parent 注入 synthetic result。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/tool/task.ts#L200-L307">固定锚点</a></td>
+<td>background subagent 受 <code>OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true</code> 控制。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/tool/task.ts#L92-L117">固定锚点</a></td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>Job runtime 规定 <code>JobId</code>、running/stopping/completed/killed/failed；producer 拥有执行资源，runtime 拥有 identity/access/lifecycle，owner Agent dispose 会 cancel 并 await。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/jobs.md#L7-L100">固定锚点</a> <code>ctx.jobs</code> 提供 start/list/get/read/kill/bounded wait 与监听器，owner session 做授权，本地 provider 每 owner 默认并发 10。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/jobs.md#L155-L241">固定锚点</a></td>
+<td>Job registration 是 process-local runtime 状态；文档没有把它等同于 durable Session goal。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>absent / documented</code></td>
+<td>core 明确不内置 background bash、to-do 或 sub-agent；这些由 extension/package 或 tmux 等外部工具承担。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/usage.md#L300-L304">固定锚点</a></td>
+<td>SDK/extension 能实现后台工作，不应反写成 core capability。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="goal-不是-job">Goal 不是 Job</h3>
+<ul>
+<li>Codex app-server 有每 Thread 单一 persisted goal 的 set/get/clear 和更新事件；它证明 durable objective 存在，但本轮不从协议文档推断内部 continuation round 规则。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L181-L187"><code>implemented / documented</code>，固定锚点</a></li>
+<li>DeepSeek 的 same-session Goal 明确把 durable phase（active/paused/blocked/complete）与 process-local activation 分离，mutation 使用 compare-and-set revision；round cap 属于 Goal snapshot。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/goal.md#L7-L75"><code>implemented / documented</code>，固定锚点</a></li>
+<li>OpenCode 本轮只确认 session todo 读取接口，未确认可跨 Turn 自动 continuation 的 durable Goal；记为 <code>unknown</code>，不把 todo 当 goal。</li>
+<li>Pi 明确不内置 todo；对 durable Goal runtime 也没有直接证据，前者为 <code>absent / documented</code>，后者仍为 <code>unknown</code>。</li>
+</ul>
+<p>Goal 描述“为什么继续和何时完成”，Job 描述“某项后台执行现在处于什么状态”。一个 Goal 可以发起多个 Turn/Job；一个 Job 也可没有 Goal。两者合并会使恢复、取消和完成语义含糊。</p>
+<h2 id="primitive多-agent-与委派拓扑">Primitive：多 Agent 与委派拓扑</h2>
+<p><strong>问题。</strong> 父 Actor 怎样创建、寻址、限制、继续、取消并回收子 Actor；工作委派与 child Session 的 durable lineage 怎样关联？成熟度暂记为 <strong>Proposed Abstraction</strong>：Codex、OpenCode、DeepSeek 有三套直接实现，Pi 的 core 缺席构成反例。</p>
+<h3 id="领域模型-5">领域模型</h3>
+<ul>
+<li><strong>Actor topology</strong>：parent/child/ancestor、depth、live activation、终态。</li>
+<li><strong>Work topology</strong>：task/message、依赖、结果、follow-up；不一定与 Actor 一一对应。</li>
+<li><strong>Context policy</strong>：fresh、full-history fork、selected history、persona/model/tool restriction。</li>
+<li><strong>Lifecycle</strong>：reserve identity → compose child → accept first input → run zero or more Turns → report/result → quiesce/dispose。</li>
+<li><strong>不变量</strong>：child identity 在 accept 后稳定；授权来自真实 lineage 而不是可伪造 message metadata；parent cancel 是否级联必须显式；共享工作区不等于共享 Session。</li>
+</ul>
+<pre class="mermaid">sequenceDiagram
+    autonumber
+    participant P as "Parent Agent"
+    participant O as "Orchestrator"
+    participant S as "Child Session store"
+    participant C as "Child activation"
+
+    P->>O: spawn(task, context policy, limits)
+    O->>S: reserve child identity + parent edge
+    O->>C: compose runtime and deliver initial input
+    C-->>O: accepted(child id, message id)
+    O-->>P: stable handle
+    par parent continues
+        P->>P: independent work
+    and child runs
+        C->>C: model/tool Turns
+    end
+    opt follow-up or interrupt
+        P->>O: message / cancel(child id)
+        O->>C: authorize by lineage, then enqueue / interrupt
+    end
+    C->>S: flush durable child state
+    C-->>P: explicit report or terminal result
+    O->>C: child-first disposal</pre>
+<h3 id="implementation-对照-6">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>代表性差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / implemented</code></td>
+<td><code>spawn_agent</code> 根据 full-history fork/role/model 等构建 child config，记录 <code>parent_thread_id</code>、<code>parent_turn_id</code>、root turn 与 environment selection，投递首条 communication 后返回 child Thread/task identity。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/tools/handlers/multi_agents_v2/spawn.rs#L41-L209">固定锚点</a></td>
+<td>child 是独立 Thread；full-history fork 与 fresh/role child 的指令继承策略不同。</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / implemented</code></td>
+<td>Task tool 校验 depth 和 task permission，按 subagent config 派生 child permission，创建带 <code>parentID</code> 的 child Session；传 <code>task_id</code> 可继续既有 child。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/tool/task.ts#L92-L184">固定锚点</a></td>
+<td>同一工具可前台等待或实验性后台运行；结果以 synthetic parent prompt 注入，不是共享 message stream。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td><code>ctx.subagents</code> 是多 provider registry，in-process、ACP、Codex、Claude Code、DSH SDK 等 provider 可共存；能力在 start 前检查，unsupported 必须 fail loud。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/subagent.md#L1-L37">固定锚点</a> one-shot child 与 continuable child 分开：后者是 durable child Session + 至多一个 live Activation，支持 FIFO follow-up、cold resume、interrupt 与 child-first disposal。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/subagent.md#L114-L159">固定锚点</a></td>
+<td>continuation manager 管 activation/lineage，Agent loop 仍独占 Turn ordering；它不创建中间 Task wrapper。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>absent / documented</code></td>
+<td>core 明确不内置 sub-agents；官方 SDK 仅说明应用可自行构建“spawn sub-agents”的 custom tool。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/usage.md#L300-L304">缺席证据</a> · <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/sdk.md#L3-L14">扩展边界</a></td>
+<td>仓库 examples/extensions/subagent 只能证明可扩展性，不能计作 core multi-agent 实现。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="关键结论">关键结论</h3>
+<p>“并行任务”至少跨越两张图：Actor 拓扑说明谁在运行，Work 拓扑说明谁依赖谁、产物如何合并。Codex 的 child Thread、OpenCode 的 child Session、DeepSeek 的 Activation 都能并行，但源码证据没有自动保证文件隔离；共享工作区并发冲突属于<a href="/harnesswiki-site/docs/module-map/#%E7%BC%96%E7%A0%81%E5%B7%A5%E4%BD%9C%E9%9D%A2">版本控制与工作区事务</a>。</p>
+<h2 id="primitive配置资源发现与项目信任">Primitive：配置、资源发现与项目信任</h2>
+<p><strong>问题。</strong> 启动时哪些来源参与配置，怎样合并、追踪来源并处理不可信项目中的可执行资源？成熟度暂记为 <strong>Proposed Abstraction</strong>：配置合并有四个直接实现，但 project trust 只在 Codex 与 Pi 得到可靠证据。</p>
+<h3 id="领域模型-6">领域模型</h3>
+<ul>
+<li><code>ConfigLayer = {source, precedence, base directory, value, origin/version, disabled reason}</code>。</li>
+<li><code>EffectiveConfig</code> 是有序 merge 的投影，不应覆盖原 layer provenance。</li>
+<li><code>ProjectResource</code> 分成纯文本 context、声明式 config、extension/plugin/package 和 executable hook；不同类别可以采用不同 trust gate。</li>
+<li><code>TrustDecision = {canonical project scope, decision, source, persistence}</code>，它只控制资源加载，不自动提供工具授权或 OS 隔离。</li>
+<li><strong>不变量</strong>：managed layer 的不可覆盖性必须保留；相对路径应相对其来源 layer 解析；拒绝 project resources 后仍要能解释有效配置来自哪里。</li>
+</ul>
+<h3 id="implementation-对照-7">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>配置机制</th>
+<th>项目信任</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / documented</code></td>
+<td>canonical loader 产生 effective TOML、per-key origins 与 per-layer versions；高到低优先级覆盖 managed、session flags、project、user、enterprise、system 等 layer，disabled layer 仍向 UI 暴露但不参与 effective config。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/config/src/loader/README.md#L1-L44">固定锚点</a></td>
+<td><code>implemented / implemented</code>：测试显示 trusted project 加载 <code>.codex/config.toml</code>，改为 untrusted 后 Project layer 数为 0。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/config/src/loader/tests.rs#L459-L573">固定锚点</a></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / documented</code></td>
+<td>remote、global、custom、project、<code>.opencode</code>、inline、managed、MDM 依次 merge，后层只覆盖冲突 key，managed 最高。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/config.mdx#L27-L58">固定锚点</a></td>
+<td><code>unknown</code>：本轮在固定锚点文档和已检查运行时中未定位 project-trust prompt/decision 契约；不能据此断言没有。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>boot 时把 profile 的 bundles、profile patch、home patch 与 <code>--patch</code> 组成有序 Cordis plugin tree；patch 按 row id 替换整项或插入。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L9-L37">固定锚点</a> User settings 又按 schema defaults → composition base → user section 解析，保留 namespace ownership。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/settings.md#L1-L20">固定锚点</a></td>
+<td><code>unknown</code>：本轮未定位项目目录级 trust decision；不要把 approval/sandbox 或 Cordis composition 当作等价证据。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / documented</code></td>
+<td>project trust 以 canonical directory 保存，closest ancestor decision 优先，默认 <code>ask</code>；interactive 可询问，非交互按 default/CLI override 处理。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/security.md#L5-L29">固定锚点</a></td>
+<td>trust 只决定 project settings、resources、packages、extensions 是否加载；context files 始终可加载。<code>absent / documented</code>：它不是 sandbox，工具和 extension 仍继承进程权限。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/security.md#L31-L53">固定锚点</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="三层安全语义">三层安全语义</h3>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>决策问题</th>
+<th>失败时的后果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resource trust</td>
+<td>是否加载仓库提供的 config/plugin/hook/package？</td>
+<td>启动前行为被仓库代码改变</td>
+</tr>
+<tr>
+<td>Action policy</td>
+<td>这一次工具调用 allow、ask 还是 deny？</td>
+<td>模型行动未经预期审批</td>
+</tr>
+<tr>
+<td>Isolation enforcement</td>
+<td>即使上层误判，进程能影响什么？</td>
+<td>文件、网络、凭证越界</td>
+</tr>
+</tbody>
+</table>
+<p>Pi 是最清晰的反例：有 project trust，但明确没有内置 sandbox。任何 Harness 画像都必须分别填这三层，不能用“安全模式”一个标签概括。</p>
+<h2 id="primitive扩展与生命周期">Primitive：扩展与生命周期</h2>
+<p><strong>问题。</strong> 扩展如何发现、排序、注册能力或 hook、拦截运行，以及在 reload/unload/dispose 时撤销副作用？成熟度暂记为 <strong>Proposed Abstraction</strong>：四者都有扩展点，但只有 DeepSeek 本轮证据完整覆盖可逆注册。</p>
+<h3 id="领域模型-7">领域模型</h3>
+<p><code>ExtensionInstance</code> 应拥有来源、trust、load order、registration handles 与 lifetime scope。Hook 需要事件名、同步/异步模式、matcher、timeout、输入/输出变换和失败隔离。关键不变量是 <strong>卸载后不再接受新调用，已注册副作用按所有权撤销</strong>；只有“能加载 JS/命令”不足以证明生命周期完整。</p>
+<h3 id="implementation-对照-8">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>生命周期空白</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / documented</code></td>
+<td><code>hooks/list</code> 按 cwd 的 effective config 发现 hook；command hook 可同步参与当前操作或异步后台执行并通过 steer 注入结果，MCP tool hook 始终同步。非 managed hook 以内容 hash 跟踪 first-seen/approved/changed，只有 trusted 才可运行。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L1958-L1968">固定锚点</a></td>
+<td>本证据证明 hook discovery/trust/execution，不足以概括所有 plugin/skill/MCP 的统一 unload 协议；该统一语义为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / documented</code></td>
+<td>npm/local plugin 依 global config → project config → global dir → project dir 顺序加载，所有 hook 顺序运行；事件覆盖 message、permission、session、tool 等域，并有专门 compaction hook。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/plugins.mdx#L45-L70">加载顺序</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/plugins.mdx#L142-L203">事件面</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/plugins.mdx#L338-L389">压缩 hook</a></td>
+<td>文档没有在本轮锚点中给出通用 plugin unload/registration rollback 契约，记为 <code>unknown</code>。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>model adapter、tool registry、session log、agent loop 都是 Cordis plugin；注册是 reversible effect，plugin unload 时逆向撤销。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L9-L27">固定锚点</a> settings namespace 也绑定 calling plugin fiber，dispose 会移除 namespace 与 observers。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/subsystems/settings.md#L18-L54">固定锚点</a></td>
+<td>这是本轮唯一直接证明“注册所有权 → 逆向撤销”的完整样本。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / documented</code></td>
+<td>TypeScript extension 可注册 tools、commands、provider、UI，并接收 session/context/model/tool 生命周期；<code>tool_call</code> 能阻断/改参，<code>tool_result</code> 可链式改写结果。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/extensions.md#L1-L16">固定锚点</a> · <a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/extensions.md#L749-L847">工具拦截</a> project extension 只有 trust 后加载，global/CLI extension 可参与 trust decision。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/security.md#L18-L29">固定锚点</a></td>
+<td>本轮没有定位与 Cordis 等价的通用热卸载回滚契约，记为 <code>unknown</code>。</td>
+</tr>
+</tbody>
+</table>
+<p>扩展页应把 <strong>Discovery、Ordering、Registration、Interception、Failure containment、Disposal</strong> 分开。当前证据支持前三至五项在多个 Harness 中存在，但只有 DeepSeek 足以把 Disposal 提升为 observed pattern。</p>
+<h2 id="primitive控制平面与互操作协议">Primitive：控制平面与互操作协议</h2>
+<p><strong>问题。</strong> 外部客户端怎样启动或寻址会话、提交输入、接收流式事件、取消运行并恢复状态？成熟度暂记为 <strong>Accepted Primitive</strong>：四个实现都提供与 UI 解耦的控制入口，但采用 JSON-RPC、HTTP/SSE、Typert Remote 或 JSONL RPC/SDK 等不同协议形态。</p>
+<h3 id="领域模型-8">领域模型</h3>
+<p>控制平面至少包含 <code>Transport + Handshake/Auth + Addressing + Commands + Correlation + Event stream + Cancellation + Schema/versioning</code>。它控制 Harness 自身的 Session/Turn；MCP 等 capability protocol 则向 Harness 提供工具。两者即使都使用 JSON-RPC，也不能合并。</p>
+<h3 id="implementation-对照-9">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>协议边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / documented</code></td>
+<td>app-server 使用双向 JSON-RPC 2.0 语义；默认 stdio JSONL，也有 experimental WebSocket 与 Unix socket。连接先 initialize/initialized，再 start/resume/fork Thread、start Turn、读 item/turn notifications、interrupt。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L20-L39">传输</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L66-L87">生命周期</a></td>
+<td>schema 可由运行版本生成；MCP extension profile 在 Thread 创建时固定并由 subagent 继承。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/app-server/README.md#L91-L117">固定锚点</a></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>implemented / documented</code></td>
+<td><code>opencode serve</code> 暴露 headless HTTP/OpenAPI 3.1；普通 TUI 本身也是 server 的 client。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/server.mdx#L9-L60">固定锚点</a> Session API 覆盖 create/children/fork/abort 与 sync/async prompt；<code>/event</code> 用 SSE 推送 bus events。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/server.mdx#L146-L180">Session API</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/web/src/content/docs/server.mdx#L275-L287">SSE/OpenAPI</a></td>
+<td>HTTP basic auth 可保护 server；它不等价于每次 tool permission。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>Client <code>Remote</code> 经 Connection 发出 unary RPC；Connection 拥有 carrier、correlation、trust check、response envelope 与 cancellation，Gateway 只做 strict descriptor/data validation 和 business dispatch。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/api-gateway.md#L80-L95">固定锚点</a> · <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/api-gateway.md#L119-L125">runtime invocation</a></td>
+<td>Remote 只允许一请求一结果；session event stream、pagination 与 incremental projection 必须使用独立 data protocol，即使复用 Connection。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/api-gateway.md#L158-L164">固定锚点</a></td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>implemented / documented</code></td>
+<td>RPC mode 通过 stdin/stdout 严格 JSONL 收 command、回 response、流式发 event；prompt 成功只表示 accepted/queued/handled，后续失败走 event stream。运行中输入必须声明 steer 或 followUp。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/rpc.md#L1-L76">固定锚点</a></td>
+<td>Node/TS 可直接嵌入 AgentSession，避免 subprocess RPC；SDK 与 RPC 是两种控制入口，不是两个 Harness。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/sdk.md#L3-L34">固定锚点</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="控制协议需要显式区分的失败">控制协议需要显式区分的失败</h3>
+<ul>
+<li>“accepted” 后模型失败：不能补发第二个同 correlation id 的 response，应走 event/error stream。</li>
+<li>客户端断连：不一定取消 Session；需要独立说明订阅、loaded lifetime 与自动 unload。</li>
+<li>cancel wait 与 cancel work：前者只终止 RPC/等待，后者必须传给 model/tool/job runtime。</li>
+<li>schema 漂移：generated schema、OpenAPI 或 strict descriptor 应绑定 server 版本，客户端不能靠文本解析猜测。</li>
+</ul>
+<h2 id="primitivetrajectory回放与评测适配">Primitive：Trajectory、回放与评测适配</h2>
+<p><strong>问题。</strong> 运行记录怎样支持恢复、诊断、确定性状态投影、环境动作重放或 benchmark 评测？成熟度暂记为 <strong>Proposed Abstraction</strong>。现有证据支持多种“replay”，但没有理由把它们统称为 trajectory replay。</p>
+<h3 id="回放层级">回放层级</h3>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>输入</th>
+<th>产物</th>
+<th>本轮例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transcript rebuild</td>
+<td>持久消息/事件</td>
+<td>模型可见历史</td>
+<td>DeepSeek SessionEvent、Pi JSONL</td>
+</tr>
+<tr>
+<td>State projection replay</td>
+<td>有序领域事件</td>
+<td>Session 数据库/客户端投影</td>
+<td>OpenCode SyncEvent</td>
+</tr>
+<tr>
+<td>Diagnostic semantic replay</td>
+<td>raw request/result/runtime evidence</td>
+<td>可查询语义图</td>
+<td>Codex rollout trace reducer</td>
+</tr>
+<tr>
+<td>Environment action replay</td>
+<td>命令、文件、网络与环境 checkpoint</td>
+<td>可重复工作区终态</td>
+<td>四者均未由本轮证据确认</td>
+</tr>
+<tr>
+<td>Benchmark trajectory</td>
+<td>标准 action/observation/score schema</td>
+<td>evaluator 输入与比较结果</td>
+<td>四者均未由本轮证据确认</td>
+</tr>
+</tbody>
+</table>
+<h3 id="implementation-对照-10">Implementation 对照</h3>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>状态 / 事实类型</th>
+<th>机制与证据</th>
+<th>不能推出什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><code>implemented / documented</code></td>
+<td>opt-in rollout trace 把 prompts、responses、tool I/O、terminal output 等写入本地 bundle；<code>trace.jsonl</code> 是 ordered raw spine，payload 独立保存，offline deterministic reducer 生成含 thread/turn/tool/terminal/compaction 与 child interaction edges 的 <code>state.json</code>。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/rollout-trace/README.md#L1-L20">固定锚点</a> · <a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/rollout-trace/README.md#L39-L116">bundle/reducer</a></td>
+<td>reducer 的 replay 是诊断语义归约，不会重新执行 shell/文件副作用，也不是 benchmark trajectory。</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>alternative / documented</code></td>
+<td>SyncEvent 设计为单 writer 的事件溯源：事件在 mutation 前记录，以全序 seq 让其他设备下载 log 并在本地 replay Session 投影；sync event 再兼容发布为 bus event。<a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/sync/README.md#L27-L47">固定锚点</a> · <a href="https://github.com/anomalyco/opencode/blob/a0f8dccbfe139ffc7137d1eaf6fee6e4195af599/packages/opencode/src/sync/README.md#L49-L107">事件形态</a></td>
+<td>目标是多设备 Session sync，不是模型 action/observation trajectory，也没有证明工作区副作用重放。</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><code>implemented / documented</code></td>
+<td>append-only Session log 是模型历史来源，raw assistant chunks 保留 UI/replay fidelity；fork/resume/transcript/telemetry/persistence 都由此派生。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/architecture.md#L92-L96">固定锚点</a> generated persistence catalog 定义 monotonic seq、surface/log-only、required unknown-event handling 与 JSON-serializable envelope。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/persistence-catalog.md#L4-L10">固定锚点</a> · <a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/47f943859bef60e4160492346772ded9b24f765a/docs/persistence-catalog.md#L45-L90">event envelope</a></td>
+<td>可重建 model-visible surface，不等于可重放 subprocess/filesystem 世界。</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>alternative / documented</code></td>
+<td>JSONL tree、compaction checkpoint 与 branch summary 足以恢复当前模型上下文和分支导航。<a href="https://github.com/earendil-works/pi/blob/d3ab2af969d64997338253c9151190aa1bc33580/packages/coding-agent/docs/session-format.md#L306-L342">固定锚点</a></td>
+<td>标准 trajectory、raw runtime evidence graph 与 environment action replay 在本轮检查范围均为 <code>unknown</code>。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="为什么必须拆开">为什么必须拆开</h3>
+<p>“能 resume”只说明 durable state 可以重新投影；“能 replay events”只说明 projector 可重复；“有 trace”只说明留下诊断证据。只有当执行环境、初始 checkpoint、工具版本、外部 I/O 与 nondeterminism 都被捕获并受控时，才可声称 environment replay。评测适配还需要另一个标准化 action/observation/score contract。Wiki 页面应把这些层级并列，避免用 <code>replay: yes</code> 制造虚假可比性。</p>
+<h2 id="跨-primitive-结论">跨 Primitive 结论</h2>
+<h3 id="可以接受为稳定-primitive-的部分">可以接受为稳定 Primitive 的部分</h3>
+<ol>
+<li><strong>会话与运行拓扑</strong>：Session identity、Turn/Step、branch/fork 与 live actor 有独立状态，虽映射不同但问题稳定。</li>
+<li><strong>Agent 循环与工作模式</strong>：循环状态机稳定；mode 是可选策略投影，不是所有 Harness 的内置对象。</li>
+<li><strong>上下文压缩</strong>：Trigger、Selection、Artifact、Commit、Continuation 五段可跨四个实现解释差异。</li>
+<li><strong>项目指令发现与组装</strong>：目录链、候选优先级、预算与 provenance 有独立失败模式。</li>
+<li><strong>工具与能力运行时</strong>：definition/exposure、policy、execution、result normalization 必须分别记录。</li>
+<li><strong>控制平面</strong>：客户端寻址与运行控制独立于 capability protocol，四个样本均有直接证据。</li>
+</ol>
+<h3 id="仍应保持-proposed-abstraction-的部分">仍应保持 Proposed Abstraction 的部分</h3>
+<ul>
+<li><strong>任务/Goal/Job/多 Agent</strong>：当前证据支持继续细拆，不支持一个万能 <code>Task</code> 接口。</li>
+<li><strong>配置与项目信任</strong>：configuration layering 已稳定，但 trust 的资源分类只在部分 Harness 有证据。</li>
+<li><strong>扩展生命周期</strong>：load/hook 普遍存在，unload rollback 只有一个完整样本。</li>
+<li><strong>Trajectory/replay</strong>：不同“回放”处在五个层级，统一接口会过早抹平用途。</li>
+</ul>
+<h3 id="领域模型带来的目录建议">领域模型带来的目录建议</h3>
+<p>大主题只负责导航，Primitive 才承载机制。运行内核下至少单列<a href="/harnesswiki-site/docs/module-map/#%E8%BF%90%E8%A1%8C%E5%86%85%E6%A0%B8">会话与运行拓扑、Agent 循环、上下文压缩、指令发现、工具运行时</a>；控制与连续性下分开<a href="/harnesswiki-site/docs/module-map/#%E6%8E%A7%E5%88%B6%E4%B8%8E%E8%BF%9E%E7%BB%AD%E6%80%A7">权限/隔离、状态恢复、任务编排、配置/信任</a>；组合与互操作下分开<a href="/harnesswiki-site/docs/module-map/#%E7%BB%84%E5%90%88%E4%B8%8E%E4%BA%92%E6%93%8D%E4%BD%9C">扩展生命周期、控制平面、Trajectory/replay</a>。压缩不再埋在“上下文管理”段落，多 Agent 也不再吞掉 Job、Goal 与工作区事务。</p>
+<h2 id="明确保留的-unknown">明确保留的 unknown</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>当前 <code>unknown</code></th>
+<th>已检查但不足以得出结论的范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td>AGENTS 加载是否受 project trust gate；任意 producer 的通用后台 Job；环境动作 replay 与标准 benchmark trajectory；所有扩展类型的统一 unload 协议</td>
+<td><code>agents_md.rs</code>、config loader/test、app-server、rollout-trace、hook 文档</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td>project-trust decision；instruction 总字节预算；持久 Turn/Step 顶层实体；plugin unload rollback；环境动作 replay/benchmark trajectory</td>
+<td>rules/config/plugins/server 文档、session loop、sync README</td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td>项目目录级 trust decision；环境动作 replay 与 benchmark trajectory</td>
+<td>architecture、settings、agent-instructions、persistence catalog、API gateway</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td>通用 extension 热卸载回滚；标准 trajectory/raw runtime graph；环境动作 replay；durable Goal runtime</td>
+<td>security/usage/session/compaction/extensions/RPC/SDK 文档与 agent loop</td>
+</tr>
+</tbody>
+</table>
+<p>这些 <code>unknown</code> 不能在正式页面中改写为“没有”。相反，Pi 对内置 subagent、background bash、permission popup、plan mode、todo 与 sandbox 的缺席都有官方明确材料，才可以分别记录 <code>absent</code>。</p>
+<h2 id="证据限制与复核入口">证据限制与复核入口</h2>
+<ul>
+<li>本文只覆盖四个固定 commit，不把后续默认分支变化回填到旧结论。</li>
+<li>同仓版本化文档属于项目方 <code>documented</code> 事实；源码与测试才标 <code>implemented</code> 事实类型。</li>
+<li>本轮没有运行产品黑盒实验，因此没有 <code>observed</code> Claim。</li>
+<li>远端 docs 入口没有替代固定 blob；所有关键结论都能回到 commit-bound source。</li>
+<li>正式 Wiki 应从各 Primitive 页面链接对应 Harness 画像与 Situation，再由这些页面回链；本底稿已经由<a href="/harnesswiki-site/docs/research/">调研底稿索引</a>反向链接，并回链<a href="/harnesswiki-site/docs/research-method/">研究方法</a>、<a href="/harnesswiki-site/docs/domain-model/">领域模型</a>与<a href="/harnesswiki-site/docs/module-map/">机制地图</a>。</li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

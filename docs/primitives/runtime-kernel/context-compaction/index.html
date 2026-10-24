@@ -1,0 +1,563 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Primitive：上下文压缩 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Primitive：上下文压缩"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#要素与契约" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">要素与契约</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#形式化定义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">形式化定义</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#压缩任务实例" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">压缩任务实例</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可行候选" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可行候选</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#目标函数" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">目标函数</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#提交判定" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">提交判定</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#压缩任务成功" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">压缩任务成功</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可比较的评测量" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可比较的评测量</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#为什么独立成-primitive" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">为什么独立成 Primitive</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#不变量" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">不变量</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#用来显露差异的具体场景" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">用来显露差异的具体场景</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#压缩后继续一个未完成工具链" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">压缩后继续一个未完成工具链</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#从旧分支切回主路径" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">从旧分支切回主路径</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#各-harness-的实现" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">各 Harness 的实现</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#opencode" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">OpenCode</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#deepseek-harness" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">DeepSeek Harness</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#claude-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Claude Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#antigravity-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Antigravity CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#minimax-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">MiniMax Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#mistral-vibe" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Mistral Vibe</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#browser-use" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Browser Use</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#zed-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Zed Agent</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#stakpak-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Stakpak Agent</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#设计策略与取舍" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">设计策略与取舍</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#选择一怎样组织完整历史和模型可见上下文" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">选择一：怎样组织完整历史和模型可见上下文</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#选择二候选怎样取得提交权" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">选择二：候选怎样取得提交权</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实际选择顺序" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实际选择顺序</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#相关原子-primitive" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">相关原子 Primitive</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#反例与未知" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">反例与未知</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">来源</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#要素与契约" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">要素与契约</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#形式化定义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">形式化定义</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#压缩任务实例" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">压缩任务实例</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可行候选" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可行候选</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#目标函数" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">目标函数</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#提交判定" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">提交判定</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#压缩任务成功" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">压缩任务成功</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#可比较的评测量" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">可比较的评测量</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#为什么独立成-primitive" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">为什么独立成 Primitive</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#不变量" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">不变量</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#用来显露差异的具体场景" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">用来显露差异的具体场景</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#压缩后继续一个未完成工具链" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">压缩后继续一个未完成工具链</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#从旧分支切回主路径" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">从旧分支切回主路径</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#各-harness-的实现" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">各 Harness 的实现</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#codex-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Codex CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#pi" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Pi</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#opencode" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">OpenCode</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#deepseek-harness" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">DeepSeek Harness</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#gemini-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Gemini CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#qwen-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Qwen Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#claude-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Claude Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#antigravity-cli" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Antigravity CLI</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#minimax-code" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">MiniMax Code</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#mistral-vibe" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Mistral Vibe</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#browser-use" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Browser Use</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#zed-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Zed Agent</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#stakpak-agent" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">Stakpak Agent</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#设计策略与取舍" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">设计策略与取舍</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#选择一怎样组织完整历史和模型可见上下文" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">选择一：怎样组织完整历史和模型可见上下文</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#选择二候选怎样取得提交权" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">选择二：候选怎样取得提交权</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#实际选择顺序" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">实际选择顺序</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#相关原子-primitive" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">相关原子 Primitive</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#反例与未知" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">反例与未知</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#来源" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">来源</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#关联阅读" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">关联阅读</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Primitive：上下文压缩</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="primitive上下文压缩"></span></p>
+<blockquote>
+<p>主题：<a href="/harnesswiki-site/docs/primitives/runtime-kernel/">运行内核</a> · 成熟度：<code>Accepted Primitive</code> · <a href="/harnesswiki-site/docs/comparisons/context-budget-pressure/">预算压力场景</a></p>
+<p>共识 Family：<code>Codex</code>、<code>Pi</code>、<code>OpenCode</code>、<code>DeepSeek</code></p>
+</blockquote>
+<p>本文所说的“上下文”，是下一次请求实际发送给模型的内容，不等于系统保存的完整会话记录。当上下文快要超过模型能接收的上限时，运行程序可以把一部分旧内容换成更短的表示，再继续当前任务。Agent 指接收目标并调用模型和工具完成任务的执行主体；负责组织模型请求、工具调用和会话状态的运行程序统称为 Harness。</p>
+<p>上下文压缩不是单纯“让模型写一段摘要”。它还要决定何时开始、哪些内容不能丢、压缩结果是否仍适用于当前会话、结果何时正式生效，以及生效后怎样继续。本文把这个“要么完整生效，要么完全不生效”的更新过程称为压缩事务。</p>
+<p>Primitive 指一个边界清楚、可以与其他能力组合的原子能力。页面顶部的 <code>Accepted Primitive</code> 表示本仓库已经接受这项抽象；Family 指共享同一主要实现来源的一组 Harness。来自同一 Family 的两个产品只能算一份独立设计证据。</p>
+<h2 id="要素与契约">要素与契约</h2>
+<p>后文比较各个 Harness 时，统一使用下面七个要素。每个要素都回答一个可以单独验证的问题。</p>
+<table>
+<thead>
+<tr>
+<th>要素</th>
+<th>要回答的问题</th>
+<th>必须满足的条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>触发</td>
+<td>为什么现在需要压缩？</td>
+<td>记录触发原因，例如超过预算、模型可接收长度变小、用户手动要求，或服务端拒绝了过长请求。</td>
+</tr>
+<tr>
+<td>输入与保护范围</td>
+<td>以哪一版上下文为输入？哪些内容不能丢？</td>
+<td>明确本次处理的消息或节点范围。节点是上下文图中一个可以单独识别的内容单元。保护最高优先级指令、当前用户请求、尚未完成的工具调用、权限决定和仍需引用的证据。</td>
+</tr>
+<tr>
+<td>候选</td>
+<td>准备拿什么替换旧内容？</td>
+<td>候选可以是摘要、裁剪后的工具结果、较便宜的媒体表示或它们的组合；它必须标明覆盖了哪些原内容。</td>
+</tr>
+<tr>
+<td>事务状态</td>
+<td>如何区分准备中、已提交、失败和取消？</td>
+<td>生成候选不等于已经生效。失败或取消不能留下“已经完成”的假标记。</td>
+</tr>
+<tr>
+<td>提交</td>
+<td>候选在什么条件下正式生效？</td>
+<td>再次确认输入范围没有变化，候选没有破坏消息结构，且压缩后的内容确实能放进下一次请求。</td>
+</tr>
+<tr>
+<td>输出与继续</td>
+<td>提交后模型看到什么，程序从哪里继续？</td>
+<td>输出新的模型可见上下文，并明确是等待下一轮用户输入、继续当前处理周期，还是重新发送刚才因超长而失败的请求。</td>
+</tr>
+<tr>
+<td>事实保存与边界</td>
+<td>完整历史是否还在？本能力不负责什么？</td>
+<td>压缩不得悄悄改写已经发生的会话事实。本页只负责触发、提交和继续；摘要怎样写、工具结果怎样裁剪、媒体怎样降级和来源怎样记录，由相邻 Primitive 负责。</td>
+</tr>
+</tbody>
+</table>
+<p>这里的“一轮”是从一次用户输入开始，到 Harness 完成这次响应为止的处理周期。“提交”是把候选正式发布为后续模型请求所见内容；提交之前，候选只能算临时结果。</p>
+<h2 id="形式化定义">形式化定义</h2>
+<h3 id="压缩任务实例">压缩任务实例</h3>
+<p>下面的符号只把上表写得更精确，不另造一套概念。把一次压缩任务写成：</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">T = (H, q, m, B, K, r, v0)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="T = (H, q, m, B, K, r, v0)"><div></div></button></div></figure></div>
+<p>其中：</p>
+<ul>
+<li><code>H = (e1, ..., en)</code> 是按发生顺序保存的完整会话记录。它是事实来源，压缩不能删除或覆写它已经记录的事实。</li>
+<li><code>q</code> 是当前任务状态，包括用户目标、尚未完成的动作、约束，以及提交后从哪里继续。</li>
+<li><code>m</code> 是下一次请求使用的模型。<code>cost_m(x)</code> 表示内容 <code>x</code> 按该模型的计数规则占用多少输入额度；这种计数单位通常称为 token，可粗略理解为模型处理文本时使用的小片段。</li>
+<li><code>B = window_m - reserve_m</code> 是上下文可用额度。<code>window_m</code> 是模型一次最多接收的总额度，<code>reserve_m</code> 是为模型输出、工具调用格式和运行信息预留的部分。</li>
+<li><code>K</code> 是保护集合，至少包含最高优先级指令、当前用户请求、尚未配对完成的工具调用与结果、权限决定和仍需直接引用的证据。</li>
+<li><code>r</code> 是触发原因。</li>
+<li><code>v0</code> 是开始生成候选时的输入范围版本，用来发现生成期间发生的新消息或替换。</li>
+</ul>
+<p>从完整记录 <code>H</code> 和任务状态 <code>q</code> 组装出的当前模型可见上下文记为 <code>x = P(H, q)</code>。压缩过程产生候选：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">c = (x', A, L, d, v0)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="c = (x&#x27;, A, L, d, v0)"><div></div></button></div></figure></div>
+<p>其中：</p>
+<ul>
+<li><code>x'</code> 是候选上下文。</li>
+<li><code>A</code> 是候选覆盖的原消息或节点集合。</li>
+<li><code>L</code> 是来源关系，说明 <code>x'</code> 中每个新表示来自 <code>H</code> 的哪些内容。</li>
+<li><code>d</code> 是检查信息，包括选择范围、丢弃项、摘要是否完整和估算成本。</li>
+<li>候选再次携带 <code>v0</code>，这样提交时才能确认它仍对应原输入。</li>
+</ul>
+<p>压缩任务的最终输出不是一段摘要，而是：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">R(T) = (status, x_next, L, continuation, evidence)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="R(T) = (status, x_next, L, continuation, evidence)"><div></div></button></div></figure></div>
+<ul>
+<li><code>status</code> 是 <code>committed</code>（已提交）、<code>rejected</code>（候选被拒绝）、<code>failed</code>（执行失败）或 <code>cancelled</code>（被取消）。</li>
+<li><code>x_next</code> 是后续模型请求使用的上下文。只有已提交时它才等于 <code>x'</code>；其他状态下必须仍等于原上下文 <code>x</code>。</li>
+<li><code>continuation</code> 是继续方式。</li>
+<li><code>evidence</code> 是触发原因、检查结果、提交记录和失败原因等事后可检查的证据。</li>
+</ul>
+<h3 id="可行候选">可行候选</h3>
+<p>给定任务 <code>T</code>，候选 <code>c</code> 只有同时满足以下条件，才属于可提交候选集合 <code>F(T)</code>：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">1. cost_m(x') &lt;= B</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">2. K 中的保护内容仍能找到、解释和正确使用</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">3. x' 中每个摘要、裁剪结果或替代标记都说明自己的来源和性质</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">4. 工具调用与工具结果的配对、权限决定和继续所需的消息结构没有被破坏</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">5. x' 可以直接组装成合法的下一次模型请求</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="1. cost_m(x&#x27;) <= B2. K 中的保护内容仍能找到、解释和正确使用3. x&#x27; 中每个摘要、裁剪结果或替代标记都说明自己的来源和性质4. 工具调用与工具结果的配对、权限决定和继续所需的消息结构没有被破坏5. x&#x27; 可以直接组装成合法的下一次模型请求"><div></div></button></div></figure></div>
+<p>第 2 条不要求所有保护内容都逐字保留，但要求其含义和引用能力仍然成立。例如，工具输出可以换成较短版本，但较短版本必须明确指出它来自哪次工具结果，不能伪装成完整原文。</p>
+<h3 id="目标函数">目标函数</h3>
+<p>压缩不是“越短越好”。先设 <code>U(x; q)</code> 表示上下文 <code>x</code> 对完成当前任务 <code>q</code> 的帮助程度，<code>C(x) = cost_m(x)</code> 表示输入成本，再设 <code>epsilon</code> 为可以接受的最大任务能力损失。目标可以写成：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">在所有 x' in F(T) 中尽量减小 C(x')</span></div></div><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">同时保证 U(x'; q) &gt;= U(x; q) - epsilon</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="在所有 x&#x27; in F(T) 中尽量减小 C(x&#x27;)同时保证 U(x&#x27;; q) >= U(x; q) - epsilon"><div></div></button></div></figure></div>
+<p>这句话的直接含义是：先守住任务质量和保护内容，再在合格候选中选择更省额度的方案。编码任务通常应把测试是否仍通过、约束是否仍有效和是否造成错误修改放在节省 token 之前。</p>
+<h3 id="提交判定">提交判定</h3>
+<p>候选生成和提交是两个不同步骤。设开始生成时的输入版本为 <code>v0</code>，准备提交时的当前版本为 <code>v1</code>，则：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">commit(T, c) iff</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">c in F(T)</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and v1 == v0</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and 来源关系与候选已经可靠保存</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and x' 可以发布为下一次模型可见上下文</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="commit(T, c) iff    c in F(T)    and v1 == v0    and 来源关系与候选已经可靠保存    and x&#x27; 可以发布为下一次模型可见上下文"><div></div></button></div></figure></div>
+<p>若 <code>v1 != v0</code>，说明候选生成期间输入已经变化。这个候选已经过期，必须拒绝，并根据新上下文重新生成。摘要模型成功返回，只能证明候选生成完成，不能证明候选已经提交。提交后，继续方式决定是等待下一轮、继续当前轮，还是重新发送被超长错误中断的请求。</p>
+<h3 id="压缩任务成功">压缩任务成功</h3>
+<p>一次压缩只有在以下条件全部满足时才算成功：</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">success(T) iff</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">status == committed</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and cost_m(x') &lt;= B</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and 所有保护内容仍然有效</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and 可以构造继续请求</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">and 完整会话历史仍可读取或重建</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="success(T) iff    status == committed    and cost_m(x&#x27;) <= B    and 所有保护内容仍然有效    and 可以构造继续请求    and 完整会话历史仍可读取或重建"><div></div></button></div></figure></div>
+<p>“摘要看起来合理”或“token 数减少”都不是充分的成功条件。若压缩后任务完成率下降、旧事实覆盖了新事实，或失败候选改坏了当前上下文，应分别记录为内容质量失败、过期候选错误提交或事务状态错误。</p>
+<h3 id="可比较的评测量">可比较的评测量</h3>
+<p>对同一个可重复执行的任务过程，可以把完整上下文 <code>x</code> 作为比较基准，把压缩后的上下文记为 <code>x'</code>：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>定义</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>压缩倍数 <code>CR</code></td>
+<td><code>C(x) / C(x')</code></td>
+<td>输入成本缩小了多少倍；需注明比较单次峰值还是整个任务的累计成本</td>
+</tr>
+<tr>
+<td>成本节省 <code>S</code></td>
+<td><code>1 - C(x') / C(x)</code></td>
+<td>归一化 token 节省</td>
+</tr>
+<tr>
+<td>任务损失 <code>DeltaU</code></td>
+<td><code>U(x; q) - U(x'; q)</code></td>
+<td>压缩造成的实际任务能力损失</td>
+</tr>
+<tr>
+<td>约束保持率 <code>KR</code></td>
+<td>保持的受保护义务数 / 义务总数</td>
+<td>早期约束、权限和未完成动作是否仍有效</td>
+</tr>
+<tr>
+<td>来源可追溯率 <code>PR</code></td>
+<td>能找到原始来源的派生陈述数 / 派生陈述总数</td>
+<td>摘要中的陈述是否能回到原始消息、工具结果或文件产物</td>
+</tr>
+<tr>
+<td>多次压缩损失 <code>RD_k</code></td>
+<td>第 <code>k</code> 次压缩后的 <code>DeltaU</code></td>
+<td>多次压缩后信息损失是否不断累积</td>
+</tr>
+<tr>
+<td>事务错误率 <code>TER</code></td>
+<td>过期、失败或取消后仍被错误提交的次数 / 总尝试次数</td>
+<td>提交失败后恢复原状态的逻辑是否正确</td>
+</tr>
+</tbody>
+</table>
+<p>正式报告应至少给出 <code>(CR, DeltaU, KR, PR, RD_k, TER)</code>，并在同一批任务上比较完整上下文、直接删掉旧消息和待测压缩方案。只有这样，才能区分“真的保住了任务能力”和“只是把输入变短了”。</p>
+<h2 id="为什么独立成-primitive">为什么独立成 Primitive</h2>
+<p>即使摘要由外部服务生成，Harness 仍然要独立回答三个问题：何时开始、候选现在还能不能提交、提交后从哪里继续。这三个问题不能交给摘要模型顺带决定，因为它们需要读取当前会话状态，并保证失败时不改变正在使用的上下文。</p>
+<pre class="mermaid">stateDiagram-v2
+    state "测量当前上下文" as Measuring
+    state "预算内，可以继续" as Ready
+    state "准备候选" as Preparing
+    state "提交候选" as Committing
+    state "重建下一次请求" as Rebuilding
+    state "失败或取消" as Failed
+    [*] --> Measuring
+    Measuring --> Ready: 没有超过预算
+    Measuring --> Preparing: 达到触发条件
+    Preparing --> Committing: 候选通过检查
+    Committing --> Rebuilding: 新上下文已经发布
+    Rebuilding --> Ready: 新请求能放进预算
+    Rebuilding --> Preparing: 仍然过长
+    Preparing --> Failed: 生成失败或被取消
+    Committing --> Failed: 输入已变化或保存失败
+    Failed --> [*]</pre>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>输入</th>
+<th>必须保留的证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>测量与触发</td>
+<td>模型可接收的总额度、预留额度、当前上下文</td>
+<td>估算方法、触发原因和阈值</td>
+</tr>
+<tr>
+<td>候选准备</td>
+<td>明确版本的输入范围，以及摘要、裁剪或表示降级组件</td>
+<td>候选身份、输入版本、失败原因和取消记录</td>
+</tr>
+<tr>
+<td>提交</td>
+<td>已通过检查的候选及本次事务身份</td>
+<td>替换是否成功、候选来自哪些原内容、相关记录是否已经可靠保存</td>
+</tr>
+<tr>
+<td>重建与继续</td>
+<td>新上下文、刚才被中断的请求和当前轮状态</td>
+<td>实际发送给模型的内容，以及等待、继续或重试的决定</td>
+</tr>
+</tbody>
+</table>
+<h3 id="不变量">不变量</h3>
+<ul>
+<li>被提交的摘要、替代标记或低成本表示必须说明自己是加工后的内容，不能伪装成用户原话或工具原始输出。</li>
+<li>项目指令的权威性不能因被模型摘要而悄然变化。</li>
+<li>工作区会在模型请求之外发生变化；摘要中的旧文件差异不能替代重新读取当前文件。</li>
+<li>多次压缩会累积信息损失，Harness 应保留边界或原历史，以便事后审计，也就是回查原始事实和每次替换。</li>
+<li>为会话分支生成的摘要与为长度预算生成的摘要可以复用同一段代码，但两者的触发原因和作用范围不同。</li>
+<li>候选生成成功不等于事务提交成功；范围变化、保存失败或取消必须保留为不同终态。</li>
+</ul>
+<h2 id="用来显露差异的具体场景">用来显露差异的具体场景</h2>
+<h3 id="压缩后继续一个未完成工具链">压缩后继续一个未完成工具链</h3>
+<p>历史中已有失败测试、部分文件修改和下一步计划。压缩后模型必须区分已执行效果与待执行意图，否则会重复修改或跳过验证。</p>
+<h3 id="从旧分支切回主路径">从旧分支切回主路径</h3>
+<p>离开分支前生成的摘要应描述分支结果，而不能把未合并文件状态注入主路径。参见<a href="/harnesswiki-site/docs/comparisons/context-budget-pressure/">长会话遇到预算压力</a>。</p>
+<h2 id="各-harness-的实现">各 Harness 的实现</h2>
+<p>下面每个实现都按“要素与契约”的顺序说明。代码字段保留原名时，会紧跟中文解释。</p>
+<h3 id="codex-cli">Codex CLI</h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码与行为都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/codex-cli/">Codex CLI 画像</a></li>
+<li><strong>触发</strong>：可因当前输入接近预算上限、切换到可接收长度更小的模型、请求格式兼容性变化或用户手动要求而开始压缩。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/session/turn.rs#L994-L1150">触发条件</a></li>
+<li><strong>输入与保护范围</strong>：区分“在新一轮开始前压缩”和“在当前轮执行到一半时压缩”。后一种情况必须保住当前用户请求和仍在进行的工作，不能把它们当成已结束的旧历史。</li>
+<li><strong>候选</strong>：生成摘要，并据此构造一份更短的替代消息历史。</li>
+<li><strong>事务状态</strong>：压缩在原请求处理流程中有明确阶段；候选生成完成后，还要进入历史替换和检查点记录阶段。</li>
+<li><strong>提交</strong>：只有替代历史和用于恢复的检查点信息都写入成功，新的模型可见上下文才算生效。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/compact.rs#L347-L393">提交替换</a></li>
+<li><strong>输出与继续</strong>：新一轮开始前的压缩，会在下一轮重新加入初始指令；当前轮中途的压缩，会把初始指令放回最后一条真实用户消息之前，再用摘要继续同一轮。<a href="https://github.com/openai/codex/blob/9ded177ce7c1c0bd2047f902936c177612ab3434/codex-rs/core/src/compact.rs#L59-L79">两种继续边界</a></li>
+<li><strong>事实保存与边界</strong>：代码能确认模型可见消息被替换，并保存恢复所需信息；摘要是否忠实、每个摘要陈述来自哪条原消息，属于其他能力的责任。</li>
+</ul>
+<h3 id="pi">Pi</h3>
+<ul>
+<li><strong>证据情况</strong>：实现存在，且公开文档说明了主要行为，站内分类为 <code>implemented + documented</code>。</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/pi/">Pi 画像</a></li>
+<li><strong>触发</strong>：支持达到长度阈值后的自动压缩、用户手动压缩，以及离开旧会话分支时生成分支摘要。</li>
+<li><strong>输入与保护范围</strong>：选择一段较旧历史作为摘要输入，同时保留最近一段消息；已有摘要和当前活动分支也参与重建。</li>
+<li><strong>候选</strong>：普通压缩产生结构化任务摘要，分支切换产生分支摘要。两者都说明目标、约束、进展和下一步，但作用范围不同。</li>
+<li><strong>事务状态</strong>：压缩结果作为独立的 <code>CompactionEntry</code> 记录，分支摘要作为 <code>BranchSummaryEntry</code> 记录。两个名称分别表示“压缩节点”和“分支摘要节点”；这里的 Entry 是会写入会话存储的一个节点。</li>
+<li><strong>提交</strong>：扩展可以观察压缩过程、取消默认行为或提供替代结果；最终只有被接受的 Entry 才参与后续上下文重建。<a href="https://github.com/earendil-works/pi/blob/59a71b235dadb4ad0d67557a8abb0aaa093e68b4/packages/coding-agent/docs/compaction.md#L271-L312">扩展取消或替换</a></li>
+<li><strong>输出与继续</strong>：后续上下文由摘要、保留的最近消息和当前活动分支共同重建。<a href="https://github.com/earendil-works/pi/blob/59a71b235dadb4ad0d67557a8abb0aaa093e68b4/packages/coding-agent/docs/compaction.md#L27-L79">阈值、保留尾部与重建</a></li>
+<li><strong>事实保存与边界</strong>：原始 JSONL 会话日志仍然保留。JSONL 是“一行一个 JSON 记录”的日志格式，因此系统可以区分“历史实际发生了什么”和“模型下一次会看到什么”。多次摘要造成的信息损失仍需另外评测。</li>
+</ul>
+<h3 id="opencode">OpenCode</h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码与行为都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/opencode/">OpenCode 画像</a></li>
+<li><strong>触发</strong>：在上下文需要缩短或服务端返回超长错误时进入压缩流程；插件也可以影响这次内部处理。</li>
+<li><strong>输入与保护范围</strong>：从会话消息中选择旧内容和需要保留的最近内容，并把已有摘要等状态一起交给内部压缩流程。</li>
+<li><strong>候选</strong>：由一个专门的隐藏压缩 Agent 生成摘要。隐藏表示它服务于内部维护，不作为普通对话参与者显示给用户。<a href="https://github.com/anomalyco/opencode/blob/9b0dd36cda0b9accb429a7f9f9ad9b054a27d04a/packages/opencode/src/session/compaction.ts#L325-L448">选择、生成与插件输入</a></li>
+<li><strong>事务状态</strong>：压缩消息及其组成部分保存在会话数据模型中，而不是作为一次无记录的字符串截断。</li>
+<li><strong>提交</strong>：候选完成后写入压缩消息与相关部分，再据此构造后续模型消息。公开实现把“生成摘要”和“继续对话”分成两个步骤。</li>
+<li><strong>输出与继续</strong>：系统可以重新发送原用户消息，也可以插入一条由系统生成的继续消息；后者不是用户原话，必须保持这个身份区别。<a href="https://github.com/anomalyco/opencode/blob/9b0dd36cda0b9accb429a7f9f9ad9b054a27d04a/packages/opencode/src/session/compaction.ts#L468-L540">重新发送与系统生成的继续消息</a></li>
+<li><strong>事实保存与边界</strong>：会话模型保留压缩相关状态，但摘要内容的来源完整性和任务质量仍需单独检查。</li>
+</ul>
+<h3 id="deepseek-harness">DeepSeek Harness</h3>
+<ul>
+<li><strong>证据情况</strong>：作为替代实现收录，公开文档详细说明了行为，站内分类为 <code>alternative + documented</code>。</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/deepseek-harness/">DeepSeek Harness 画像</a></li>
+<li><strong>触发</strong>：可以在预算压力、确认收到超长错误或用户指定范围时开始压缩。</li>
+<li><strong>输入与保护范围</strong>：从当前模型可见内容中选择一段范围和需要保留的尾部；在生成语义摘要前，也可以先缩短旧工具结果。</li>
+<li><strong>候选</strong>：摘要内容和“用什么替换哪些旧事件”的操作分开记录。</li>
+<li><strong>事务状态</strong>：<code>compaction/start</code> 表示事务开始，<code>compaction/end</code> 表示事务完整结束。若进程在两者之间崩溃，会留下可检测的未完成锁，而不会伪装成成功。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/docs/subsystems/compaction.md#L9-L21">事务开始、结束与提交</a></li>
+<li><strong>提交</strong>：只有带 <code>surfaceOp: replace</code> 的消息才会改变模型可见内容；这个字段直译为“对模型可见内容执行替换”。摘要记录本身不自动取得提交权。</li>
+<li><strong>输出与继续</strong>：是否重新发送刚才失败的请求，取决于超长错误发生在请求构造、发送还是响应处理的哪个阶段。<a href="https://github.com/deepseek-ai/DeepSeek-Harness/blob/99f6f02fecdb7dff40c3fbc9470f5907c29f74ca/docs/subsystems/compaction.md#L60-L88">触发、失败和重试边界</a></li>
+<li><strong>事实保存与边界</strong>：完整会话采用只追加日志，也就是只新增事件、不改写旧事件。压缩只改变模型可见内容，旧事实仍可审计；代价是恢复程序必须识别未完成事务。</li>
+</ul>
+<h3 id="gemini-cli">Gemini CLI</h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码与行为都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/gemini-cli/">Gemini CLI 画像</a></li>
+<li><strong>Family 计数</strong>：Qwen Code 继承了这套主要机制，因此两者合计只算一份独立设计证据。</li>
+<li><strong>触发</strong>：实验性的 Context Graph，也就是“把上下文保存成带关系的节点图”，会在预算压力下依次运行不同的缩减步骤。</li>
+<li><strong>输入与保护范围</strong>：输入是一组当前活动节点。处理步骤可以隐藏不需要发送的节点、把高成本内容换成低成本表示、提取关键信息、直接裁掉尾部，或生成任务状态摘要。</li>
+<li><strong>候选</strong>：后台摘要先产生 <code>PROPOSED_SNAPSHOT</code>，意思是“尚未提交的快照候选”；<code>consumedIds</code> 列出它读取并准备覆盖的原节点身份。</li>
+<li><strong>事务状态</strong>：候选与已生效快照使用不同节点类型，因此后台生成完成不会自动改变当前图。</li>
+<li><strong>提交</strong>：应用候选前，再检查 <code>consumedIds</code> 中的节点是否仍在活动图中。只要输入已经变化，就拒绝旧候选，并可以改为根据当前节点立即重新生成。<a href="https://github.com/google-gemini/gemini-cli/blob/571851b1077a51cef757146ce13f9da887326bec/packages/core/src/context/processors/stateSnapshotProcessor.ts#L66-L135">候选验证与提交</a></li>
+<li><strong>输出与继续</strong>：提交后，新快照节点进入活动图，下一次模型请求从更新后的图重新组装。</li>
+<li><strong>事实保存与边界</strong>：新节点用 <code>abstractsIds</code> 记录自己摘要了哪些旧节点。这能说明来源和拒绝过期候选，但不能证明摘要内容正确，也不能恢复工作区或外部进程。</li>
+</ul>
+<h3 id="qwen-code">Qwen Code</h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码与行为都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>研究锚点</strong>：见 <a href="/harnesswiki-site/docs/harnesses/qwen-code/">Qwen Code 画像</a></li>
+<li><strong>Family 计数</strong>：这里只把 Qwen 在继承 Gemini 之后新增或改变的机制当作差异证据，不把共同代码重复计票。</li>
+<li><strong>触发</strong>：旧工具或媒体结果可先做小范围压缩；完整历史接近模型上限时可生成任务状态快照；连续自动压缩失败后会暂时停止重试。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/chatCompressionService.ts#L390-L435">触发与失败限制</a></li>
+<li><strong>输入与保护范围</strong>：小范围压缩只处理旧工具结果或媒体内容；完整压缩处理会话历史，并另外保存提交后仍需恢复的附件、计划和子 Agent 状态。</li>
+<li><strong>候选</strong>：小范围压缩产生替代标记或低成本表示；完整压缩产生语义状态快照。</li>
+<li><strong>事务状态</strong>：系统会拒绝空摘要、疑似因输出上限而截断的摘要，以及压缩后反而更长的摘要。连续失败次数也作为状态保存，防止无休止重试。<a href="https://github.com/QwenLM/qwen-code/blob/b4f5079dc0cc89ce1448785898ab72b358399c95/packages/core/src/services/chatCompressionService.ts#L1202-L1230">候选拒绝条件</a></li>
+<li><strong>提交</strong>：只有候选通过完整性和成本检查才替换当前模型历史；失败时保留原历史。</li>
+<li><strong>输出与继续</strong>：成功后，用快照、确认消息和压缩点之后的新消息继续，并恢复必要的附件、计划与子 Agent 状态。固定恢复实验验证了这一模型输入形状。<a href="/harnesswiki-site/docs/research/recovery-behavior-experiments/#%E5%AE%9E%E9%AA%8C%E4%B8%80qwen-%E4%B8%A2%E5%A4%B1-worktree-%E4%B8%8E%E5%8E%8B%E7%BC%A9%E5%90%8E%E6%81%A2%E5%A4%8D%E6%8A%95%E5%BD%B1">恢复输入与断言</a></li>
+<li><strong>事实保存与边界</strong>：压缩前记录仍存在于长期保存的会话输入中，但不再进入模型服务接口的消息历史。后台服务另有一种“回放压缩”，只缩短客户端重连时需要重新播放的已保存事件，不减少模型输入，因此不属于本文讨论的上下文压缩。</li>
+</ul>
+<h3 id="claude-code"><a href="/harnesswiki-site/docs/harnesses/claude-code/">Claude Code</a></h3>
+<ul>
+<li><strong>证据情况</strong>：行为已实现，但目前依据主要是公开发布记录，站内分类为 <code>implemented + documented</code>。</li>
+<li><strong>Family 计数</strong>：本地界面与 Remote Control 远程界面使用同一会话能力，只计一次。</li>
+<li><strong>触发</strong>：公开记录确认会根据模型可接收长度自动压缩。<a href="https://github.com/anthropics/claude-code/blob/354757e5b2d9aa1ebb62e5d05ecd384f0e11c0f7/CHANGELOG.md#L268-L273">自动压缩窗口</a></li>
+<li><strong>输入与保护范围</strong>：未公开，不能从界面上的进度提示推断具体选择了哪些消息。</li>
+<li><strong>候选</strong>：可以确认存在压缩结果，但摘要格式、生成方法和来源记录未公开。</li>
+<li><strong>事务状态</strong>：Remote Control 客户端能看到压缩进度和压缩完成后的边界，说明客户端可区分压缩前后状态。</li>
+<li><strong>提交</strong>：公开材料没有说明如何拒绝过期候选、失败时如何恢复原状态，或何时把摘要正式发布给模型。</li>
+<li><strong>输出与继续</strong>：压缩完成后会话继续；终端滚动历史仍可显示压缩前内容，说明用户界面历史与模型实际输入不是同一份列表。<a href="https://github.com/anthropics/claude-code/blob/354757e5b2d9aa1ebb62e5d05ecd384f0e11c0f7/CHANGELOG.md#L240-L250">历史与边界显示</a></li>
+<li><strong>事实保存与边界</strong>：只能确认可观察行为，不能据此断言完整历史的保存格式、摘要来源或失败事务设计。</li>
+</ul>
+<h3 id="antigravity-cli"><a href="/harnesswiki-site/docs/harnesses/antigravity-cli/">Antigravity CLI</a></h3>
+<ul>
+<li><strong>证据情况</strong>：行为已实现，但目前依据主要是公开发布记录，站内分类为 <code>implemented + documented</code>。</li>
+<li><strong>Family 计数</strong>：命令行界面与图形界面共用同一运行引擎，只计一次。</li>
+<li><strong>触发</strong>：公开材料没有说明自动触发阈值或手动入口。</li>
+<li><strong>输入与保护范围</strong>：未公开。</li>
+<li><strong>候选</strong>：未公开摘要格式、选择范围和来源记录。</li>
+<li><strong>事务状态</strong>：更新日志确认每次上下文压缩完成后都会显示一个边界标记。<a href="https://github.com/google-antigravity/antigravity-cli/blob/76ff39c65b5d52482172b6408c27ded9b17c303d/CHANGELOG.md#L199-L206">压缩边界</a></li>
+<li><strong>提交</strong>：边界标记能证明某次压缩已经生效，但不能说明候选如何取得提交权，也不能证明失败后会恢复原状态。</li>
+<li><strong>输出与继续</strong>：长会话会跨过可见边界继续进行；具体如何重建下一次模型请求未公开。</li>
+<li><strong>事实保存与边界</strong>：不能从边界标记反推完整历史保存方式、检查点结构或摘要来源。</li>
+</ul>
+<h3 id="minimax-code"><a href="/harnesswiki-site/docs/harnesses/minimax-code/">MiniMax Code</a></h3>
+<ul>
+<li><strong>证据情况</strong>：行为已实现，但目前依据主要是官方版本记录，站内分类为 <code>implemented + documented</code>。</li>
+<li><strong>Family 计数</strong>：桌面端、远程控制和即时通讯入口观察同一个 MiniMax Code 会话，只计一次。</li>
+<li><strong>触发</strong>：<code>v3.0.23</code> 记录了自动压缩摘要，<code>v3.0.46</code> 记录了 <code>/compact</code> 手动命令的状态反馈。<a href="https://agent.minimaxi.com/docs/changelog">压缩版本记录（快照 2026-08-19）</a></li>
+<li><strong>输入与保护范围</strong>：未公开自动压缩选择哪些消息，也未公开手动压缩是否使用不同范围。</li>
+<li><strong>候选</strong>：界面会显示自动压缩摘要，但摘要结构和来源关系未公开。</li>
+<li><strong>事务状态</strong>：手动命令有状态反馈，说明用户可以观察压缩是否正在进行或已经结束；内部失败状态未公开。</li>
+<li><strong>提交</strong>：没有公开候选检查、过期判断或失败后恢复原状态的规则。</li>
+<li><strong>输出与继续</strong>：可以确认压缩后原会话继续，但不能确认系统如何恢复指令、附件或未完成工具链。</li>
+<li><strong>事实保存与边界</strong>：界面证据只能证明自动与手动触发存在，不能据此推断内部事务和完整历史保存方式。</li>
+</ul>
+<h3 id="mistral-vibe"><a href="/harnesswiki-site/docs/harnesses/mistral-vibe/">Mistral Vibe</a></h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码和边界测试都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>Family 计数</strong>：命令行、Agent Client Protocol 接口、程序调用模式和应用服务共用同一个压缩管理器，只计一次。Agent Client Protocol 是编辑器或其他客户端与 Agent 通信的协议。</li>
+<li><strong>触发</strong>：压缩管理器在当前消息历史需要缩短时运行；公开证据重点说明候选生成和失败处理，没有给出统一的产品级阈值。</li>
+<li><strong>输入与保护范围</strong>：先复制当前消息历史，在副本上选择旧内容。若单次输入过长，只按完整对话轮次裁剪，避免从一轮中间切开工具调用与结果。</li>
+<li><strong>候选</strong>：优先使用主要摘要方法；主要方法失败时，可以改用备用方法。</li>
+<li><strong>事务状态</strong>：主要方法失败、备用方法成功和全部失败是不同结果，测试分别覆盖这些路径。</li>
+<li><strong>提交</strong>：只有成功候选才替换当前正在使用的消息列表；全部失败时，原消息列表保持不变。<a href="https://github.com/mistralai/mistral-vibe/blob/5e6aa0f6beb3454454f4c1de74a7652ba577ab05/vibe/core/compaction/manager.py">压缩管理器</a></li>
+<li><strong>输出与继续</strong>：提交后从较短消息列表继续；备用路径仍保留工具调用与工具结果的配对。<a href="https://github.com/mistralai/mistral-vibe/blob/5e6aa0f6beb3454454f4c1de74a7652ba577ab05/tests/core/compaction/test_compaction_manager.py">边界测试</a></li>
+<li><strong>事实保存与边界</strong>：这种“先在副本上做，成功后再替换”的方式能防止失败污染当前会话，但不能保证摘要内容忠实。</li>
+</ul>
+<h3 id="browser-use"><a href="/harnesswiki-site/docs/harnesses/browser-use/">Browser Use</a></h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码和压缩测试都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>Family 计数</strong>：Agent 服务与 <code>MessageManager</code> 消息管理器属于同一实现，只计一次。</li>
+<li><strong>适用范围</strong>：这是浏览器自动化 Harness，只能支持“模型历史和页面读取状态怎样压缩”的通用结论，不能用来证明编码工作区怎样恢复。</li>
+<li><strong>触发</strong>：消息历史达到配置门槛后开始压缩。</li>
+<li><strong>输入与保护范围</strong>：输入包括任务说明、完整步骤历史和页面读取状态；构造模型输入前，还会把已声明的敏感值换成安全替代文本。</li>
+<li><strong>候选</strong>：压缩器根据这些输入生成摘要。</li>
+<li><strong>事务状态</strong>：系统保存压缩次数和压缩边界，使后续代码能判断历史是否已经缩短。</li>
+<li><strong>提交</strong>：摘要成功后更新当前消息历史、压缩次数和边界。<a href="https://github.com/browser-use/browser-use/blob/3c989dc0adc594d592be62272d70e28caaa5553b/browser_use/agent/message_manager/service.py">消息管理器</a></li>
+<li><strong>输出与继续</strong>：后续模型请求使用任务、摘要、仍保留的近期步骤和读取状态继续。<a href="https://github.com/browser-use/browser-use/blob/3c989dc0adc594d592be62272d70e28caaa5553b/tests/ci/test_message_compaction.py">压缩测试</a></li>
+<li><strong>事实保存与边界</strong>：逐条消息的 token 计数仍不完整；摘要也不能恢复浏览器事件流，或撤销网站上已经发生的操作。</li>
+</ul>
+<h3 id="zed-agent"><a href="/harnesswiki-site/docs/harnesses/zed/">Zed Agent</a></h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码与行为都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>Family 计数</strong>：编辑器内 Agent 面板、会话存储、隔离环境和子 Agent 工具共用同一运行程序，只计一次。</li>
+<li><strong>触发</strong>：用户可以手动压缩；自动压缩会在发送模型请求前根据上下文阈值触发。<a href="https://github.com/zed-industries/zed/blob/3624a5bfda8a4610bf9926499517a776c7028321/crates/agent/src/thread.rs#L3116-L3251">自动压缩与摘要写入</a></li>
+<li><strong>输入与保护范围</strong>：手动压缩先写入尚未落盘的消息，再取消正在进行的模型轮次，并从一个明确的请求结束位置之前选择历史。这样可以避免把仍在变化的半轮请求直接拿去摘要。<a href="https://github.com/zed-industries/zed/blob/3624a5bfda8a4610bf9926499517a776c7028321/crates/agent/src/thread.rs#L2540-L2585">手动压缩边界</a></li>
+<li><strong>候选</strong>：根据选定历史生成摘要。</li>
+<li><strong>事务状态</strong>：正在运行的轮次先被取消，成功结果再写成独立的 <code>Compaction</code> 消息；取消和成功不是同一状态。</li>
+<li><strong>提交</strong>：只有成功生成的 <code>Compaction</code> 消息才改写后续模型可见历史。</li>
+<li><strong>输出与继续</strong>：下一次模型请求从压缩消息和保留的近期历史继续。</li>
+<li><strong>事实保存与边界</strong>：该消息只表示模型历史被压缩，不保存或恢复项目文件、工具进程、权限答复和子 Agent 已经改变的外部状态。</li>
+</ul>
+<h3 id="stakpak-agent"><a href="/harnesswiki-site/docs/harnesses/stakpak-agent/">Stakpak Agent</a></h3>
+<ul>
+<li><strong>证据情况</strong>：实现代码与行为都可直接核验，站内分类为 <code>implemented + implemented</code>。</li>
+<li><strong>Family 计数</strong>：终端界面、异步模式和 Autopilot 自动执行模式共用同一个上下文缩减器，只计一次。</li>
+<li><strong>触发</strong>：每次模型请求前先构造实际输入；若发现超过模型可接收长度，就调用压缩器。<a href="https://github.com/stakpak/agent/blob/760cd2b5984d29c2d513bb15ca33e995fae45f17/libs/agent-core/src/agent.rs#L130-L248">上下文缩减、压缩与重试</a></li>
+<li><strong>输入与保护范围</strong>：输入是本次请求原本准备发送的消息列表。公开代码没有表明工作区、权限等待或外部进程会进入压缩候选。</li>
+<li><strong>候选</strong>：压缩器用摘要替换一部分旧消息。</li>
+<li><strong>事务状态</strong>：系统发布压缩前后的 token 计数事件，并把超长、压缩和重试作为同一次运行中的不同步骤。</li>
+<li><strong>提交</strong>：摘要成功后替换模型可见消息；随后重新检查并发送请求。</li>
+<li><strong>输出与继续</strong>：同一次运行继续模型推理，不等待新的用户输入。</li>
+<li><strong>事实保存与边界</strong>：压缩只改变模型消息。密钥映射、工作区、隔离容器、等待中的权限请求和已经发生的外部操作不会因摘要而被保存或恢复。</li>
+</ul>
+<h2 id="设计策略与取舍">设计策略与取舍</h2>
+<p>设计时至少要分开回答两个问题：</p>
+<ol>
+<li><strong>完整历史怎样保存，模型可见上下文怎样从中重建？</strong> 这是数据组织方式。</li>
+<li><strong>候选怎样证明自己仍适用于当前历史，并取得提交权？</strong> 这是提交纪律。</li>
+</ol>
+<p>这两个问题可以自由组合。例如，“先在副本上生成，成功后再替换”既可以用于普通消息列表，也可以用于树或图。把它们混成一条“压缩路线”，会让读者误以为只能六选一。</p>
+<h3 id="选择一怎样组织完整历史和模型可见上下文">选择一：怎样组织完整历史和模型可见上下文</h3>
+<h4 id="直接替换模型消息列表">直接替换模型消息列表</h4>
+<p><strong>具体做法</strong>：从准备发送给模型的线性消息列表中选出一段旧消息，用摘要或较短表示替换，再保留最近消息。Codex CLI、OpenCode、Stakpak Agent 和 Zed Agent 主要表现为这种形态。</p>
+<p><strong>适用条件</strong>：运行程序本来就围绕模型服务的普通消息接口工作，会话通常沿一条主路径向前增长，也不需要同时维护很多分支。</p>
+<p><strong>主要收益</strong>：实现直接，压缩前后输入长度容易测量，也容易在现有请求构造器中接入。</p>
+<p><strong>主要代价</strong>：消息列表本身通常不能说明摘要来自哪些旧消息。当前轮中途压缩时，还必须另外处理初始指令重放、当前用户消息位置、工具调用与结果配对，以及从当前轮还是下一轮继续。若完整历史没有保存在别处，直接替换还会削弱审计能力。</p>
+<h4 id="完整日志只追加模型可见内容单独计算">完整日志只追加，模型可见内容单独计算</h4>
+<p><strong>具体做法</strong>：已经发生的会话事件只允许新增，不允许改写；压缩事务、摘要和替换操作也作为新事件写入。构造模型请求时，再根据这些事件计算当前应该显示哪些内容。DeepSeek Harness 使用这种方式。</p>
+<p><strong>适用条件</strong>：系统重视崩溃恢复、审计或多客户端回放，需要明确区分“历史发生过什么”和“模型现在看到什么”。</p>
+<p><strong>主要收益</strong>：旧事实不会被压缩覆盖。进程在事务中途崩溃时，开始记录仍然存在，恢复程序可以发现这次事务没有正常结束。</p>
+<p><strong>主要代价</strong>：恢复程序必须理解开始、结束、替换和重试等多种事件。若只读取日志最后一条消息，而不按规则重建模型可见内容，就会得到错误上下文。</p>
+<h4 id="在会话树中增加摘要节点">在会话树中增加摘要节点</h4>
+<p><strong>具体做法</strong>：完整会话是一棵树；每次分支都会产生不同路径。压缩不会改写旧节点，而是在树中增加摘要节点，当前活动叶节点决定模型沿哪条路径重建上下文。Pi 使用这种方式。</p>
+<p><strong>适用条件</strong>：产品允许从旧消息分叉、在多个会话分支之间切换，或需要分别记录“预算压缩摘要”和“离开分支时的摘要”。</p>
+<p><strong>主要收益</strong>：原节点和分支关系都能保留，切回旧分支时不必把另一条分支的文件状态或结论混进来。</p>
+<p><strong>主要代价</strong>：重建上下文比线性列表复杂。系统必须明确当前活动路径、每个摘要覆盖的节点和摘要之后保留的尾部；树长期增长后，也要处理多次摘要的累积损失。</p>
+<h4 id="在上下文图中保存节点关系">在上下文图中保存节点关系</h4>
+<p><strong>具体做法</strong>：上下文由一组节点和节点之间的关系组成。摘要节点记录自己覆盖了哪些旧节点；提交前检查这些旧节点是否仍然处于当前活动集合。Gemini CLI 和 Qwen Code 的共同机制属于这种方式。</p>
+<p><strong>适用条件</strong>：系统同时存在隐藏、替换、媒体降级、工具结果裁剪和语义摘要等多种变换，或者允许后台异步生成候选。</p>
+<p><strong>主要收益</strong>：来源关系保存在专门字段中，系统可以判断候选是否过期，也能解释某个摘要替代了哪些节点。更多细节见<a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-lineage/">上下文血缘</a>。</p>
+<p><strong>主要代价</strong>：节点类型、处理顺序和恢复状态的组合明显增多。若附件、计划或子 Agent 状态不在图中，还需要单独保存和恢复；有来源关系也不代表摘要内容正确。</p>
+<h3 id="选择二候选怎样取得提交权">选择二：候选怎样取得提交权</h3>
+<h4 id="同步生成成功后一次替换">同步生成，成功后一次替换</h4>
+<p><strong>具体做法</strong>：先复制当前上下文，在副本上生成并检查候选；只有全部成功才把当前模型消息一次换成新版本。Mistral Vibe 清楚展示了这种纪律，Browser Use 也在成功后更新摘要和边界。</p>
+<p><strong>主要收益</strong>：失败不会留下半份新历史，主要方法失败后也容易尝试备用方法。</p>
+<p><strong>主要代价</strong>：若生成期间仍允许新消息进入，只检查“摘要成功”仍不够；提交前还要比较输入版本。它也只能保证更新过程完整，不能保证摘要语义正确。</p>
+<h4 id="后台异步生成提交前重验输入">后台异步生成，提交前重验输入</h4>
+<p><strong>具体做法</strong>：异步表示候选在主处理流程之外由后台任务生成。后台任务开始时记录输入版本或被覆盖节点的身份；准备提交时，再确认这些输入仍然有效。不一致就拒绝旧候选并重新生成。Gemini CLI 的 <code>consumedIds</code> 是明确例子。</p>
+<p><strong>主要收益</strong>：摘要生成不会长时间阻塞主流程，也不会让迟到的旧候选覆盖新消息。</p>
+<p><strong>主要代价</strong>：实现必须保存候选身份、输入版本、取消状态和重试规则。只按“哪个后台任务最后完成”选择结果，会提交到错误历史。</p>
+<h4 id="先停止当前轮再从稳定边界生成">先停止当前轮，再从稳定边界生成</h4>
+<p><strong>具体做法</strong>：手动压缩前，先写入待保存消息并取消正在运行的模型轮次，再从明确的请求结束位置生成候选。Zed 的手动压缩采用这种纪律。</p>
+<p><strong>主要收益</strong>：输入范围不再继续变化，较容易保证候选对应一段完整历史。</p>
+<p><strong>主要代价</strong>：正在进行的工作会被中断。系统必须说明取消前哪些工具操作已经改变了外部状态，以及提交后是否需要重新发送请求。</p>
+<h4 id="只有界面边界内部提交纪律未知">只有界面边界，内部提交纪律未知</h4>
+<p>Claude Code、Antigravity CLI 和 MiniMax Code 的公开材料能证明用户会看到压缩进度、摘要或边界，但没有公开输入版本检查、失败后恢复原状态的规则和来源记录。这是一类证据限制，不是一种可以照着实现的设计方案。</p>
+<h3 id="实际选择顺序">实际选择顺序</h3>
+<ol>
+<li>先决定完整会话是否必须可审计，以及产品是否有分支。普通单路径会话可以从线性消息列表开始；需要审计时优先考虑只追加日志；需要分支时使用树；需要多种节点变换或后台候选时使用图。</li>
+<li>再决定候选生成期间历史是否可能变化。不会变化时可以同步生成后一次替换；会变化时必须携带输入版本或来源集合，并在提交前重验。</li>
+<li>最后单独设计继续方式。新一轮开始前压缩、当前轮中途压缩和超长请求失败后的重试，不能共享一个含糊的“继续”分支。</li>
+<li>无论选择哪种组合，都要分别测试候选生成失败、用户取消、输入变化、保存失败、压缩后仍超长和多次连续压缩。摘要写得流畅不能替代这些事务测试。</li>
+</ol>
+<h2 id="相关原子-primitive">相关原子 Primitive</h2>
+<p>下面这些相邻能力可以为压缩准备候选或保存来源，但它们都不能替压缩事务决定何时提交和怎样继续。</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>它负责保存或处理什么</th>
+<th>与上下文压缩的关系</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-output-retention/">工具输出保留</a></td>
+<td>哪些旧工具结果继续保留，哪些可以裁短或换成替代标记，以及依赖旧结果的缓存何时失效</td>
+<td>可在生成压缩候选前先做不需要语义判断的减压，但不决定提交后怎样继续</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/runtime-kernel/semantic-context-snapshot/">语义上下文快照</a></td>
+<td>摘要候选的结构、输入版本、完整性检查和连续失败后的暂停重试</td>
+<td>提供可提交的语义摘要；生成成功不代表已经提交</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-representation-degradation/">上下文表示降级</a></td>
+<td>图片、大块二进制内容等高成本数据的低成本表示、原内容位置和恢复可能性</td>
+<td>可在请求前或候选准备时降低成本，但不声称理解任务内容</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-lineage/">上下文血缘</a></td>
+<td>新表示替换或摘要了哪些原内容，以及这些来源是否仍可取得</td>
+<td>与新上下文一起发布，用于发现过期候选、审计和解释回放结果</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a></td>
+<td>跨会话保存哪些信息、在什么范围内召回，以及怎样更正或遗忘</td>
+<td>可以成为新上下文的一项输入，但不属于当前会话的压缩阶段</td>
+</tr>
+</tbody>
+</table>
+<h2 id="反例与未知">反例与未知</h2>
+<ul>
+<li>只保留最近 N 条消息属于直接截断。只有系统明确说明从哪里切、丢掉什么以及怎样恢复，才能把它视为一种受约束的上下文压缩实现。</li>
+<li>更大的模型上下文上限只会推迟压缩，不会消除无限增长会话最终超长的问题。</li>
+<li>自动记忆把经验写入跨会话存储，属于<a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a>。它可以为压缩后的上下文补充信息，但不是压缩本身。</li>
+<li>Qwen 后台服务的“回放压缩”只减少客户端重连时需要重放的事件，属于<a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">重连投影</a>，不会减少模型输入。</li>
+<li>Gemini CLI 与 Qwen Code 共享主要实现来源，不能因为有两个产品名称就把一份设计证据算成两票。</li>
+<li>当前公开材料还不能统一各实现的 token 估算、摘要质量指标和多次压缩误差，因此本文不提出所有 Harness 必须实现的公共代码接口。</li>
+</ul>
+<h2 id="来源">来源</h2>
+<ul>
+<li>Codex、Pi、OpenCode、DeepSeek：固定提交与具体文件见<a href="/harnesswiki-site/docs/research/runtime-primitives-evidence/">运行内核调研底稿</a>。</li>
+<li>Gemini CLI、Qwen Code：上下文图、四类压缩与来源关系证据见<a href="/harnesswiki-site/docs/research/validation-harnesses-evidence/">独立验证底稿</a>。</li>
+<li>Qwen Code 的压缩记录怎样重建模型可见上下文，见<a href="/harnesswiki-site/docs/research/recovery-behavior-experiments/">恢复边界行为实测</a>。</li>
+</ul>
+<h2 id="关联阅读">关联阅读</h2>
+<ul>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/instruction-assembly/">指令发现与组装</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/runtime-kernel/session-topology/">会话与运行拓扑</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态持久化与恢复</a></li>
+<li><a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">回放投影</a></li>
+<li><a href="/harnesswiki-site/docs/comparisons/context-budget-pressure/">长会话预算压力</a></li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>上游仓库引入清单 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/research/upstream-repository-inventory/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="上游仓库引入清单"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/research/upstream-repository-inventory/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#核验方法与结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">核验方法与结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#当前引入结果" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">当前引入结果</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#当前-corpus-画像对应-git-仓库19" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">当前 Corpus 画像对应 Git 仓库（19）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#候选扩展与历史-harness12" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">候选、扩展与历史 Harness（12）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#独立第三方-harness12" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">独立第三方 Harness（12）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#通用-agent-邻接样本4" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">通用 Agent 邻接样本（4）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#相关-runtimeframework-与客户端壳17" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">相关 Runtime、Framework 与客户端壳（17）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#历史迁移与安全记录3" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">历史、迁移与安全记录（3）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#候选发现与证据来源1" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">候选发现与证据来源（1）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#尚未完成的核验" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">尚未完成的核验</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#核验方法与结论" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">核验方法与结论</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#当前引入结果" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">当前引入结果</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#当前-corpus-画像对应-git-仓库19" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">当前 Corpus 画像对应 Git 仓库（19）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#候选扩展与历史-harness12" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">候选、扩展与历史 Harness（12）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#独立第三方-harness12" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">独立第三方 Harness（12）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#通用-agent-邻接样本4" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">通用 Agent 邻接样本（4）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#相关-runtimeframework-与客户端壳17" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">相关 Runtime、Framework 与客户端壳（17）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#历史迁移与安全记录3" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">历史、迁移与安全记录（3）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#候选发现与证据来源1" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">候选发现与证据来源（1）</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#尚未完成的核验" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">尚未完成的核验</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">上游仓库引入清单</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="上游仓库引入清单"></span></p>
+<blockquote>
+<p>初次引入快照：2026-08-19 · 版本职责复核：2026-08-25<br>
+清单来源：<a href="/harnesswiki-site/harness%E4%BB%93%E5%BA%93%E5%88%97%E8%A1%A8/">Harness 仓库列表</a><br>
+用途：为浅克隆研究仓库提供规范 Git URL、默认分支、克隆前基线、当前引入结果和建议路径。</p>
+</blockquote>
+<h2 id="核验方法与结论">核验方法与结论</h2>
+<ul>
+<li>从仓库列表机械提取并去重得到 <strong>68 个 GitHub 仓库</strong>；另有 MiniMax Code 只有<a href="https://agent.minimax.io/download">官方下载入口</a>，没有已核验的官方核心 Git 仓库。</li>
+<li>在主任务开始引入前，根目录没有 <code>.gitmodules</code>，<code>git submodule status</code> 为空，也没有上游仓库目录；因此下表 68 项的基线状态均为“未引入”。这是克隆前快照，不描述后续并行任务的实时状态。</li>
+<li>默认分支通过仓库自己的 Git <code>HEAD</code>（<code>git ls-remote --symref &lt;url&gt; HEAD</code>）或 GitHub 官方仓库页的 <code>defaultBranch</code> 元数据核验。每行仓库链接与分支链接均指向一手来源。</li>
+<li>URL 重定向审计确认旧地址 <code>OpenInterpreter/open-interpreter</code> 已迁移到 <a href="https://github.com/openinterpreter/openinterpreter"><code>openinterpreter/openinterpreter</code></a>，清单使用新规范地址。</li>
+<li>建议统一放在 <code>upstreams/&lt;owner&gt;/&lt;repo&gt;</code>。保留 owner 可区分 Refact 新旧仓库、<code>browser-use</code> 的 runtime/skill，以及同名或同 family 项目。</li>
+<li>浅克隆模板：<code>git clone --depth 1 --branch &lt;default-branch&gt; &lt;git-url&gt; &lt;path&gt;</code>。若采用 submodule，还应记录固定提交；<code>--depth 1</code> 只限制本地抓取历史，不替代版本锚点。</li>
+</ul>
+<h2 id="当前引入结果">当前引入结果</h2>
+<p>2026-08-19 的本地审计以 <a href="/harnesswiki-site/_sources/.gitmodules"><code>.gitmodules</code></a> 和顶层 gitlink 为权威清单，并通过 <a href="/harnesswiki-site/_sources/scripts/check-upstreams.mjs"><code>pnpm upstreams:check</code></a> 逐项读取子仓库元数据，不做网络请求：</p>
+<table>
+<thead>
+<tr>
+<th>检查项</th>
+<th style="text-align: right">结果</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.gitmodules</code> 声明</td>
+<td style="text-align: right">68</td>
+<td>与机械去重后的仓库清单一致</td>
+</tr>
+<tr>
+<td>子仓库 HEAD = 顶层 gitlink</td>
+<td style="text-align: right">68 / 68</td>
+<td>当前 gitlink 全部物化；不代表画像旧研究锚点已存在于浅克隆</td>
+</tr>
+<tr>
+<td><code>origin</code> = 规范 URL</td>
+<td style="text-align: right">68 / 68</td>
+<td>比较前规范化末尾 <code>.git</code> 与 <code>/</code></td>
+</tr>
+<tr>
+<td>Git shallow repository</td>
+<td style="text-align: right">68 / 68</td>
+<td>每个子仓库都只保留浅历史</td>
+</tr>
+<tr>
+<td><code>.git</code> 形态</td>
+<td style="text-align: right">58 个目录 + 10 个 gitfile</td>
+<td>两种形态均可被 Git 正常寻址</td>
+</tr>
+</tbody>
+</table>
+<p>因此仓库列表中已核验到官方 Git 地址的 68 项都已作为浅 submodule 引入。MiniMax Code 仍不计入 68：目前只有官方下载安装入口，没有可核验的核心 Git 仓库，不能为满足数量而猜测地址。审计刻意不把子仓库“工作树必须 clean”当成引入条件；身份、版本和浅克隆正确性由 gitlink、HEAD、origin 与 shallow 四项共同判定。</p>
+<h2 id="当前-corpus-画像对应-git-仓库19">当前 Corpus 画像对应 Git 仓库（19）</h2>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex CLI</td>
+<td><a href="https://github.com/openai/codex"><code>openai/codex</code></a></td>
+<td><a href="https://github.com/openai/codex/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/openai/codex</code></td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><a href="https://github.com/anomalyco/opencode"><code>anomalyco/opencode</code></a></td>
+<td><a href="https://github.com/anomalyco/opencode/tree/dev"><code>dev</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/anomalyco/opencode</code></td>
+</tr>
+<tr>
+<td>aider</td>
+<td><a href="https://github.com/Aider-AI/aider"><code>Aider-AI/aider</code></a></td>
+<td><a href="https://github.com/Aider-AI/aider/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/Aider-AI/aider</code></td>
+</tr>
+<tr>
+<td>DeepSeek Harness</td>
+<td><a href="https://github.com/deepseek-ai/DeepSeek-Harness"><code>deepseek-ai/DeepSeek-Harness</code></a></td>
+<td><a href="https://github.com/deepseek-ai/DeepSeek-Harness/tree/master"><code>master</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/deepseek-ai/DeepSeek-Harness</code></td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><a href="https://github.com/earendil-works/pi"><code>earendil-works/pi</code></a></td>
+<td><a href="https://github.com/earendil-works/pi/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/earendil-works/pi</code></td>
+</tr>
+<tr>
+<td>Cline</td>
+<td><a href="https://github.com/cline/cline"><code>cline/cline</code></a></td>
+<td><a href="https://github.com/cline/cline/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/cline/cline</code></td>
+</tr>
+<tr>
+<td>OpenHands</td>
+<td><a href="https://github.com/OpenHands/OpenHands"><code>OpenHands/OpenHands</code></a></td>
+<td><a href="https://github.com/OpenHands/OpenHands/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/OpenHands/OpenHands</code></td>
+</tr>
+<tr>
+<td>mini-SWE-agent</td>
+<td><a href="https://github.com/SWE-agent/mini-swe-agent"><code>SWE-agent/mini-swe-agent</code></a></td>
+<td><a href="https://github.com/SWE-agent/mini-swe-agent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/SWE-agent/mini-swe-agent</code></td>
+</tr>
+<tr>
+<td>Gemini CLI</td>
+<td><a href="https://github.com/google-gemini/gemini-cli"><code>google-gemini/gemini-cli</code></a></td>
+<td><a href="https://github.com/google-gemini/gemini-cli/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/google-gemini/gemini-cli</code></td>
+</tr>
+<tr>
+<td>Qwen Code</td>
+<td><a href="https://github.com/QwenLM/qwen-code"><code>QwenLM/qwen-code</code></a></td>
+<td><a href="https://github.com/QwenLM/qwen-code/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/QwenLM/qwen-code</code></td>
+</tr>
+<tr>
+<td>Kilo Code</td>
+<td><a href="https://github.com/Kilo-Org/kilocode"><code>Kilo-Org/kilocode</code></a></td>
+<td><a href="https://github.com/Kilo-Org/kilocode/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/Kilo-Org/kilocode</code></td>
+</tr>
+<tr>
+<td>Loopal</td>
+<td><a href="https://github.com/AgentsMesh/Loopal"><code>AgentsMesh/Loopal</code></a></td>
+<td><a href="https://github.com/AgentsMesh/Loopal/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/AgentsMesh/Loopal</code></td>
+</tr>
+<tr>
+<td>Mistral Vibe</td>
+<td><a href="https://github.com/mistralai/mistral-vibe"><code>mistralai/mistral-vibe</code></a></td>
+<td><a href="https://github.com/mistralai/mistral-vibe/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/mistralai/mistral-vibe</code></td>
+</tr>
+<tr>
+<td>Refact</td>
+<td><a href="https://github.com/JegernOUTT/refact"><code>JegernOUTT/refact</code></a></td>
+<td><a href="https://github.com/JegernOUTT/refact/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/JegernOUTT/refact</code></td>
+</tr>
+<tr>
+<td>Zed Agent</td>
+<td><a href="https://github.com/zed-industries/zed"><code>zed-industries/zed</code></a></td>
+<td><a href="https://github.com/zed-industries/zed/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/zed-industries/zed</code></td>
+</tr>
+<tr>
+<td>Stakpak Agent</td>
+<td><a href="https://github.com/stakpak/agent"><code>stakpak/agent</code></a></td>
+<td><a href="https://github.com/stakpak/agent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/stakpak/agent</code></td>
+</tr>
+<tr>
+<td>browser-use</td>
+<td><a href="https://github.com/browser-use/browser-use"><code>browser-use/browser-use</code></a></td>
+<td><a href="https://github.com/browser-use/browser-use/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/browser-use/browser-use</code></td>
+</tr>
+<tr>
+<td>Claude Code</td>
+<td><a href="https://github.com/anthropics/claude-code"><code>anthropics/claude-code</code></a></td>
+<td><a href="https://github.com/anthropics/claude-code/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/anthropics/claude-code</code></td>
+</tr>
+<tr>
+<td>Antigravity CLI</td>
+<td><a href="https://github.com/google-antigravity/antigravity-cli"><code>google-antigravity/antigravity-cli</code></a></td>
+<td><a href="https://github.com/google-antigravity/antigravity-cli/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/google-antigravity/antigravity-cli</code></td>
+</tr>
+</tbody>
+</table>
+<p>当前 20 个 Corpus 画像中，17 个源码可读、3 个闭源/黑盒，19 个能映射到上表当前 gitlink；MiniMax Code 只有<a href="https://agent.minimax.io/download">官方下载入口</a>，没有已核验的官方核心 Git 仓库，不应创建猜测的子仓库。browser-use 是跨域 Corpus Harness，不计作 Coding Harness。表中的“未引入”保留为克隆前基线；当前物化状态以上文 68 / 68 审计为准，画像 Claim 能否直接离线复核则看<a href="/harnesswiki-site/docs/research/deep-harness-uniqueness-audit/#%E7%89%88%E6%9C%AC%E5%AE%8C%E6%95%B4%E6%80%A7%E5%AE%A1%E8%AE%A1">版本完整性审计</a>。</p>
+<h2 id="候选扩展与历史-harness12">候选、扩展与历史 Harness（12）</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grok Build</td>
+<td><a href="https://github.com/xai-org/grok-build"><code>xai-org/grok-build</code></a></td>
+<td><a href="https://github.com/xai-org/grok-build/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/xai-org/grok-build</code></td>
+</tr>
+<tr>
+<td>Kimi Code</td>
+<td><a href="https://github.com/MoonshotAI/kimi-code"><code>MoonshotAI/kimi-code</code></a></td>
+<td><a href="https://github.com/MoonshotAI/kimi-code/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/MoonshotAI/kimi-code</code></td>
+</tr>
+<tr>
+<td>Oh My Pi</td>
+<td><a href="https://github.com/can1357/oh-my-pi"><code>can1357/oh-my-pi</code></a></td>
+<td><a href="https://github.com/can1357/oh-my-pi/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/can1357/oh-my-pi</code></td>
+</tr>
+<tr>
+<td>Pydantic AI Harness</td>
+<td><a href="https://github.com/pydantic/pydantic-ai-harness"><code>pydantic/pydantic-ai-harness</code></a></td>
+<td><a href="https://github.com/pydantic/pydantic-ai-harness/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/pydantic/pydantic-ai-harness</code></td>
+</tr>
+<tr>
+<td>goose</td>
+<td><a href="https://github.com/aaif-goose/goose"><code>aaif-goose/goose</code></a></td>
+<td><a href="https://github.com/aaif-goose/goose/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/aaif-goose/goose</code></td>
+</tr>
+<tr>
+<td>Open Interpreter</td>
+<td><a href="https://github.com/openinterpreter/openinterpreter"><code>openinterpreter/openinterpreter</code></a></td>
+<td><a href="https://github.com/openinterpreter/openinterpreter/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/openinterpreter/openinterpreter</code></td>
+</tr>
+<tr>
+<td>Plandex</td>
+<td><a href="https://github.com/plandex-ai/plandex"><code>plandex-ai/plandex</code></a></td>
+<td><a href="https://github.com/plandex-ai/plandex/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/plandex-ai/plandex</code></td>
+</tr>
+<tr>
+<td>Crush</td>
+<td><a href="https://github.com/charmbracelet/crush"><code>charmbracelet/crush</code></a></td>
+<td><a href="https://github.com/charmbracelet/crush/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/charmbracelet/crush</code></td>
+</tr>
+<tr>
+<td>MiMo Code</td>
+<td><a href="https://github.com/XiaomiMiMo/MiMo-Code"><code>XiaomiMiMo/MiMo-Code</code></a></td>
+<td><a href="https://github.com/XiaomiMiMo/MiMo-Code/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/XiaomiMiMo/MiMo-Code</code></td>
+</tr>
+<tr>
+<td>Kimi CLI</td>
+<td><a href="https://github.com/MoonshotAI/kimi-cli"><code>MoonshotAI/kimi-cli</code></a></td>
+<td><a href="https://github.com/MoonshotAI/kimi-cli/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/MoonshotAI/kimi-cli</code></td>
+</tr>
+<tr>
+<td>Roo Code</td>
+<td><a href="https://github.com/RooCodeInc/Roo-Code"><code>RooCodeInc/Roo-Code</code></a></td>
+<td><a href="https://github.com/RooCodeInc/Roo-Code/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/RooCodeInc/Roo-Code</code></td>
+</tr>
+<tr>
+<td>Continue</td>
+<td><a href="https://github.com/continuedev/continue"><code>continuedev/continue</code></a></td>
+<td><a href="https://github.com/continuedev/continue/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/continuedev/continue</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="独立第三方-harness12">独立第三方 Harness（12）</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Freebuff</td>
+<td><a href="https://github.com/CodebuffAI/freebuff"><code>CodebuffAI/freebuff</code></a></td>
+<td><a href="https://github.com/CodebuffAI/freebuff/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/CodebuffAI/freebuff</code></td>
+</tr>
+<tr>
+<td>SWE-agent</td>
+<td><a href="https://github.com/SWE-agent/SWE-agent"><code>SWE-agent/SWE-agent</code></a></td>
+<td><a href="https://github.com/SWE-agent/SWE-agent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/SWE-agent/SWE-agent</code></td>
+</tr>
+<tr>
+<td>Open SWE</td>
+<td><a href="https://github.com/langchain-ai/open-swe"><code>langchain-ai/open-swe</code></a></td>
+<td><a href="https://github.com/langchain-ai/open-swe/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/langchain-ai/open-swe</code></td>
+</tr>
+<tr>
+<td>Pochi</td>
+<td><a href="https://github.com/TabbyML/pochi"><code>TabbyML/pochi</code></a></td>
+<td><a href="https://github.com/TabbyML/pochi/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/TabbyML/pochi</code></td>
+</tr>
+<tr>
+<td>RA.Aid</td>
+<td><a href="https://github.com/ai-christianson/RA.Aid"><code>ai-christianson/RA.Aid</code></a></td>
+<td><a href="https://github.com/ai-christianson/RA.Aid/tree/master"><code>master</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/ai-christianson/RA.Aid</code></td>
+</tr>
+<tr>
+<td>AutoCodeRover</td>
+<td><a href="https://github.com/AutoCodeRoverSG/auto-code-rover"><code>AutoCodeRoverSG/auto-code-rover</code></a></td>
+<td><a href="https://github.com/AutoCodeRoverSG/auto-code-rover/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/AutoCodeRoverSG/auto-code-rover</code></td>
+</tr>
+<tr>
+<td>Prime Agent</td>
+<td><a href="https://github.com/PrimeIntellect-ai/prime-agent"><code>PrimeIntellect-ai/prime-agent</code></a></td>
+<td><a href="https://github.com/PrimeIntellect-ai/prime-agent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/PrimeIntellect-ai/prime-agent</code></td>
+</tr>
+<tr>
+<td>DeepSeek-Reasonix</td>
+<td><a href="https://github.com/esengine/DeepSeek-Reasonix"><code>esengine/DeepSeek-Reasonix</code></a></td>
+<td><a href="https://github.com/esengine/DeepSeek-Reasonix/tree/main-v2"><code>main-v2</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/esengine/DeepSeek-Reasonix</code></td>
+</tr>
+<tr>
+<td>DeepCode</td>
+<td><a href="https://github.com/HKUDS/DeepCode"><code>HKUDS/DeepCode</code></a></td>
+<td><a href="https://github.com/HKUDS/DeepCode/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/HKUDS/DeepCode</code></td>
+</tr>
+<tr>
+<td>mi</td>
+<td><a href="https://github.com/av/mi"><code>av/mi</code></a></td>
+<td><a href="https://github.com/av/mi/tree/master"><code>master</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/av/mi</code></td>
+</tr>
+<tr>
+<td>Void</td>
+<td><a href="https://github.com/voideditor/void"><code>voideditor/void</code></a></td>
+<td><a href="https://github.com/voideditor/void/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/voideditor/void</code></td>
+</tr>
+<tr>
+<td>Warp</td>
+<td><a href="https://github.com/warpdotdev/warp"><code>warpdotdev/warp</code></a></td>
+<td><a href="https://github.com/warpdotdev/warp/tree/master"><code>master</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/warpdotdev/warp</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="通用-agent-邻接样本4">通用 Agent 邻接样本（4）</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GenericAgent</td>
+<td><a href="https://github.com/lsdefine/GenericAgent"><code>lsdefine/GenericAgent</code></a></td>
+<td><a href="https://github.com/lsdefine/GenericAgent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/lsdefine/GenericAgent</code></td>
+</tr>
+<tr>
+<td>OpenClaw</td>
+<td><a href="https://github.com/openclaw/openclaw"><code>openclaw/openclaw</code></a></td>
+<td><a href="https://github.com/openclaw/openclaw/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/openclaw/openclaw</code></td>
+</tr>
+<tr>
+<td>Hermes Agent</td>
+<td><a href="https://github.com/NousResearch/hermes-agent"><code>NousResearch/hermes-agent</code></a></td>
+<td><a href="https://github.com/NousResearch/hermes-agent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/NousResearch/hermes-agent</code></td>
+</tr>
+<tr>
+<td>OpenManus</td>
+<td><a href="https://github.com/FoundationAgents/OpenManus"><code>FoundationAgents/OpenManus</code></a></td>
+<td><a href="https://github.com/FoundationAgents/OpenManus/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/FoundationAgents/OpenManus</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="相关-runtimeframework-与客户端壳17">相关 Runtime、Framework 与客户端壳（17）</h2>
+<p>这些仓库出现在总列表中，但当前边界不把它们都计作独立 Harness。用户要求按仓库列表引入时仍应保存源码，同时在研究计票中沿用原分类。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenHands Software Agent SDK</td>
+<td><a href="https://github.com/OpenHands/software-agent-sdk"><code>OpenHands/software-agent-sdk</code></a></td>
+<td><a href="https://github.com/OpenHands/software-agent-sdk/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/OpenHands/software-agent-sdk</code></td>
+</tr>
+<tr>
+<td>Pydantic AI</td>
+<td><a href="https://github.com/pydantic/pydantic-ai"><code>pydantic/pydantic-ai</code></a></td>
+<td><a href="https://github.com/pydantic/pydantic-ai/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/pydantic/pydantic-ai</code></td>
+</tr>
+<tr>
+<td>LangGraph</td>
+<td><a href="https://github.com/langchain-ai/langgraph"><code>langchain-ai/langgraph</code></a></td>
+<td><a href="https://github.com/langchain-ai/langgraph/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/langchain-ai/langgraph</code></td>
+</tr>
+<tr>
+<td>OpenAI Agents SDK</td>
+<td><a href="https://github.com/openai/openai-agents-python"><code>openai/openai-agents-python</code></a></td>
+<td><a href="https://github.com/openai/openai-agents-python/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/openai/openai-agents-python</code></td>
+</tr>
+<tr>
+<td>Microsoft Agent Framework</td>
+<td><a href="https://github.com/microsoft/agent-framework"><code>microsoft/agent-framework</code></a></td>
+<td><a href="https://github.com/microsoft/agent-framework/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/microsoft/agent-framework</code></td>
+</tr>
+<tr>
+<td>Mastra</td>
+<td><a href="https://github.com/mastra-ai/mastra"><code>mastra-ai/mastra</code></a></td>
+<td><a href="https://github.com/mastra-ai/mastra/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/mastra-ai/mastra</code></td>
+</tr>
+<tr>
+<td>MetaGPT</td>
+<td><a href="https://github.com/FoundationAgents/MetaGPT"><code>FoundationAgents/MetaGPT</code></a></td>
+<td><a href="https://github.com/FoundationAgents/MetaGPT/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/FoundationAgents/MetaGPT</code></td>
+</tr>
+<tr>
+<td>Opcode</td>
+<td><a href="https://github.com/winfunc/opcode"><code>winfunc/opcode</code></a></td>
+<td><a href="https://github.com/winfunc/opcode/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/winfunc/opcode</code></td>
+</tr>
+<tr>
+<td>Agent Deck</td>
+<td><a href="https://github.com/asheshgoplani/agent-deck"><code>asheshgoplani/agent-deck</code></a></td>
+<td><a href="https://github.com/asheshgoplani/agent-deck/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/asheshgoplani/agent-deck</code></td>
+</tr>
+<tr>
+<td>AgentsMesh</td>
+<td><a href="https://github.com/AgentsMesh/agentsmesh"><code>AgentsMesh/agentsmesh</code></a></td>
+<td><a href="https://github.com/AgentsMesh/agentsmesh/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/AgentsMesh/agentsmesh</code></td>
+</tr>
+<tr>
+<td>Trellis</td>
+<td><a href="https://github.com/mindfold-ai/Trellis"><code>mindfold-ai/Trellis</code></a></td>
+<td><a href="https://github.com/mindfold-ai/Trellis/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/mindfold-ai/Trellis</code></td>
+</tr>
+<tr>
+<td>browser-harness</td>
+<td><a href="https://github.com/browser-use/browser-harness"><code>browser-use/browser-harness</code></a></td>
+<td><a href="https://github.com/browser-use/browser-harness/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/browser-use/browser-harness</code></td>
+</tr>
+<tr>
+<td>Vibe Kanban</td>
+<td><a href="https://github.com/BloopAI/vibe-kanban"><code>BloopAI/vibe-kanban</code></a></td>
+<td><a href="https://github.com/BloopAI/vibe-kanban/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/BloopAI/vibe-kanban</code></td>
+</tr>
+<tr>
+<td>bolt.diy</td>
+<td><a href="https://github.com/stackblitz-labs/bolt.diy"><code>stackblitz-labs/bolt.diy</code></a></td>
+<td><a href="https://github.com/stackblitz-labs/bolt.diy/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/stackblitz-labs/bolt.diy</code></td>
+</tr>
+<tr>
+<td>Dyad</td>
+<td><a href="https://github.com/dyad-sh/dyad"><code>dyad-sh/dyad</code></a></td>
+<td><a href="https://github.com/dyad-sh/dyad/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/dyad-sh/dyad</code></td>
+</tr>
+<tr>
+<td>Tabby</td>
+<td><a href="https://github.com/TabbyML/tabby"><code>TabbyML/tabby</code></a></td>
+<td><a href="https://github.com/TabbyML/tabby/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/TabbyML/tabby</code></td>
+</tr>
+<tr>
+<td>PR-Agent</td>
+<td><a href="https://github.com/The-PR-Agent/pr-agent"><code>The-PR-Agent/pr-agent</code></a></td>
+<td><a href="https://github.com/The-PR-Agent/pr-agent/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/The-PR-Agent/pr-agent</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="历史迁移与安全记录3">历史、迁移与安全记录（3）</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT Pilot</td>
+<td><a href="https://github.com/Pythagora-io/gpt-pilot"><code>Pythagora-io/gpt-pilot</code></a></td>
+<td><a href="https://github.com/Pythagora-io/gpt-pilot/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/Pythagora-io/gpt-pilot</code></td>
+</tr>
+<tr>
+<td>GPT Engineer</td>
+<td><a href="https://github.com/AntonOsika/gpt-engineer"><code>AntonOsika/gpt-engineer</code></a></td>
+<td><a href="https://github.com/AntonOsika/gpt-engineer/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/AntonOsika/gpt-engineer</code></td>
+</tr>
+<tr>
+<td>Refact 旧仓库</td>
+<td><a href="https://github.com/smallcloudai/refact"><code>smallcloudai/refact</code></a></td>
+<td><a href="https://github.com/smallcloudai/refact/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/smallcloudai/refact</code></td>
+</tr>
+</tbody>
+</table>
+<p>GPT Pilot 的上游 README 已给出供应链安全警告；浅克隆当前 HEAD 只适合静态审计，不应直接运行。Refact 旧仓库仅保留迁移证据，不能与 <code>JegernOUTT/refact</code> 重复计作独立实现。</p>
+<h2 id="候选发现与证据来源1">候选发现与证据来源（1）</h2>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规范 Git URL</th>
+<th>默认分支</th>
+<th>克隆前状态</th>
+<th>建议路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phistory</td>
+<td><a href="https://github.com/WEIFENG2333/phistory"><code>WEIFENG2333/phistory</code></a></td>
+<td><a href="https://github.com/WEIFENG2333/phistory/tree/main"><code>main</code></a></td>
+<td>未引入</td>
+<td><code>upstreams/WEIFENG2333/phistory</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="尚未完成的核验">尚未完成的核验</h2>
+<ul>
+<li><code>voideditor/void</code> 的 Git <code>HEAD</code> 已解析为 <code>main</code>，但后续仓库页重定向检查遇到一次 TLS 连接失败；这不能证明 URL 异常，也不能证明没有迁移。</li>
+<li>因主任务已开始 clone，为避免继续占用网络，以下 6 项没有完成“请求 URL 与最终 URL 是否一致”的单独重定向审计：<code>TabbyML/tabby</code>、<code>The-PR-Agent/pr-agent</code>、<code>Pythagora-io/gpt-pilot</code>、<code>AntonOsika/gpt-engineer</code>、<code>smallcloudai/refact</code>、<code>WEIFENG2333/phistory</code>。它们的仓库页与默认分支均已成功读取，clone 时仍应以远端返回的最终 URL 为准。</li>
+<li>除 Open Interpreter 的已确认迁移外，本轮完成审计的其余 URL 均返回原地址；没有发现 404、私有仓库或无符号 <code>HEAD</code>。</li>
+</ul>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

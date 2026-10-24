@@ -1,0 +1,599 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-fhv3w52t"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Harness Wiki Primitive 重写规划 | Harness Wiki</title><link rel="canonical" href="https://redreamality.github.io/harnesswiki-site/docs/primitive-rewrite-plan/"/><link rel="sitemap" href="/harnesswiki-site/sitemap-index.xml"/><link rel="shortcut icon" href="/harnesswiki-site/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v7.4.2"/><meta name="generator" content="Starlight v0.42.7"/><meta property="og:title" content="Harness Wiki Primitive 重写规划"/><meta property="og:type" content="article"/><meta property="og:url" content="https://redreamality.github.io/harnesswiki-site/docs/primitive-rewrite-plan/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><meta property="og:site_name" content="Harness Wiki"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="AI 编码 Harness 的机制、设计取舍与源码证据。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/harnesswiki-site/_astro/print.ehPL0gv-.css" media="print"><link rel="stylesheet" href="/harnesswiki-site/_astro/common.CJ16O8L8.css"><script type="module" src="/harnesswiki-site/_astro/page.cNngjUgL.js"></script></head><body class="astro-fhv3w52t"><a class="sl-skip-link astro-wgkgyizl" href="#_top">跳转到内容</a><div class="page sl-flex astro-cp4aluuq"><header class="header astro-cp4aluuq"><div class="header astro-l4vsusuu"><div class="title-wrapper sl-flex astro-l4vsusuu"><a href="/harnesswiki-site/" class="site-title sl-flex astro-3eibmtpa"><span class="astro-3eibmtpa" translate="no">Harness Wiki</span></a></div><div class="sl-flex print:hidden astro-l4vsusuu"><site-search class="astro-l4vsusuu astro-bxq3n3iu" data-translations="{&quot;placeholder&quot;:&quot;搜索&quot;}"><button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-bxq3n3iu"><svg aria-hidden="true" class="astro-bxq3n3iu astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg><span class="sl-hidden md:sl-block astro-bxq3n3iu" aria-hidden="true">搜索</span><kbd class="sl-hidden md:sl-flex astro-bxq3n3iu" style="display: none;"><kbd class="astro-bxq3n3iu">Ctrl</kbd><kbd class="astro-bxq3n3iu">K</kbd></kbd></button><dialog style="padding:0" aria-label="搜索" class="astro-bxq3n3iu"><div class="dialog-frame sl-flex astro-bxq3n3iu"><button data-close-modal class="sl-flex md:sl-hidden astro-bxq3n3iu">取消</button><div class="search-container astro-bxq3n3iu"><div id="starlight__search" class="astro-bxq3n3iu"></div></div></div></dialog></site-search><script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script><script type="module" src="/harnesswiki-site/_astro/Search.astro_astro_type_script_index_0_lang.CUndMZWs.js"></script></div><div class="sl-hidden md:sl-flex print:hidden right-group astro-l4vsusuu"><div class="sl-flex social-icons astro-l4vsusuu"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script><script type="module">var e=`starlight-theme`,t=e=>e===`auto`||e===`dark`||e===`light`?e:`auto`,n=()=>t(typeof localStorage<`u`&&localStorage.getItem(e));function r(t){typeof localStorage<`u`&&localStorage.setItem(e,t===`light`||t===`dark`?t:``)}var i=()=>matchMedia(`(prefers-color-scheme: light)`).matches?`light`:`dark`;function a(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e===`auto`?i():e,r(e)}matchMedia(`(prefers-color-scheme: light)`).addEventListener(`change`,()=>{n()===`auto`&&a(`auto`)});var o=class extends HTMLElement{constructor(){super(),a(n()),this.querySelector(`select`)?.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&a(t(e.currentTarget.value))})}};customElements.define(`starlight-theme-select`,o);</script><script type="module">var e=class extends HTMLElement{constructor(){super();let e=this.querySelector(`select`);e&&(e.addEventListener(`change`,e=>{e.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=e.currentTarget.value)}),window.addEventListener(`pageshow`,t=>{if(!t.persisted)return;let n=e.querySelector(`option[selected]`)?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}};customElements.define(`starlight-lang-select`,e);</script></div></div></header><nav class="sidebar print:hidden astro-cp4aluuq" aria-label="主要"><button popovertarget="starlight__sidebar" class="sl-menu-button sl-flex md:sl-hidden print:hidden astro-2lahxddp"><svg aria-hidden="true" class="open-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg><svg aria-hidden="true" class="close-menu astro-2lahxddp astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg><span class="sr-only astro-2lahxddp">菜单</span></button><script type="module">var e=class extends HTMLElement{constructor(){super();let e=matchMedia(`(min-width: 50em)`),t=()=>{this.popover=e.matches?null:`auto`};t(),e.addEventListener(`change`,()=>t()),this.addEventListener(`toggle`,({newState:e})=>this.trapFocus(e===`open`))}trapFocus(e){document.querySelectorAll(`.main-frame, .sl-skip-link`).forEach(t=>{t.toggleAttribute(`inert`,e)})}};customElements.define(`sl-sidebar-pane`,e);</script><sl-sidebar-pane popover id="starlight__sidebar" class="sidebar-pane astro-cp4aluuq"><div class="sidebar-content sl-flex astro-cp4aluuq"><sl-sidebar-state-persist data-hash="19kali9" class="astro-jgeb6igj"><script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script><ul class="top-level astro-vuepklys"><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">从这里开始</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="0"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/" class="astro-vuepklys"><span class="astro-vuepklys">首页</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/design-essence-atlas/" class="astro-vuepklys"><span class="astro-vuepklys">设计精髓与阅读路线</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/module-map/" class="astro-vuepklys"><span class="astro-vuepklys">机制地图</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/context/" class="astro-vuepklys"><span class="astro-vuepklys">共同语言</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/domain-model/" class="astro-vuepklys"><span class="astro-vuepklys">领域模型</span></a></li></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">运行内核</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="1"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">编码工作面</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="2"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">控制与连续性</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="3"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">组合与互操作</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="4"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">Harness 画像</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="5"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">情境比较</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="6"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究与证据</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="7"></sl-sidebar-restore><ul class="astro-vuepklys"></ul></details></li><li class="astro-vuepklys"><details open class="astro-vuepklys"><summary class="astro-vuepklys"><span class="group-label astro-vuepklys"><span class="large astro-vuepklys">研究方法与规划</span></span><svg aria-hidden="true" class="caret astro-vuepklys astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></summary><sl-sidebar-restore data-index="8"></sl-sidebar-restore><ul class="astro-vuepklys"><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/research-method/" class="astro-vuepklys"><span class="astro-vuepklys">研究方法</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/goal/" class="astro-vuepklys"><span class="astro-vuepklys">项目目标</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/docs/primitive-rewrite-plan/" aria-current="page" class="astro-vuepklys"><span class="astro-vuepklys">Primitive 重写规划</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/harness仓库列表/" class="astro-vuepklys"><span class="astro-vuepklys">上游仓库列表</span></a></li><li class="astro-vuepklys"><a href="/harnesswiki-site/agents/" class="astro-vuepklys"><span class="astro-vuepklys">维护规则</span></a></li></ul></details></li></ul><script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script></sl-sidebar-state-persist><div class="md:sl-hidden"><div class="mobile-preferences sl-flex astro-eicz7zqz"><div class="social-icons astro-eicz7zqz"></div><starlight-theme-select><label style="--sl-select-width: 6.25em" class="astro-3ns6nr37"><span class="sr-only astro-3ns6nr37">选择主题</span><svg aria-hidden="true" class="icon label-icon astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg><select autocomplete="off" class="astro-3ns6nr37"><option value="dark" class="astro-3ns6nr37">深色</option><option value="light" class="astro-3ns6nr37">浅色</option><option value="auto" selected class="astro-3ns6nr37">自动</option></select><svg aria-hidden="true" class="icon caret astro-3ns6nr37 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg></label></starlight-theme-select><script>
+	StarlightThemeProvider.updatePickers();
+</script></div></div></div></sl-sidebar-pane></nav><div class="main-frame astro-cp4aluuq"><script type="module">var e=document.getElementById(`starlight__sidebar`),t=e?.querySelector(`sl-sidebar-state-persist`),n=`sl-sidebar-state`,r=()=>{let r=[],i=t?.dataset.hash||``;try{let e=sessionStorage.getItem(n),t=JSON.parse(e||`{}`);Array.isArray(t.open)&&t.hash===i&&(r=t.open)}catch{}return{hash:i,open:r,scroll:e?.scrollTop||0}},i=e=>{try{sessionStorage.setItem(n,JSON.stringify(e))}catch{}},a=()=>i(r()),o=(e,t)=>{let n=r();n.open[t]=e,i(n)};t?.addEventListener(`click`,e=>{if(!(e.target instanceof Element))return;let t=e.target.closest(`summary`)?.closest(`details`);if(!t)return;let n=t.querySelector(`sl-sidebar-restore`),r=parseInt(n?.dataset.index||``);isNaN(r)||o(!t.open,r)}),addEventListener(`visibilitychange`,()=>{document.visibilityState===`hidden`&&a()});</script><div class="lg:sl-flex astro-gok677js"><aside class="right-sidebar-container print:hidden astro-gok677js"><div class="right-sidebar astro-gok677js"><div class="lg:sl-hidden astro-yotvuryy"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-c5il42t5"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-c5il42t5"><details id="starlight__mobile-toc" class="astro-c5il42t5"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-c5il42t5"><span class="toggle sl-flex astro-c5il42t5">本页内容<svg aria-hidden="true" class="caret astro-c5il42t5 astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-c5il42t5"></span></summary><div class="dropdown astro-c5il42t5"><ul class="isMobile astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#一为什么要重写" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">一、为什么要重写</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#二深模型把一次工作看成业务闭环" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">二、深模型：把一次工作看成业务闭环</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#21-一句话的业务故事" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">2.1 一句话的业务故事</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#22-五个互相协作但不合并的领域" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">2.2 五个互相协作但不合并的领域</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#23-建议的聚合边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">2.3 建议的聚合边界</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#三重写时采用的-ddd-规则" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">三、重写时采用的 DDD 规则</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#31-先做知识压缩再写技术细节" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.1 先做知识压缩，再写技术细节</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#32-固定统一语言但承认边界内的不同方言" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.2 固定统一语言，但承认边界内的不同方言</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#33-把隐含概念提升为显式对象" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.3 把隐含概念提升为显式对象</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#34-用边界和反例验证深度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.4 用边界和反例验证深度</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#35-把策略取舍写成业务后果" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.5 把策略取舍写成业务后果</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#四目标文章模板" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">四、目标文章模板</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#五整体重写顺序" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">五、整体重写顺序</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#六逐篇重写卡片" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">六、逐篇重写卡片</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#61-运行内核" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.1 运行内核</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#62-编码工作面" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.2 编码工作面</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#63-控制与连续性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.3 控制与连续性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#64-组合与互操作" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.4 组合与互操作</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#七协调指南怎样重写" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">七、协调指南怎样重写</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#八实施分批与探索方式" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">八、实施分批与探索方式</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#第一批建立业务主链p0" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">第一批：建立业务主链（P0）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#第二批加入证据恢复与协作p1" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">第二批：加入证据、恢复与协作（P1）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#第三批补齐知识资产和外部消费p2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">第三批：补齐知识资产和外部消费（P2）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#九每篇文章的验收清单" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">九、每篇文章的验收清单</span></a><ul class="isMobile astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域表达" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域表达</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#差异和证据" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">差异和证据</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#业务可读性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">业务可读性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#工程校验" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">工程校验</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#十最终完成定义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">十、最终完成定义</span></a></li></ul></div></details></nav></mobile-starlight-toc><script type="module" src="/harnesswiki-site/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.C3fM4Kra.js"></script></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-yotvuryy"><div class="sl-container astro-yotvuryy"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">本页内容</h2><ul class="astro-oycbgiyw" style="--depth: 0;"><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#_top" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">概述</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#一为什么要重写" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">一、为什么要重写</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#二深模型把一次工作看成业务闭环" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">二、深模型：把一次工作看成业务闭环</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#21-一句话的业务故事" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">2.1 一句话的业务故事</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#22-五个互相协作但不合并的领域" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">2.2 五个互相协作但不合并的领域</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#23-建议的聚合边界" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">2.3 建议的聚合边界</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#三重写时采用的-ddd-规则" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">三、重写时采用的 DDD 规则</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#31-先做知识压缩再写技术细节" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.1 先做知识压缩，再写技术细节</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#32-固定统一语言但承认边界内的不同方言" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.2 固定统一语言，但承认边界内的不同方言</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#33-把隐含概念提升为显式对象" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.3 把隐含概念提升为显式对象</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#34-用边界和反例验证深度" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.4 用边界和反例验证深度</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#35-把策略取舍写成业务后果" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">3.5 把策略取舍写成业务后果</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#四目标文章模板" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">四、目标文章模板</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#五整体重写顺序" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">五、整体重写顺序</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#六逐篇重写卡片" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">六、逐篇重写卡片</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#61-运行内核" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.1 运行内核</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#62-编码工作面" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.2 编码工作面</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#63-控制与连续性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.3 控制与连续性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#64-组合与互操作" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">6.4 组合与互操作</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#七协调指南怎样重写" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">七、协调指南怎样重写</span></a></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#八实施分批与探索方式" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">八、实施分批与探索方式</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#第一批建立业务主链p0" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">第一批：建立业务主链（P0）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#第二批加入证据恢复与协作p1" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">第二批：加入证据、恢复与协作（P1）</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#第三批补齐知识资产和外部消费p2" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">第三批：补齐知识资产和外部消费（P2）</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#九每篇文章的验收清单" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">九、每篇文章的验收清单</span></a><ul class="astro-oycbgiyw" style="--depth: 1;"><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#领域表达" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">领域表达</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#差异和证据" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">差异和证据</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#业务可读性" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">业务可读性</span></a></li><li style="--depth: 1;" class="astro-oycbgiyw"><a href="#工程校验" style="--depth: 1;" class="astro-oycbgiyw"><span style="--depth: 1;" class="astro-oycbgiyw">工程校验</span></a></li></ul></li><li style="--depth: 0;" class="astro-oycbgiyw"><a href="#十最终完成定义" style="--depth: 0;" class="astro-oycbgiyw"><span style="--depth: 0;" class="astro-oycbgiyw">十、最终完成定义</span></a></li></ul></nav></starlight-toc><script type="module" src="/harnesswiki-site/_astro/TableOfContents.astro_astro_type_script_index_0_lang.BpJaGz7G.js"></script></div></div></div></aside><div class="main-pane astro-gok677js"><main data-pagefind-body class="astro-fhv3w52t" lang="zh-CN" dir="ltr"><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><h1 id="_top" class="astro-fdq7rtet">Harness Wiki Primitive 重写规划</h1></div></div><div class="content-panel astro-eaidgqg6"><div class="sl-container astro-eaidgqg6"><div class="sl-markdown-content"><p><span id="harness-wiki-primitive-重写规划"></span></p>
+<blockquote>
+<p>目标：用 Eric Evans 的深模型方法，重新表达 35 个正式 Primitive 所处理的业务问题、领域对象、生命周期和边界。本文是重写计划，不替代当前 Primitive 正文，也不改变现有证据结论。</p>
+<p>范围：四个 Theme 下的 35 个正式 Primitive。<code>执行环境、放置与连续性</code>、<code>权限、审批与隔离边界</code>、<code>任务、目标与多 Actor 编排</code>、<code>运行记录与回放边界</code>是协调指南，负责串联模型，不另起 Primitive。</p>
+</blockquote>
+<h2 id="一为什么要重写">一、为什么要重写</h2>
+<p>当前文章已经有不错的机制边界和证据纪律，但阅读顺序仍然容易从英文技术名词开始：Session、Action、Provider、Replay、Trajectory 等词先出现，业务读者必须自己回答“这到底在替谁处理什么事情”。重写要把解释中心从“系统有哪些组件”移到“工作怎样被可靠地完成”。</p>
+<p>重写后的每篇文章都应先回答四个普通问题：</p>
+<ol>
+<li><strong>谁在什么情况下遇到了什么麻烦？</strong></li>
+<li><strong>系统需要记住哪些业务对象和承诺？</strong></li>
+<li><strong>哪些变化可以一起提交，哪些必须分开？</strong></li>
+<li><strong>失败、取消、恢复或交付时，谁拥有下一步？</strong></li>
+</ol>
+<p>技术实现仍然重要，但应作为这些问题的可观察答案，而不是文章的主语。</p>
+<h2 id="二深模型把一次工作看成业务闭环">二、深模型：把一次工作看成业务闭环</h2>
+<h3 id="21-一句话的业务故事">2.1 一句话的业务故事</h3>
+<p>用户给出一个目标，Harness 负责把目标变成一串可追踪的工作；它准备必要的信息，让模型提出行动，检查行动是否获准，在一个明确的执行世界中产生效果，收集验证证据，把事实保存下来，并把可检查的产物交给用户或其他参与者。工作可能暂停、分支、委派、重连或恢复，但每一步都必须知道“现在谁拥有状态”。</p>
+<div class="expressive-code"><link rel="stylesheet" href="/harnesswiki-site/_astro/ec.w36nc.css"><script type="module" src="/harnesswiki-site/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="text"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">目标</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 工作拆解</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 信息准备</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 行动提议</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 授权 / 审批</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 执行效果</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 验证与反馈</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 事实记录</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 产物交付</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">  </span></span><span style="--0:#d6deeb;--1:#403f53">-&gt; 完成、阻塞、继续或恢复</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="复制到剪贴板" data-copied="复制成功！" data-code="目标  -> 工作拆解  -> 信息准备  -> 行动提议  -> 授权 / 审批  -> 执行效果  -> 验证与反馈  -> 事实记录  -> 产物交付  -> 完成、阻塞、继续或恢复"><div></div></button></div></figure></div>
+<p>这条链不是新的架构层，也不是要求每个 Harness 都具备全部能力。它只是重写文章时的共同故事；每篇文章要说明自己拥有其中哪一段，以及明确不拥有哪一段。</p>
+<h3 id="22-五个互相协作但不合并的领域">2.2 五个互相协作但不合并的领域</h3>
+<table>
+<thead>
+<tr>
+<th>领域</th>
+<th>业务问题</th>
+<th>主要对象</th>
+<th>需要避免的误读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>工作意图域</strong></td>
+<td>要完成什么，怎样拆成可加入、可等待、可验收的工作？</td>
+<td>Goal、Work Item、Acceptance Condition、Result、Evidence Reference</td>
+<td>一个 task 名称不等于 Goal、Work Item 或后台 Job</td>
+</tr>
+<tr>
+<td><strong>运行决策域</strong></td>
+<td>当前这一轮要看什么、决定什么、提出哪个 Action？</td>
+<td>Session、Turn、Step、Context Snapshot、Model、Action、Observation</td>
+<td>一次模型请求不等于 Turn；历史不等于模型实际看到的 Context</td>
+</tr>
+<tr>
+<td><strong>许可与效果域</strong></td>
+<td>谁允许行动，行动能影响什么，效果发生在哪里？</td>
+<td>Policy Context、Approval Request、Approver Principal、Execution World、Execution Session、Workspace Transaction</td>
+<td><code>allow</code> 不等于隔离；容器不等于授权；远端不等于可恢复</td>
+</tr>
+<tr>
+<td><strong>事实与交付域</strong></td>
+<td>发生过什么，谁能重连或审计，结果如何被外部消费？</td>
+<td>Transcript Entry、Live Event、Replay Projection、Telemetry Signal、Artifact、Trajectory</td>
+<td>事件流不等于事实源；完成文本不等于 Artifact 或证明</td>
+</tr>
+<tr>
+<td><strong>变化与配置域</strong></td>
+<td>能力、规则、模型和扩展怎样进入系统并安全变化？</td>
+<td>Instruction Source、Memory Record、Model Provider、Extension、Capability Provider、Configuration Source</td>
+<td>配置文件、项目指令、插件和 MCP 的信任后果不同</td>
+</tr>
+</tbody>
+</table>
+<p>这些领域之间用身份和引用协作，而不是共享一张可随意修改的对象图。特别是：</p>
+<ul>
+<li><strong>Session</strong> 保存运行连续性；<strong>Goal</strong> 保存业务完成承诺；二者可以关联，但不能互相替代。</li>
+<li><strong>Action</strong> 是效果请求；<strong>Artifact</strong> 是效果产生后可独立消费的交付物；<strong>Observation</strong> 只是帮助下一步决策的反馈。</li>
+<li><strong>Transcript</strong> 是发生过什么的事实源；<strong>Context Snapshot</strong> 是下一次模型实际看到什么的投影；<strong>Long-term Memory</strong> 是未来会话选择性召回什么的知识。</li>
+<li><strong>Workspace Transaction</strong> 管文件与版本控制效果；<strong>Execution World</strong> 管行动所处环境；<strong>Execution Session</strong> 管 cwd、环境和进程是否连续。</li>
+</ul>
+<h3 id="23-建议的聚合边界">2.3 建议的聚合边界</h3>
+<p>DDD 中的 Aggregate 不是“把相关对象全部塞进一个类”，而是一次必须一起维护不变量的提交边界。重写时建议使用以下解释边界：</p>
+<table>
+<thead>
+<tr>
+<th>聚合或独立根</th>
+<th>根对象负责的承诺</th>
+<th>可引用但不应内嵌的对象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>运行聚合</strong></td>
+<td>Session 选择当前分支，Turn/Step 按顺序推进并产生可寻址终态</td>
+<td>Model、Action、Observation、Transcript Entry</td>
+</tr>
+<tr>
+<td><strong>决策聚合</strong></td>
+<td>一个规范化 Action 在当前 policy context 下只能得到 allow、ask 或 deny</td>
+<td>Approval Request、Approver Principal、Sandbox</td>
+</tr>
+<tr>
+<td><strong>审批请求聚合</strong></td>
+<td>一个待决请求只收口到一个已授权或关闭结果</td>
+<td>Action、Policy Version、Responder</td>
+</tr>
+<tr>
+<td><strong>执行世界聚合</strong></td>
+<td>一组能力共同指向同一个 workspace、网络和资源边界</td>
+<td>Tool Runtime、Execution Session、Process Handle</td>
+</tr>
+<tr>
+<td><strong>工作区事务聚合</strong></td>
+<td>一次变更的基线、所有权、checkpoint、恢复和交付状态可解释</td>
+<td>Git commit、worktree、外部进程效果</td>
+</tr>
+<tr>
+<td><strong>工作意图聚合</strong></td>
+<td>Goal 或 Work Item 的 revision、依赖、验收和结果引用保持一致</td>
+<td>Actor、Job、Artifact、Verifier</td>
+</tr>
+<tr>
+<td><strong>交付产物聚合</strong></td>
+<td>Artifact 的 identity、版本、内容完整性、权限和保留期稳定</td>
+<td>Observation、临时路径、展示文本</td>
+</tr>
+</tbody>
+</table>
+<p>以下对象更适合作为 Value Object、Policy、Domain Service 或 Projection 来写，而不是新的大聚合：<code>Cursor</code>、<code>Provenance</code>、<code>Risk</code>、<code>Capability Descriptor</code>、<code>Check Plan</code>、<code>Model Selection</code>、<code>Replay Projection</code>。文章应说明它们的值、规则或派生关系，而不是仅列一个类名。</p>
+<h2 id="三重写时采用的-ddd-规则">三、重写时采用的 DDD 规则</h2>
+<h3 id="31-先做知识压缩再写技术细节">3.1 先做知识压缩，再写技术细节</h3>
+<p>每篇开头先用一个具体情境呈现损失：例如“审批通过后客户端断线，工具到底有没有执行？”、“模型看过旧文件后，旧缓存还能不能支持编辑？”、“两个 child 都说完成了，父目标为什么仍不能完成？”。然后从情境中抽出业务词，最后才映射到源码中的类、函数、协议字段。</p>
+<h3 id="32-固定统一语言但承认边界内的不同方言">3.2 固定统一语言，但承认边界内的不同方言</h3>
+<p>首次出现的英文词必须带中文职责和后果，例如：</p>
+<ul>
+<li><code>Action</code>：一次可能改变外部世界的<strong>行动请求</strong>；模型说要做，不代表已经做了。</li>
+<li><code>Observation</code>：行动后的<strong>可供下一步判断的反馈</strong>；它不自动是长期记录或交付物。</li>
+<li><code>Execution World</code>：文件、进程、语言服务和网络共同看到的<strong>执行世界</strong>；只写 <code>cwd</code> 不足以定位它。</li>
+<li><code>Artifact</code>：可由用户、CI 或父 Actor 独立读取的<strong>交付产物</strong>；完成声明不能替代它。</li>
+</ul>
+<p>同一篇文章里不要交替使用“任务、运行、线程、进程”来指同一个对象。若不同 Harness 使用不同词，应先翻译到共同语言，再说明各自方言。</p>
+<h3 id="33-把隐含概念提升为显式对象">3.3 把隐含概念提升为显式对象</h3>
+<p>发现以下信号时，优先增加领域对象或规则，而不是补充解释性形容词：</p>
+<ul>
+<li>一个结果需要长段落解释，说明它可能是 <code>Artifact</code>、<code>Itinerary</code> 或 <code>Verification Report</code>。</li>
+<li>一个字段组合才有意义，说明可能需要 Value Object，例如 <code>Workspace Identity</code>、<code>Policy Context</code>、<code>Model Selection</code>。</li>
+<li>多处重复判断同一规则，说明需要 Policy、Specification 或 Domain Service。</li>
+<li>一个“状态”既表示可见性又表示事实权威，说明需要拆成 Transcript、Projection 或 Live Event。</li>
+</ul>
+<h3 id="34-用边界和反例验证深度">3.4 用边界和反例验证深度</h3>
+<p>每一篇至少保留两个能改变设计选择的 Situation，并明确：触发条件、初始状态、关键事件、可观察终态。反例不是附录装饰，而是检验 Primitive 是否过宽的工具。若一个页面只能靠“支持/不支持”描述，就说明领域对象还没有被说清楚。</p>
+<h3 id="35-把策略取舍写成业务后果">3.5 把策略取舍写成业务后果</h3>
+<p>不要只写“更灵活”“更安全”“更高效”。要写清楚收益如何产生，以及为此新增了什么状态、运维负担或失败模式。例如：</p>
+<ul>
+<li>持久 PTY 让用户可以继续原来的 shell 状态，但引入进程树、租约和孤儿回收责任。</li>
+<li>worktree 隔离并行文件效果，但不能自动解决合并、冲突归因和整体验证。</li>
+<li>独立 Goal verifier 降低“自报完成”的风险，但需要管理 evidence freshness、verifier 版本和拒绝理由。</li>
+</ul>
+<h2 id="四目标文章模板">四、目标文章模板</h2>
+<p>每篇重写后的 Primitive 采用同一阅读节奏，但不强迫每页使用相同图形：</p>
+<ol>
+<li><strong>这篇在帮谁解决什么问题</strong>：一段友好业务语言，先说损失和后果。</li>
+<li><strong>领域对象</strong>：对象职责、身份、生命周期、Owner、与相邻对象的关系。</li>
+<li><strong>最小模型</strong>：输入、状态、输出、终态和 3 至 6 条关键不变量；必要时用状态图或时序图。</li>
+<li><strong>一次完整情境</strong>：用一个贯穿示例解释对象怎样协作。</li>
+<li><strong>差异情境</strong>：至少两个 Situation，优先选择能暴露所有权、提交边界、取消或恢复差异的场景。</li>
+<li><strong>Harness 如何实现</strong>：先按策略路线归类，再列版本化 Implementation；产品名只作为证据锚点。</li>
+<li><strong>设计策略与取舍</strong>：说明何时选择每条路线、换来什么、牺牲什么、失败停在哪里。</li>
+<li><strong>边界与不负责什么</strong>：链接相邻 Primitive 或协调指南，防止对象越界。</li>
+<li><strong>来源与成熟度</strong>：保留现有 <code>documented</code>、<code>implemented</code>、<code>observed</code>、<code>inferred</code> 和 Family 去重纪律。</li>
+</ol>
+<p>建议每页都增加一个小表：</p>
+<table>
+<thead>
+<tr>
+<th>领域对象</th>
+<th>它代表什么业务事实</th>
+<th>谁拥有它</th>
+<th>何时生效</th>
+<th>失败时怎样收口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>示例对象</td>
+<td>用业务语言描述，而不是先写类名</td>
+<td>Owner</td>
+<td>提交/发布边界</td>
+<td>refused、cancelled、failed、orphaned 等</td>
+</tr>
+</tbody>
+</table>
+<h2 id="五整体重写顺序">五、整体重写顺序</h2>
+<p>重写顺序按模型依赖，而不是按目录字母排序：</p>
+<ol>
+<li><strong>先定共同语言和运行骨架</strong>：会话拓扑、Agent 循环、工具运行时、执行世界、Action 授权。</li>
+<li><strong>再写真实效果和工作区</strong>：执行放置、进程连续性、执行隔离、变更应用、验证反馈、工作区事务。</li>
+<li><strong>再写持续工作</strong>：Goal 证据、工作拓扑、Actor 委派、后台 Job、审批协调、审批者身份、状态恢复。</li>
+<li><strong>再写上下文知识</strong>：指令组装、上下文快照、工具输出保留、表示降级、上下文血缘、压缩、模型路由、长期记忆。</li>
+<li><strong>最后写外部可见性和演化</strong>：耐久 Transcript、在线事件流、重连投影、控制平面、扩展生命周期、遥测、评测 Trajectory、产物交付。</li>
+</ol>
+<p>每完成一组，应回看协调指南，检查是否仍然只是组合说明；不能因为重写后对象更清楚，就把协调指南升级成第五个领域或新的 Primitive。</p>
+<h2 id="六逐篇重写卡片">六、逐篇重写卡片</h2>
+<p>下面的卡片是每篇文章的目标模型和写作任务。<code>P0</code> 表示先写，因为它决定其他页面的共同语言；<code>P1</code> 表示第二批；<code>P2</code> 表示在主模型稳定后再写。成熟度只沿用当前研究状态，不能因为文章换了业务说法就自动升级。</p>
+<h3 id="61-运行内核">6.1 运行内核</h3>
+<h4 id="会话与运行拓扑一次工作怎样留下连续的历史p0"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/session-topology/">会话与运行拓扑</a>｜一次工作怎样留下连续的历史（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：用户提出一次请求后，系统如何把多次模型判断、工具行动、取消、恢复和分支组织成一段可继续的工作。</li>
+<li><strong>领域对象</strong>：Session 是连续性根；Turn 是一次外部输入到交还控制的运行段；Step 是一次决策；Item/Event 是可记录事实；Branch/Fork 是后续路径。</li>
+<li><strong>模型重点</strong>：先区分“历史还在”“运行还活着”“工作区效果还在”三个恢复域；明确终态由哪个对象提交，历史分支是否绑定文件分支。</li>
+<li><strong>重写动作</strong>：用“同一请求触发三次工具失败重试，但仍只有一个 Turn”的例子开场；把类名和 API 放到“实现方言”表；保留对 <code>state-recovery</code>、<code>durable-transcript</code> 和 <code>workspace-transactions</code> 的边界说明。</li>
+</ul>
+<h4 id="agent-循环与工作模式harness-怎样把目标推进成下一步p0"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/agent-loop-modes/">Agent 循环与工作模式</a>｜Harness 怎样把目标推进成下一步（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：系统何时观察环境、向模型提问、执行行动、回传结果，以及何时暂停、继续或交还控制。</li>
+<li><strong>领域对象</strong>：Loop/Run、Context Snapshot、Model Decision、Action、Observation、Continuation Decision；模式是改变规则的 Policy，不默认是新 Actor。</li>
+<li><strong>模型重点</strong>：把“继续条件”从“模型输出了文字”中分离出来；解释 Plan、Review、Edit 等模式怎样改变工具面、模型、权限或完成条件。</li>
+<li><strong>重写动作</strong>：用“先给方案、确认后再改文件”和“测试失败后是否继续”两个情境串联全文；明确多模型流水线不自动产生 child Session；链接 <a href="/harnesswiki-site/docs/primitives/control-continuity/goal-evidence/">Goal 证据协议</a> 说明完成判定边界。</li>
+</ul>
+<h4 id="模型接入与路由不同模型怎样承担不同角色p2"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/model-routing/">模型接入与路由</a>｜不同模型怎样承担不同角色（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：面对不同模型能力、成本和可用性，系统怎样为当前步骤选出合适的模型，并在换模后保持历史可解释。</li>
+<li><strong>领域对象</strong>：Provider Adapter、Model Descriptor、Model Selection、Role、Fallback Policy、Compatibility Record。</li>
+<li><strong>模型重点</strong>：Model Selection 是一次有来源的决策值；Provider、模型身份、能力和 Session 历史必须分开；fallback 是新选择，不是无痕重试。</li>
+<li><strong>重写动作</strong>：从“同一任务切换到便宜模型后，旧工具结果还能否解释”写起；把“模型名清单”改为“选择规则和兼容性”；将模型路由与 Agent Loop、长期记忆、上下文预算的边界画清。</li>
+</ul>
+<h4 id="上下文压缩上下文超限时怎样继续工作p0"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-compaction/">上下文压缩</a>｜上下文超限时怎样继续工作（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：模型输入快超预算时，系统如何保留当前任务所需的事实，并把候选摘要安全提交为下一次输入。</li>
+<li><strong>领域对象</strong>：Compaction Transaction、Input Version、Protected Set、Candidate Snapshot、Commit Record、Continuation。</li>
+<li><strong>模型重点</strong>：压缩是一个有版本校验的事务；候选生成、候选提交和继续发送是三个不同阶段；完整 Transcript 不因压缩而被改写。</li>
+<li><strong>重写动作</strong>：保留现有形式化定义，但把符号放到业务故事之后；明确它不拥有摘要内容质量、工具结果裁剪、富媒体降级和血缘；增加“工作区在摘要生成期间变化”的反例。</li>
+</ul>
+<h4 id="工具输出保留哪些工具结果还值得带回去p1"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-output-retention/">工具输出保留</a>｜哪些工具结果还值得带回去（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：工具输出太多时，下一次模型仍应看到哪些原文、裁剪片段或占位提示。</li>
+<li><strong>领域对象</strong>：Observation Projection、Retention Policy、Call/Result Pair、Placeholder、Dependency Cache。</li>
+<li><strong>模型重点</strong>：这是模型输入投影，不是删除事实；工具调用与结果必须成对；一旦旧字节不可见，依赖旧内容的缓存必须失效。</li>
+<li><strong>重写动作</strong>：以“旧文件读取被裁掉后再次编辑”和“构建日志中最后一段才有错误”为例；把字符阈值、token 成本、最近项策略写成取舍；继续保持 <code>Proposed Abstraction</code>，明确需要第三个独立 Family。</li>
+</ul>
+<h4 id="语义上下文快照下一步模型需要记住什么p1"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/semantic-context-snapshot/">语义上下文快照</a>｜下一步模型需要记住什么（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：从长历史中提炼一份对当前目标有用的模型可见状态，而不是简单复制聊天记录。</li>
+<li><strong>领域对象</strong>：Snapshot Candidate、Consumed Input、Goal/Constraint Summary、Validity Check、Usage Record。</li>
+<li><strong>模型重点</strong>：Snapshot 是有来源、有限范围、可能过期的 Value Object；它不能冒充用户原话、当前文件事实或完整历史。</li>
+<li><strong>重写动作</strong>：用“摘要生成期间用户又修改了需求”说明 stale candidate；区分“语义提炼”与“预算触发/替换提交”；保留当前两票证据和第三 Family 缺口。</li>
+</ul>
+<h4 id="上下文表示降级大文件和图片怎样变成可用线索p2"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-representation-degradation/">上下文表示降级</a>｜大文件和图片怎样变成可用线索（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：图片、二进制、长附件等高成本内容无法原样放入模型输入时，系统怎样留下便宜但诚实的表示。</li>
+<li><strong>领域对象</strong>：Rich Context Node、Degraded Representation、Recovery Locator、Temporary Resource。</li>
+<li><strong>模型重点</strong>：表示变便宜不等于信息消失；placeholder、caption、URI 和可恢复 handle 的能力不同，必须明确原内容是否仍可取回。</li>
+<li><strong>重写动作</strong>：从“模型看到附件说明，却以为看过原图”开场；用 Value Object 表格解释 MIME、成本、locator 和保留期；不把降级与摘要、保留策略或压缩提交合并。</li>
+</ul>
+<h4 id="上下文血缘摘要和替代内容从哪里来p1"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-lineage/">上下文血缘</a>｜摘要和替代内容从哪里来（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：当模型看到的是摘要、裁剪结果或替代节点时，系统如何说明它取代或抽象了哪些原始内容。</li>
+<li><strong>领域对象</strong>：Source Node、Derived Node、Replace Edge、Abstract Edge、Surface Position、Availability。</li>
+<li><strong>模型重点</strong>：来源关系回答“它从哪里来”，不回答“它是否正确”；一对一替换和多对一抽象是不同关系。</li>
+<li><strong>重写动作</strong>：用“摘要中一句结论追不回原工具输出”的审计场景开篇；把 lineage 写成可查询的关系对象；明确它不拥有代码 provenance、Session 血缘或摘要真实性判断。</li>
+</ul>
+<h4 id="长期记忆哪些经验值得带到下一次工作p2"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a>｜哪些经验值得带到下一次工作（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：会话结束后，哪些知识可以跨 Session 保留、召回、更正和删除，避免旧推断变成永久隐性指令。</li>
+<li><strong>领域对象</strong>：Memory Record、Memory Scope、Source Session、Writer、Recall Block、Retention/Forget Policy。</li>
+<li><strong>模型重点</strong>：长期记忆是有范围和来源的知识资产，不是完整 Transcript，也不是当前项目指令；用户纠正和遗忘是生命周期的一部分。</li>
+<li><strong>重写动作</strong>：以“上次会话记住了已过期的构建命令”为例；区分显式 remember、自动提取、注入和 forget；把新鲜度和权限写成不变量；成熟度维持 <code>Proposed Abstraction</code>。</li>
+</ul>
+<h4 id="指令发现与组装项目规则怎样进入工作p0"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/instruction-assembly/">指令发现与组装</a>｜项目规则怎样进入工作（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：系统启动或进入子目录时，如何发现用户、仓库和运行参数带来的规则，并按作用域、优先级和信任合并。</li>
+<li><strong>领域对象</strong>：Instruction Source、Scope、Precedence Rule、Trust Decision、Instruction Set、Provenance。</li>
+<li><strong>模型重点</strong>：同名文件只是发现线索；规则文本影响模型判断，但不等于 OS enforcement；更具体目录和显式参数的优先级必须可解释。</li>
+<li><strong>重写动作</strong>：用“用户配置允许 Bash、项目配置要求自动批准”的冲突情境开场；把行为配置、上下文资源、可执行资源拆成三类；链接 <a href="/harnesswiki-site/docs/primitives/control-continuity/configuration-trust/">配置、资源发现与项目信任</a> 讨论启动信任。</li>
+</ul>
+<h4 id="工具与能力运行时把行动请求交给真实能力p0"><a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/">工具与能力运行时</a>｜把行动请求交给真实能力（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：模型提出结构化行动后，系统如何校验参数、决定是否进入执行、选择能力实现，并把结果变成下一步可理解的反馈。</li>
+<li><strong>领域对象</strong>：Capability Registry、Tool Schema、Action Call、Execution Handle、Provider、Observation、Artifact Reference。</li>
+<li><strong>模型重点</strong>：注册、授权、派发、执行、结果规范化是不同责任；Call identity 连接流式参数、审批、取消和结果；多个 provider 要共同指向同一 Execution World。</li>
+<li><strong>重写动作</strong>：用“把本地能力迁到远端沙箱”和“长时间流式命令”两例说明生命周期；把 MCP 写成一种 provider 方言，不写成控制平面；将安全决策移交 <a href="/harnesswiki-site/docs/primitives/control-continuity/action-authorization/">Action 授权</a>。</li>
+</ul>
+<h3 id="62-编码工作面">6.2 编码工作面</h3>
+<h4 id="代码库智能在大仓库里找到真正相关的代码p1"><a href="/harnesswiki-site/docs/primitives/coding-workspace/repository-intelligence/">代码库智能</a>｜在大仓库里找到真正相关的代码（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：面对陌生或庞大的代码库，系统怎样在有限时间和上下文预算内找到值得阅读的文件、符号、引用和依赖。</li>
+<li><strong>领域对象</strong>：Workspace Snapshot、Repository Index、Symbol/Reference、Freshness Marker、Ranking Context、Retrieval Budget、Rendered Fragment。</li>
+<li><strong>模型重点</strong>：索引必须绑定 workspace identity 和 dirty state；相关性是有损选择，结果要能回到原文件核验；“会搜索”不等于“有持久索引”。</li>
+<li><strong>重写动作</strong>：用“错误只给出一个公共接口名”和“Agent 刚修改了被索引文件”开场；按文本、AST、引用图、embedding 四类路线比较成本和新鲜度；把结果进入 Context 的部分交给上下文快照。</li>
+</ul>
+<h4 id="变更生成与应用把修改意图变成可控的文件变更p0"><a href="/harnesswiki-site/docs/primitives/coding-workspace/change-application/">变更生成与应用</a>｜把修改意图变成可控的文件变更（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：模型说“把这里改掉”之后，系统如何确认目标位置、检查文件没有变旧，再以可解释方式写入或拒绝。</li>
+<li><strong>领域对象</strong>：Edit Intent、Edit Protocol、Workspace Snapshot、Match Set、Change Set、Application Result、Diff。</li>
+<li><strong>模型重点</strong>：先计算 Change Set，再决定是否写盘；零匹配、多匹配、快照过期和部分提交必须是不同结果；diff preview 是信息，不是事务提交。</li>
+<li><strong>重写动作</strong>：以“目标片段出现两次”和“生成 patch 后文件被另一个 Actor 修改”为贯穿情境；把 whole-file、search/replace、unified diff、structured edit 写成不同协议策略；明确局部 undo 不覆盖 Shell、Git 或外部进程效果。</li>
+</ul>
+<h4 id="执行放置行动应该在哪个工作世界发生p0"><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-placement/">执行放置</a>｜行动应该在哪个工作世界发生（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：一次行动应绑定哪个本机、容器、虚拟机或远端环境，之后如何重新找到或释放这个环境。</li>
+<li><strong>领域对象</strong>：Placement Request、Execution World、World Identity、Workspace Root、Capability Endpoint、Lease、Execution Session。</li>
+<li><strong>模型重点</strong>：所有文件、命令、LSP 和网络能力要能说清楚自己看到的是哪个世界；placement 只回答“在哪里”，不回答“能影响什么”。</li>
+<li><strong>重写动作</strong>：从“本机 LSP 与远端 Shell 观察到不同提交”开场；用“世界身份 → 能力集合 → 连接/租约 → 释放”替换容器清单；与 <a href="/harnesswiki-site/docs/primitives/control-continuity/execution-isolation/">执行隔离</a> 和 <a href="/harnesswiki-site/docs/primitives/coding-workspace/process-continuity/">进程连续性</a> 做正交边界图。</li>
+</ul>
+<h4 id="进程连续性下一条命令是否接着上一个环境p0"><a href="/harnesswiki-site/docs/primitives/coding-workspace/process-continuity/">进程连续性</a>｜下一条命令是否接着上一个环境（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：用户先激活虚拟环境、切换目录或启动长进程后，下一次行动是否继续使用同一 cwd、环境、PTY 和进程树。</li>
+<li><strong>领域对象</strong>：Execution Session、Command Action、Process Handle、Output Chunk、Terminal Reason、Lease。</li>
+<li><strong>模型重点</strong>：持久文件系统不等于持久进程；取消等待方不等于杀死进程；正常退出、非零退出、超时、取消、断线和孤儿必须分别收口。</li>
+<li><strong>重写动作</strong>：用“先 <code>cd</code> 再测试”和“长命令输出一半后客户端取消”说明差异；把 <code>execution-session identity</code> 当作业务连续性凭据，而不是内部句柄；将长时后台工作链接到 <a href="/harnesswiki-site/docs/primitives/control-continuity/background-job-lifecycle/">后台 Job 生命周期</a>。</li>
+</ul>
+<h4 id="验证与反馈怎样知道修改真的有效p1"><a href="/harnesswiki-site/docs/primitives/coding-workspace/verification-feedback/">验证与反馈</a>｜怎样知道修改真的有效（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：变更之后应该运行哪些检查，失败属于旧问题还是新回归，结果怎样反馈给下一步决策。</li>
+<li><strong>领域对象</strong>：Candidate Change、Verification Trigger、Check Plan、Baseline、Diagnostic、Verification Result、Continuation Decision。</li>
+<li><strong>模型重点</strong>：验证结果只对记录的命令、环境和 workspace identity 成立；“测试通过”不是“需求正确”；失败反馈必须可归因并能触发继续、询问、重试或结束。</li>
+<li><strong>重写动作</strong>：以“lint 失败但测试通过”和“测试命令不存在”开场；区分模型主动运行检查与 Harness 自动触发；引入独立 verifier 的业务语言，但不把 verifier 强行并入本 Primitive。</li>
+</ul>
+<h4 id="版本控制与工作区事务怎样保护隔离和交付工作区变更p0"><a href="/harnesswiki-site/docs/primitives/coding-workspace/workspace-transactions/">版本控制与工作区事务</a>｜怎样保护、隔离和交付工作区变更（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：任务开始已有修改、多个 Actor 并行写文件或需要回退时，系统如何知道谁改了什么、哪些效果可以交付。</li>
+<li><strong>领域对象</strong>：Workspace Identity、Baseline、Transaction、Effect Set、Ownership Claim、Checkpoint、Restore Operation、Delivery Artifact。</li>
+<li><strong>模型重点</strong>：用户原有 dirty state、Agent 变更、未跟踪文件、外部进程效果要分开；worktree 只提供文件树隔离；Git commit 只是某种 checkpoint，不是完整世界快照。</li>
+<li><strong>重写动作</strong>：用“用户带着未提交修改启动 Agent”和“两个 child 改相邻代码”贯穿全文；把 baseline、ownership、isolation、checkpoint coverage、restore、delivery 作为六个业务问题；最终交付链接 <a href="/harnesswiki-site/docs/primitives/composition-interop/artifact-delivery/">产物交付</a>。</li>
+</ul>
+<h3 id="63-控制与连续性">6.3 控制与连续性</h3>
+<h4 id="action-授权这次行动是否允许进入执行p0"><a href="/harnesswiki-site/docs/primitives/control-continuity/action-authorization/">Action 授权</a>｜这次行动是否允许进入执行（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：系统如何根据具体命令、目标资源、行为模式、Actor 血缘和规则来源，决定允许、询问还是拒绝。</li>
+<li><strong>领域对象</strong>：Normalized Action、Policy Context、Rule Source、Scope、Session Grant、Policy Decision、Decision Evidence。</li>
+<li><strong>模型重点</strong>：授权绑定完整参数而不是工具名；<code>allow once</code>、Session、项目和托管规则有不同范围；<code>allow</code> 只把行动交给既有 enforcement，不扩大沙箱。</li>
+<li><strong>重写动作</strong>：以“同一个 Bash 工具访问两个不同路径”和“父执行者委派只读调查 child”开场；把 rule precedence、继承收窄、拒绝 Observation 写成模型；把待决请求交给 <a href="/harnesswiki-site/docs/primitives/control-continuity/approval-mediation/">审批协调</a>。</li>
+</ul>
+<h4 id="审批协调待决的高风险行动怎样被处理p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/approval-mediation/">审批协调</a>｜待决的高风险行动怎样被处理（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：一个行动需要人或多个参与者决定时，系统如何呈现请求、收集回答、处理断线和超时，并只形成一个终态。</li>
+<li><strong>领域对象</strong>：Approval Request、Action Reference、Eligible Responder Snapshot、Response、Quorum、Resolution、Audit Pair。</li>
+<li><strong>模型重点</strong>：pending 不是 allow；响应资格、规则和 quorum 是 issue 时冻结还是动态变化，必须显式；late response 不能改写已收口结果。</li>
+<li><strong>重写动作</strong>：从“原客户端在审批等待时断线”和“N-of-M 投票期间 policy 被修改”开始；把 timeout、withdraw、unavailable、cancel 作为业务终态；与 <a href="/harnesswiki-site/docs/primitives/control-continuity/approver-identity/">审批者身份</a> 分开叙述“请求怎么收口”和“谁有资格回答”。</li>
+</ul>
+<h4 id="审批者身份谁有资格替用户做决定p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/approver-identity/">审批者身份</a>｜谁有资格替用户做决定（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：系统如何确认回答审批的人或程序确实是有权限的主体，而不是仅仅自报一个 client id。</li>
+<li><strong>领域对象</strong>：Principal、Credential、Role/Scope、Connection Lease、Delegation、Expiry、Revocation、Identity Provenance。</li>
+<li><strong>模型重点</strong>：Session 发起者、当前连接、Work Item owner 和 approver role 是不同关系；重连或跨客户端接管必须重新证明或使用可验证租约。</li>
+<li><strong>重写动作</strong>：以“客户端冒用 originator id”和“共享 callback 处理多租户请求”开场；把本地用户、远端人、自动审批程序分为不同 principal kind；不把身份校验写成审批 UI 的附属步骤。</li>
+</ul>
+<h4 id="执行隔离即使获准效果最多能影响什么p0"><a href="/harnesswiki-site/docs/primitives/control-continuity/execution-isolation/">执行隔离</a>｜即使获准，效果最多能影响什么（P0）</h4>
+<ul>
+<li><strong>处理的事情</strong>：一个已获准行动在文件、网络、进程、凭据和资源方面究竟能造成多大影响，系统如何强制限制并证明清理完成。</li>
+<li><strong>领域对象</strong>：Sandbox Instance、Mount Table、Network Profile、Credential Set、Process Tree、Resource Limit、Teardown Result。</li>
+<li><strong>模型重点</strong>：授权是决策，隔离是 enforcement；“sandboxed”必须拆成文件、网络、进程、凭据和资源五个维度；可写挂载仍可能改变宿主文件。</li>
+<li><strong>重写动作</strong>：用“获准命令读取工作区外 credential”和“命令启动 daemon 后 Turn 被取消”说明边界；把容器、VM、本机 provider 写成实现路线，不写成安全结论；明确何时由进程连续性或 Job 生命周期负责取消。</li>
+</ul>
+<h4 id="状态持久化与恢复中断后哪些部分还能继续p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态持久化与恢复</a>｜中断后哪些部分还能继续（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：进程消失、客户端重启或环境漂移后，系统怎样判断哪些历史、工作区、审批、Job 和配置仍可重建。</li>
+<li><strong>领域对象</strong>：Durable Fact、Recovery Identity、Checkpoint Coverage、Projection、Compatibility Guard、Drift、Recovery Outcome。</li>
+<li><strong>模型重点</strong>：exact、partial、forked、refused 是不同结果；恢复历史不等于恢复进程或文件；重放事实不等于重新执行不可幂等 Action。</li>
+<li><strong>重写动作</strong>：以“聊天恢复了，但未提交文件没有恢复”为例；按恢复域逐项列出 coverage；把版本兼容、工具 schema、插件和远端资源漂移放入恢复前检查。</li>
+</ul>
+<h4 id="goal-证据协议完成声明需要哪些证据p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/goal-evidence/">Goal 证据协议</a>｜完成声明需要哪些证据（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：系统何时有资格说目标已完成或确实受阻，而不是把模型的一句总结当成事实。</li>
+<li><strong>领域对象</strong>：Goal、Goal Revision、Claim、Evidence Reference、Verifier、Terminal Proposal、Verdict。</li>
+<li><strong>模型重点</strong>：每条 Claim 都要说明证据类型和引用；证据必须绑定当前 revision；交付内容、测试结果、Job 退出和外部事实各自只能证明自己的范围。</li>
+<li><strong>重写动作</strong>：用“所有 child 都回了消息，但合并后测试失败”和“测试命令不存在却宣布 blocked”开场；把 verifier 写成独立协作角色；链接 <a href="/harnesswiki-site/docs/primitives/coding-workspace/verification-feedback/">验证与反馈</a> 和 <a href="/harnesswiki-site/docs/primitives/composition-interop/artifact-delivery/">产物交付</a>。</li>
+</ul>
+<h4 id="工作拓扑一项工作怎样拆解认领和汇合p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/work-topology/">工作拓扑</a>｜一项工作怎样拆解、认领和汇合（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：复杂目标如何拆成有依赖关系的 Work Item，怎样被 Actor 认领、等待、阻塞并在最后汇合。</li>
+<li><strong>领域对象</strong>：Work Item、Acceptance Condition、Dependency Edge、Claim/Lease、Attempt、Join State、Result/Evidence Reference。</li>
+<li><strong>模型重点</strong>：Work Item identity 和 revision 稳定；<code>blocked</code> 与“尚未有人认领”不同；Claim 需要原子化或租约；子项完成不自动证明整体无冲突。</li>
+<li><strong>重写动作</strong>：从“两个并行工作项各自通过检查，但修改互相冲突”开始；把依赖图、认领和 join 分成三个状态面；与 Actor 血缘、Workspace ownership、Goal verifier 明确正交关系。</li>
+</ul>
+<h4 id="actor-委派父执行者怎样把工作交给子执行者p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/actor-delegation/">Actor 委派</a>｜父执行者怎样把工作交给子执行者（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：Parent 把任务交给 Child 时，如何传递上下文、模型、工具、权限、取消边界和结果归属。</li>
+<li><strong>领域对象</strong>：Parent Actor、Child Actor、Lineage、Context Policy、Capability Snapshot、Inbox、Child Handle、Effect/Artifact Reference。</li>
+<li><strong>模型重点</strong>：child 只有被正式发布后才可寻址；fresh、full-history fork 和 selected context 是不同传递策略；继承上下文不等于继承 authority 或 filesystem。</li>
+<li><strong>重写动作</strong>：用“选择完整历史还是只传任务摘要”和“父取消时 child 正在写文件”说明 parent/child 关系；把 child 文本报告、Artifact 引用和已发生效果分开；并行任务依赖留给 <a href="/harnesswiki-site/docs/primitives/control-continuity/work-topology/">工作拓扑</a>。</li>
+</ul>
+<h4 id="后台-job-生命周期离开当前交互后工作怎样继续p1"><a href="/harnesswiki-site/docs/primitives/control-continuity/background-job-lifecycle/">后台 Job 生命周期</a>｜离开当前交互后工作怎样继续（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：调用已经返回后，构建、扫描或长时命令如何继续运行、被查询、取消并形成唯一终态。</li>
+<li><strong>领域对象</strong>：Job、Owner、Resource Handle、Output Cursor、Waiter、Terminal Reason、Orphan、Cleanup Coordinator。</li>
+<li><strong>模型重点</strong>：Job identity 与底层 process/future 分离；wait 超时只结束等待者；cancel acknowledgement 不等于资源已经停止；terminal transition 采用 first-wins。</li>
+<li><strong>重写动作</strong>：从“<code>wait(30s)</code> 超时但构建仍在运行”和“Owner Session 关闭后子进程仍存活”开始；把 owner transfer、输出保留、孤儿回收列为生命周期事件；不要把 Job 自动写成 child Actor。</li>
+</ul>
+<h4 id="配置资源发现与项目信任项目带进来的规则和程序是否可信p2"><a href="/harnesswiki-site/docs/primitives/control-continuity/configuration-trust/">配置、资源发现与项目信任</a>｜项目带进来的规则和程序是否可信（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：Harness 启动时加载哪些配置、指令和可执行扩展，以及它们在什么信任条件下生效。</li>
+<li><strong>领域对象</strong>：Configuration Source、Instruction Resource、Executable Resource、Merge Result、Trust Decision、Activation Record。</li>
+<li><strong>模型重点</strong>：行为配置、上下文资源和可执行资源虽然可能共享目录，但风险不同；“被发现”不等于“被信任”，项目代码不能静默提升权限。</li>
+<li><strong>重写动作</strong>：用“用户配置允许 Bash、项目配置要求自动批准”和“从 monorepo 根进入子包”开场；把启动时序、来源 provenance、覆盖优先级和信任边界写成业务流程；与指令组装、扩展生命周期、Action 授权交叉链接。</li>
+</ul>
+<h3 id="64-组合与互操作">6.4 组合与互操作</h3>
+<h4 id="扩展与生命周期能力扩展怎样进入并离开运行p2"><a href="/harnesswiki-site/docs/primitives/composition-interop/extension-lifecycle/">扩展与生命周期</a>｜能力扩展怎样进入并离开运行（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：插件、技能、Hook 和 capability provider 如何被发现、加载、参与运行，并在取消、禁用或关闭时撤销副作用。</li>
+<li><strong>领域对象</strong>：Extension Package、Manifest、Lifecycle Hook、Capability Provider、Registration、Dependency、Disposal Record。</li>
+<li><strong>模型重点</strong>：声明式资源、生命周期拦截点、能力 provider 是三种不同接缝；扩展拥有的资源、顺序和卸载责任必须可追踪。</li>
+<li><strong>重写动作</strong>：以“两个扩展同时重写压缩结果”和“初始化后启动子进程、随后热重载配置”开场；把 MCP 作为 provider 方言；强调初始化失败不得留下半注册工具、监听器或后台进程。</li>
+</ul>
+<h4 id="控制平面与互操作协议其他客户端怎样可靠地控制运行p1"><a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面与互操作协议</a>｜其他客户端怎样可靠地控制运行（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：CLI、IDE、桌面端或第三方宿主如何寻址 Session，发送 steer/approve/cancel 命令，并知道命令到底被接收、执行还是完成。</li>
+<li><strong>领域对象</strong>：Session Address、Command、Run Address、Event、Cursor、Subscription、Control Request、Client Ownership。</li>
+<li><strong>模型重点</strong>：transport accepted、admitted、executing 和 terminal 是不同事实；取消必须绑定明确目标；多写者需要所有权或冲突规则。</li>
+<li><strong>重写动作</strong>：从“IDE 断线后桌面端取消同一个 Turn”和“审批等待期间切换客户端”开始；用协议对象解释为什么解析终端文本不够；把 replay 保证交给 <a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">重连投影</a>。</li>
+</ul>
+<h4 id="耐久-transcript系统怎样保存发生过的事实p1"><a href="/harnesswiki-site/docs/primitives/composition-interop/durable-transcript/">耐久 Transcript</a>｜系统怎样保存发生过的事实（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：进程重启后，哪些用户输入、模型输出、Action、Observation 和生命周期事件仍能作为同一 Session 的可靠历史。</li>
+<li><strong>领域对象</strong>：Transcript Entry、Session Identity、Sequence/Parent、Schema Version、Durability Acknowledgement、Gap、Branch。</li>
+<li><strong>模型重点</strong>：只有被持久化层确认的 append 才是耐久事实；顺序和 parent 要表达因果与分支；Action 已执行但 Observation 未写入时必须留下可检测缺口。</li>
+<li><strong>重写动作</strong>：先说明“保存聊天”为什么不够；以“工具改了文件，进程在写 Observation 前崩溃”和“从历史节点 fork”贯穿；把模型历史投影、在线流、评测样本与事实源分开。</li>
+</ul>
+<h4 id="在线事件流当前观察者怎样看到运行进展p1"><a href="/harnesswiki-site/docs/primitives/composition-interop/live-event-stream/">在线事件流</a>｜当前观察者怎样看到运行进展（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：运行中的 UI、SDK 或自动控制器如何收到有序增量，并可靠知道运行何时完成、取消或失败。</li>
+<li><strong>领域对象</strong>：Live Subscription、Event Sequence、Correlation Identity、Backpressure State、Terminal Event、Consumer Connection。</li>
+<li><strong>模型重点</strong>：事件流服务当前观察者，不自动提供跨连接 replay；accepted response 不等于 terminal outcome；terminal 后不应再有改变终态的普通 update。</li>
+<li><strong>重写动作</strong>：用“长工具持续输出并可被取消”和“Prompt 已 accepted，随后模型异步失败”开场；把慢消费者、丢事件、断线和取消写成状态转移；不要把 UI 显示文本当作事件协议。</li>
+</ul>
+<h4 id="重连投影断线后客户端怎样补回状态p1"><a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">重连投影</a>｜断线后客户端怎样补回状态（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：客户端断线再连时，系统如何从 cursor、快照或事件窗口重建一份有边界的当前状态，并无缝接入在线流。</li>
+<li><strong>领域对象</strong>：Replay Window、Cursor、Projector Version、Snapshot、Gap/Truncation、Deduplication Key、Live Handoff。</li>
+<li><strong>模型重点</strong>：投影是派生视图，不是事实源；输出必须声明覆盖范围和缺口；重放不能再次调用外部工具，也不能改变已完成 Action、审批或 Turn 的终态。</li>
+<li><strong>重写动作</strong>：以“Replay window 已截断但完整 Transcript 仍存在”和“旧客户端遇到新 terminal event”为例；区分完整历史、有限窗口和压缩状态；把 projector 重建与 Transcript 只读关系写清楚。</li>
+</ul>
+<h4 id="遥测导出运行信号怎样送给运维和分析p2"><a href="/harnesswiki-site/docs/primitives/composition-interop/telemetry-export/">遥测导出</a>｜运行信号怎样送给运维和分析（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：系统怎样记录延迟、成本、错误和资源信号，并在脱敏、采样、批量和失败重试后交给观测后端。</li>
+<li><strong>领域对象</strong>：Telemetry Signal、Correlation Attribute、Exporter、Sampling Policy、Batch Queue、Redaction Rule、Delivery Attempt。</li>
+<li><strong>模型重点</strong>：遥测是运行的旁路观察，不是业务事实源，也不应成为 Agent Loop 的控制依赖；发送失败通常不改写已完成 Action，但必须可诊断。</li>
+<li><strong>重写动作</strong>：从“定位一次运行的延迟和成本”和“把包含用户内容的事件发给第三方 collector”开始；用日志、指标、trace 三种消费模型解释 schema 与 cardinality；把 secret、prompt、路径和 Session id 的泄露风险写成业务后果。</li>
+</ul>
+<h4 id="评测-trajectory一次运行怎样变成可比较样本p2"><a href="/harnesswiki-site/docs/primitives/composition-interop/evaluation-trajectory/">评测 Trajectory</a>｜一次运行怎样变成可比较样本（P2）</h4>
+<ul>
+<li><strong>处理的事情</strong>：把任务输入、模型决策、Action/Observation、环境锚点、最终提交和评分组织成可复现、可比较的数据样本。</li>
+<li><strong>领域对象</strong>：Task Instance、Run Identity、Step/Action Identity、Environment Anchor、Trajectory Envelope、Evaluator、Score、Redaction Policy。</li>
+<li><strong>模型重点</strong>：Harness 正常结束与任务通过是两个终态；adapter 只能转换和脱敏，不能篡改原始事实；重放应产生新 Run，不能覆盖原样本。</li>
+<li><strong>重写动作</strong>：用“批量运行 SWE-bench 中途重启”和“发布一次运行作为训练数据”开场；把环境版本、工具配置、成本、artifact 引用和 evaluator 版本列为样本身份；保留当前 <code>Proposed Abstraction</code>。</li>
+</ul>
+<h4 id="产物交付结果怎样成为别人可检查的交付物p1"><a href="/harnesswiki-site/docs/primitives/composition-interop/artifact-delivery/">产物交付</a>｜结果怎样成为别人可检查的交付物（P1）</h4>
+<ul>
+<li><strong>处理的事情</strong>：Patch、报告、文件、commit 或下载包如何从一次运行中封存出来，交给用户、父 Actor、CI 或 evaluator，并保持可访问和可验证。</li>
+<li><strong>领域对象</strong>：Producer、Artifact、Artifact Version、ArtifactRef、Locator、Integrity、Access Scope、Retention、Consumer。</li>
+<li><strong>模型重点</strong>：发布成功与内容正确是两个状态；裸路径不是稳定 identity；展示预览可能被截断；交付前必须处理临时 workspace、权限和 secret 清理。</li>
+<li><strong>重写动作</strong>：以“隔离 worktree 中的 child 完成修改”和“远端运行产生大文件，事件通道只能发小消息”为例；把 Observation 与 Artifact 的消费边界说清楚；与 Goal evidence、Workspace transaction 和 Evaluation trajectory 形成闭环。</li>
+</ul>
+<h2 id="七协调指南怎样重写">七、协调指南怎样重写</h2>
+<p>协调指南应从“概念索引”改成“端到端业务故事”，但不拥有新的状态或成熟度。每篇只回答多个 Primitive 如何在一个情境中交接：</p>
+<table>
+<thead>
+<tr>
+<th>协调指南</th>
+<th>重写后的故事</th>
+<th>必须保持的边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-kernel/">执行环境、放置与连续性</a></td>
+<td>一条命令如何找到执行世界、复用进程环境、产生观察并在取消后收口</td>
+<td>放置回答在哪里，进程连续性回答是否接着运行，工具运行时回答怎样派发</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/control-continuity/permission-sandbox/">权限、审批与隔离边界</a></td>
+<td>高风险行动从提出到执行，谁决定、谁回答、什么边界真正阻止越界</td>
+<td>授权、审批、审批者身份和隔离是四个不同责任</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/control-continuity/task-orchestration/">任务、目标与多 Actor 编排</a></td>
+<td>一个大目标怎样拆给多个执行者，如何等待、汇合、交付并取得完成证据</td>
+<td>Goal、Work Item、Actor、Job 和 Artifact 各有自己的 identity 与终态</td>
+</tr>
+<tr>
+<td><a href="/harnesswiki-site/docs/primitives/composition-interop/trajectory-replay/">运行记录与回放边界</a></td>
+<td>当前 UI 如何看进展，断线后如何补回，事后怎样审计和生成评测样本</td>
+<td>Transcript、Live Event、Replay、Telemetry、Trajectory 是五种不同消费契约</td>
+</tr>
+</tbody>
+</table>
+<p>协调指南的验收重点是“交接是否讲清楚”，不是“是否增加更多技术名词”。如果某段内容开始描述新的独立 identity、状态机和 Situation，应把它移回对应 Primitive，而不是继续扩展指南。</p>
+<h2 id="八实施分批与探索方式">八、实施分批与探索方式</h2>
+<h3 id="第一批建立业务主链p0">第一批：建立业务主链（P0）</h3>
+<p>重写 <a href="/harnesswiki-site/docs/primitives/runtime-kernel/session-topology/">会话与运行拓扑</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/agent-loop-modes/">Agent 循环与工作模式</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-runtime/">工具与能力运行时</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/action-authorization/">Action 授权</a>、<a href="/harnesswiki-site/docs/primitives/coding-workspace/execution-placement/">执行放置</a>、<a href="/harnesswiki-site/docs/primitives/coding-workspace/process-continuity/">进程连续性</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/execution-isolation/">执行隔离</a>、<a href="/harnesswiki-site/docs/primitives/coding-workspace/change-application/">变更生成与应用</a>和<a href="/harnesswiki-site/docs/primitives/coding-workspace/workspace-transactions/">版本控制与工作区事务</a>。</p>
+<p>这一批只需证明“目标如何变成受约束的文件/进程效果”。先用 mini-SWE-agent、aider、Pi、OpenHands、Codex CLI 等已经有固定证据的 Family 做知识压缩，不在此阶段追求新增抽象。</p>
+<h3 id="第二批加入证据恢复与协作p1">第二批：加入证据、恢复与协作（P1）</h3>
+<p>重写 <a href="/harnesswiki-site/docs/primitives/coding-workspace/verification-feedback/">验证与反馈</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/goal-evidence/">Goal 证据协议</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/work-topology/">工作拓扑</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/actor-delegation/">Actor 委派</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/background-job-lifecycle/">后台 Job 生命周期</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/state-recovery/">状态持久化与恢复</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/approval-mediation/">审批协调</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/approver-identity/">审批者身份</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/control-plane/">控制平面与互操作协议</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/durable-transcript/">耐久 Transcript</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/live-event-stream/">在线事件流</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/replay-projection/">重连投影</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/artifact-delivery/">产物交付</a>、<a href="/harnesswiki-site/docs/primitives/coding-workspace/repository-intelligence/">代码库智能</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/instruction-assembly/">指令发现与组装</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-lineage/">上下文血缘</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/semantic-context-snapshot/">语义上下文快照</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/tool-output-retention/">工具输出保留</a>。</p>
+<p>这一批要重点开展一次小型“探索团队”评审：开发者、熟悉 Harness 运行时的人和一名业务读者一起走完“审批等待断线、子 Agent 并行修改、验证失败后恢复”三个场景，确认每个对象只有一个 Owner，且没有把完成文本当成证据。</p>
+<h3 id="第三批补齐知识资产和外部消费p2">第三批：补齐知识资产和外部消费（P2）</h3>
+<p>重写 <a href="/harnesswiki-site/docs/primitives/runtime-kernel/model-routing/">模型接入与路由</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/long-term-memory/">长期记忆</a>、<a href="/harnesswiki-site/docs/primitives/runtime-kernel/context-representation-degradation/">上下文表示降级</a>、<a href="/harnesswiki-site/docs/primitives/control-continuity/configuration-trust/">配置、资源发现与项目信任</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/extension-lifecycle/">扩展与生命周期</a>、<a href="/harnesswiki-site/docs/primitives/composition-interop/telemetry-export/">遥测导出</a>和<a href="/harnesswiki-site/docs/primitives/composition-interop/evaluation-trajectory/">评测 Trajectory</a>。</p>
+<p>这些页面依赖前两批的身份、来源和生命周期词汇。先写业务消费者和数据保留责任，再写 provider、schema、collector 或 evaluator，避免重新回到“能力清单”叙述。</p>
+<h2 id="九每篇文章的验收清单">九、每篇文章的验收清单</h2>
+<h3 id="领域表达">领域表达</h3>
+<ul>
+<li>开头能用三句话说明使用者、触发情境和失败后果，不要求读者先知道英文术语。</li>
+<li>所有核心对象都写明身份、Owner、生命周期和与相邻对象的关系。</li>
+<li>至少有一个贯穿示例，能从输入走到终态；示例中的对象名称与正文统一。</li>
+<li>明确哪些是 Entity、Value Object、Policy、Domain Service、Aggregate 或 Projection；不为了“像 DDD”而给每个名词造类。</li>
+</ul>
+<h3 id="差异和证据">差异和证据</h3>
+<ul>
+<li>至少两个 Situation 能真正改变实现选择，包含触发、初始状态、关键事件和可观察终态。</li>
+<li>四个或更多实现的页面必须有综合的策略取舍，不得只堆 Harness 名称。</li>
+<li><code>implemented</code>、<code>alternative</code>、<code>absent</code>、<code>unknown</code> 与事实类型继续分开；没有新证据时不改变成熟度。</li>
+<li>同一 Harness Family 继承的机制只计一次；新增独特实现后复核 Family 声明和比较矩阵。</li>
+</ul>
+<h3 id="业务可读性">业务可读性</h3>
+<ul>
+<li>首次出现的英文词后面有中文职责和一句“为什么这会影响结果”。</li>
+<li>把“更安全、更灵活、更可靠”改写为机制产生的具体收益和新增代价。</li>
+<li>不把 UI、终端输出、日志、聊天记录和模型自报文字当作同一种事实。</li>
+<li>结尾明确“不负责什么”，并链接到真正拥有该状态的页面或协调指南。</li>
+</ul>
+<h3 id="工程校验">工程校验</h3>
+<ul>
+<li>保留现有 slug、Theme 回链、Harness 反向索引、Situation 回链和固定版本来源。</li>
+<li>文章重写后运行 <code>pnpm wiki:check</code> 与 <code>pnpm wiki:test</code>；先单页/单测试定位，再运行全量。</li>
+<li>如修改交互行为或示例中的可操作流程，增加对应 Playwright e2e；纯文字重写不虚构不存在的 e2e。</li>
+<li>Markdown 不引入 BOM、行尾空格或断链；大段重写分批提交，便于审阅和回退。</li>
+</ul>
+<h2 id="十最终完成定义">十、最终完成定义</h2>
+<p>这次重写完成，不是因为 35 篇页面都换了措辞，而是因为读者可以沿着同一套业务语言回答：</p>
+<ol>
+<li>用户的目标、工作项和运行 Session 分别由谁拥有？</li>
+<li>模型提出的 Action 何时只是意图，何时获得许可，何时产生真实效果？</li>
+<li>结果是 Observation、durable fact、evidence 还是 Artifact，各自能证明什么？</li>
+<li>取消、断线、恢复、并发和环境漂移分别在哪个边界收口？</li>
+<li>不同 Harness 的差异来自哪条策略路线，以及为此付出了什么代价？</li>
+</ol>
+<p>如果读者仍需要先读源码类名才能回答这些问题，说明文章只是把技术名词换了位置，还没有形成 Evans 所说的“深模型”。</p>
+</div><footer class="sl-flex astro-dmbsnbhf"><div class="meta sl-flex astro-dmbsnbhf"></div><div class="pagination-links print:hidden astro-5midzo3a" dir="ltr"><a href="/harnesswiki-site/goal/" rel="prev" class="astro-5midzo3a"><svg aria-hidden="true" class="astro-5midzo3a astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg><span class="astro-5midzo3a">上一页<br class="astro-5midzo3a"><span class="link-title astro-5midzo3a">项目目标</span></span></a><a href="/harnesswiki-site/harness仓库列表/" rel="next" class="astro-5midzo3a"><svg aria-hidden="true" class="astro-5midzo3a astro-dukkowz2" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg><span class="astro-5midzo3a">下一页<br class="astro-5midzo3a"><span class="link-title astro-5midzo3a">上游仓库列表</span></span></a></div></footer><script type="module" src="/harnesswiki-site/_astro/Footer.astro_astro_type_script_index_0_lang.CrTLljbn.js"></script></div></div></main></div></div></div></div></body></html>

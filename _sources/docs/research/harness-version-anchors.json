@@ -1,0 +1,476 @@
+{
+  "schemaVersion": 1,
+  "snapshotDate": "2026-08-25",
+  "expectedCounts": {
+    "profiles": 20,
+    "gitSources": 20,
+    "externalOnlyProfiles": 1
+  },
+  "profiles": [
+    {
+      "id": "codex-cli",
+      "profilePath": "docs/harnesses/codex-cli.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/openai/codex",
+          "repositoryUrl": "https://github.com/openai/codex",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "9ded177ce7c1c0bd2047f902936c177612ab3434"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "76ceaddb29444388fbbbae07c46f7e8849f9658b",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "opencode",
+      "profilePath": "docs/harnesses/opencode.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/anomalyco/opencode",
+          "repositoryUrl": "https://github.com/anomalyco/opencode",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "a0f8dccbfe139ffc7137d1eaf6fee6e4195af599"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "9b0dd36cda0b9accb429a7f9f9ad9b054a27d04a",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "aider",
+      "profilePath": "docs/harnesses/aider.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/Aider-AI/aider",
+          "repositoryUrl": "https://github.com/Aider-AI/aider",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "5dc9490bb35f9729ef2c95d00a19ccd30c26339c"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "5dc9490bb35f9729ef2c95d00a19ccd30c26339c",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "deepseek-harness",
+      "profilePath": "docs/harnesses/deepseek-harness.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/deepseek-ai/DeepSeek-Harness",
+          "repositoryUrl": "https://github.com/deepseek-ai/DeepSeek-Harness",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "47f943859bef60e4160492346772ded9b24f765a"
+          },
+          "claimAnchors": [
+            {
+              "id": "recovery-behavior",
+              "kind": "behavior",
+              "value": "99f6f02fecdb7dff40c3fbc9470f5907c29f74ca",
+              "evidencePath": "docs/research/recovery-behavior-experiments.md"
+            }
+          ],
+          "materialized": {
+            "gitlink": "99f6f02fecdb7dff40c3fbc9470f5907c29f74ca",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": [
+              "recovery-behavior"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pi",
+      "profilePath": "docs/harnesses/pi.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/earendil-works/pi",
+          "repositoryUrl": "https://github.com/earendil-works/pi",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "d3ab2af969d64997338253c9151190aa1bc33580"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "59a71b235dadb4ad0d67557a8abb0aaa093e68b4",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "cline",
+      "profilePath": "docs/harnesses/cline.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "sdk",
+          "path": "upstreams/cline/cline",
+          "repositoryUrl": "https://github.com/cline/cline",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "8bbdde2a5c1f972864fe1b954f639c21fac61a40"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "8a038022a439f401d78764a059e1561578848e81",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "openhands",
+      "profilePath": "docs/harnesses/openhands.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "canvas",
+          "path": "upstreams/OpenHands/OpenHands",
+          "repositoryUrl": "https://github.com/OpenHands/OpenHands",
+          "profileBaseline": {
+            "kind": "commit",
+            "marker": "Canvas",
+            "value": "0d15c5e79e91a659f238954e1db8a3da289c4801"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "b25f9b3969f924f37440fee908ff35309ec6eea2",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        },
+        {
+          "id": "runtime",
+          "path": "upstreams/OpenHands/software-agent-sdk",
+          "repositoryUrl": "https://github.com/OpenHands/software-agent-sdk",
+          "profileBaseline": {
+            "kind": "commit",
+            "marker": "runtime",
+            "value": "167c1f924ac8a8acbeb0432bf9b1fcf77d5c2497"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "98338ff37aea6627777b9978963ab727f51e4f40",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "mini-swe-agent",
+      "profilePath": "docs/harnesses/mini-swe-agent.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/SWE-agent/mini-swe-agent",
+          "repositoryUrl": "https://github.com/SWE-agent/mini-swe-agent",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "a83fcae82d2a08f0ee0c688f9d137b3566c097f8"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "25941c89cfbc91eb40b3f8756348c91d9977d57e",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "gemini-cli",
+      "profilePath": "docs/harnesses/gemini-cli.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/google-gemini/gemini-cli",
+          "repositoryUrl": "https://github.com/google-gemini/gemini-cli",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "2a87e7be103308b8734246097ba723cc7deb4122"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "571851b1077a51cef757146ce13f9da887326bec",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "qwen-code",
+      "profilePath": "docs/harnesses/qwen-code.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/QwenLM/qwen-code",
+          "repositoryUrl": "https://github.com/QwenLM/qwen-code",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "f2a6e6c727c4964ccc7d7e516740678aaf80763b"
+          },
+          "claimAnchors": [
+            {
+              "id": "control-plane-behavior",
+              "kind": "behavior",
+              "value": "b4f5079dc0cc89ce1448785898ab72b358399c95",
+              "evidencePath": "docs/research/control-plane-behavior-experiments.md"
+            }
+          ],
+          "materialized": {
+            "gitlink": "b4f5079dc0cc89ce1448785898ab72b358399c95",
+            "baselineStatus": "drifted",
+            "matchingClaimAnchors": [
+              "control-plane-behavior"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "kilo-code",
+      "profilePath": "docs/harnesses/kilo-code.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/Kilo-Org/kilocode",
+          "repositoryUrl": "https://github.com/Kilo-Org/kilocode",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "c90f5d68802e55fd35c88882e4b6785dc202ac83"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "c90f5d68802e55fd35c88882e4b6785dc202ac83",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "loopal",
+      "profilePath": "docs/harnesses/loopal.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/AgentsMesh/Loopal",
+          "repositoryUrl": "https://github.com/AgentsMesh/Loopal",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "a1be69e12f3d7a5aab600490727ff3bd8b93aa8d"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "a1be69e12f3d7a5aab600490727ff3bd8b93aa8d",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "mistral-vibe",
+      "profilePath": "docs/harnesses/mistral-vibe.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/mistralai/mistral-vibe",
+          "repositoryUrl": "https://github.com/mistralai/mistral-vibe",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "5e6aa0f6beb3454454f4c1de74a7652ba577ab05"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "5e6aa0f6beb3454454f4c1de74a7652ba577ab05",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "refact",
+      "profilePath": "docs/harnesses/refact.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/JegernOUTT/refact",
+          "repositoryUrl": "https://github.com/JegernOUTT/refact",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "5f5bbd0257c5d667c7b60903088c953533ffd5ce"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "5f5bbd0257c5d667c7b60903088c953533ffd5ce",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "zed",
+      "profilePath": "docs/harnesses/zed.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "agent-crate",
+          "path": "upstreams/zed-industries/zed",
+          "repositoryUrl": "https://github.com/zed-industries/zed",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "3624a5bfda8a4610bf9926499517a776c7028321"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "3624a5bfda8a4610bf9926499517a776c7028321",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "stakpak-agent",
+      "profilePath": "docs/harnesses/stakpak-agent.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/stakpak/agent",
+          "repositoryUrl": "https://github.com/stakpak/agent",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "760cd2b5984d29c2d513bb15ca33e995fae45f17"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "760cd2b5984d29c2d513bb15ca33e995fae45f17",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "browser-use",
+      "profilePath": "docs/harnesses/browser-use.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "core",
+          "path": "upstreams/browser-use/browser-use",
+          "repositoryUrl": "https://github.com/browser-use/browser-use",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "3c989dc0adc594d592be62272d70e28caaa5553b"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "3c989dc0adc594d592be62272d70e28caaa5553b",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "claude-code",
+      "profilePath": "docs/harnesses/claude-code.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "official-materials",
+          "path": "upstreams/anthropics/claude-code",
+          "repositoryUrl": "https://github.com/anthropics/claude-code",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "354757e5b2d9aa1ebb62e5d05ecd384f0e11c0f7"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "354757e5b2d9aa1ebb62e5d05ecd384f0e11c0f7",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "antigravity-cli",
+      "profilePath": "docs/harnesses/antigravity-cli.md",
+      "sourceMode": "git",
+      "sources": [
+        {
+          "id": "official-materials",
+          "path": "upstreams/google-antigravity/antigravity-cli",
+          "repositoryUrl": "https://github.com/google-antigravity/antigravity-cli",
+          "profileBaseline": {
+            "kind": "commit",
+            "value": "76ff39c65b5d52482172b6408c27ded9b17c303d"
+          },
+          "claimAnchors": [],
+          "materialized": {
+            "gitlink": "76ff39c65b5d52482172b6408c27ded9b17c303d",
+            "baselineStatus": "aligned",
+            "matchingClaimAnchors": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "minimax-code",
+      "profilePath": "docs/harnesses/minimax-code.md",
+      "sourceMode": "external-only",
+      "profileBaseline": {
+        "kind": "release",
+        "value": "v3.0.65",
+        "releasedOn": "2026-08-13",
+        "evidenceType": "official-release-notes"
+      },
+      "sources": []
+    }
+  ]
+}
